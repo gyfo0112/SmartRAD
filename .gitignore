@@ -1,10 +1,33 @@
+# OS
+.DS_Store
+Thumbs.db
+
 # Node / Next.js (frontend/)
 frontend/node_modules/
 frontend/.next/
 frontend/out/
 frontend/.env*.local
 frontend/npm-debug.log*
+frontend/.turbo/
 
-# OS
-.DS_Store
-Thumbs.db
+# Java / Gradle (backend/)
+backend/build/
+backend/.gradle/
+backend/out/
+backend/*.log
+!backend/gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+.idea/
+*.iml
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
