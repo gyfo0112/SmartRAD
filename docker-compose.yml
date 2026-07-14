@@ -9,7 +9,7 @@ services:
       MYSQL_USER: tp_hr_user
       MYSQL_PASSWORD: tp_hr_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - tp-hr-mysql-data:/var/lib/mysql
     healthcheck:
