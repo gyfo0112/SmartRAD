@@ -25,6 +25,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 84px; /* Header의 sticky 높이(h-[84px])만큼 보정 */
 }
 
 html,

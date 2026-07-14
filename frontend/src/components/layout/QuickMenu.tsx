@@ -8,11 +8,13 @@ const quickMenus = [
     label: "로그인",
     href: "/login",
     icon: "/icons/quick-menu/login.svg",
+    isHash: false,
   },
   {
     label: "문의하기",
     href: "#contact",
     icon: "/icons/quick-menu/contact.svg",
+    isHash: true,
   },
 ] as const
 
@@ -89,13 +91,8 @@ export default function QuickMenu() {
       className="fixed right-5 top-4/5 z-40 hidden -translate-y-1/2 flex-col items-center lg:flex xl:right-8"
     >
       <div className="flex flex-col gap-4">
-        {quickMenus.map((menu) => (
-          <Link
-            key={menu.label}
-            href={menu.href}
-            aria-label={menu.label}
-            className={buttonClassName}
-          >
+        {quickMenus.map((menu) => {
+          const icon = (
             <Image
               src={menu.icon}
               alt=""
@@ -104,8 +101,29 @@ export default function QuickMenu() {
               aria-hidden="true"
               className={iconClassName}
             />
-          </Link>
-        ))}
+          )
+
+          // 같은 페이지 내 해시 이동은 next/link보다 네이티브 앵커가 더 안정적으로 스크롤됨
+          return menu.isHash ? (
+            <a
+              key={menu.label}
+              href={menu.href}
+              aria-label={menu.label}
+              className={buttonClassName}
+            >
+              {icon}
+            </a>
+          ) : (
+            <Link
+              key={menu.label}
+              href={menu.href}
+              aria-label={menu.label}
+              className={buttonClassName}
+            >
+              {icon}
+            </Link>
+          )
+        })}
 
         <button
           type="button"
