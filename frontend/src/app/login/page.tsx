@@ -178,6 +178,23 @@ export default function LoginPage() {
       {/* 우측 로그인 패널 */}
       <div className="flex w-full flex-1 items-center justify-center bg-white px-6 py-14 lg:w-1/2">
         <div className="w-full max-w-[420px]">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="mb-6 flex items-center gap-1.5 text-sm font-semibold text-brand-muted transition-colors hover:text-brand-primary"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+              <path
+                d="M15 5 8 12l7 7"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            뒤로가기
+          </button>
+
           <div className="mb-8 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary">
@@ -185,12 +202,12 @@ export default function LoginPage() {
               </div>
               <span className="hidden text-sm font-semibold text-brand-navy sm:inline">SmartHR</span>
             </Link>
-            <button
-              type="button"
+            <Link
+              href="/#contact"
               className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-primary-dark"
             >
               문의하기
-            </button>
+            </Link>
           </div>
 
           <div className="rounded-3xl border border-brand-border bg-white p-8 shadow-[0_8px_30px_rgb(15,23,42,0.06)] sm:p-10">
