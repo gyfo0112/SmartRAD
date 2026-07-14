@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Container from "@/components/ui/Container";
+import Logo from "@/components/ui/Logo";
 
 const navigation = [
   { label: "주요 기능", href: "#features" },
@@ -17,8 +18,8 @@ export default function Header() {
           className="flex items-center gap-3"
           aria-label="SmartHR 홈"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-brand-primary text-xl font-bold text-white">
-            S
+          <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-brand-primary text-white">
+            <Logo className="h-6 w-6" />
           </span>
           <span className="text-xl font-bold text-brand-navy">SmartHR</span>
         </Link>

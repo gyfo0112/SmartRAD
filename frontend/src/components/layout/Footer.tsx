@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Container from "@/components/ui/Container";
+import Logo from "@/components/ui/Logo";
 
 const footerMenus = [
   {
@@ -65,8 +66,8 @@ export default function Footer() {
               aria-label="SmartHR 홈"
               className="inline-flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-brand-primary font-bold text-white">
-                S
+              <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-brand-primary text-white">
+                <Logo className="h-5 w-5" />
               </span>
               <span className="text-[20px] font-extrabold text-brand-navy">
                 SmartHR

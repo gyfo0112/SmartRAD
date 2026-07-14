@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/ui/Logo";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
 
@@ -122,11 +123,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600">
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
-              <path d="M12 3 3 7.5 12 12l9-4.5L12 3Z" fill="currentColor" opacity="0.9" />
-              <path d="M3 12.5 12 17l9-4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M3 17 12 21.5 21 17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <Logo className="h-5 w-5 text-white" />
           </div>
           <span className="text-lg font-bold tracking-tight text-white">SmartHR</span>
         </div>
@@ -188,11 +185,7 @@ export default function LoginPage() {
           <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700">
-                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white">
-                  <path d="M12 3 3 7.5 12 12l9-4.5L12 3Z" fill="currentColor" opacity="0.9" />
-                  <path d="M3 12.5 12 17l9-4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M3 17 12 21.5 21 17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <Logo className="h-4 w-4 text-white" />
               </div>
               <span className="hidden text-sm font-semibold text-slate-900 sm:inline">SmartHR</span>
             </div>
@@ -207,11 +200,7 @@ export default function LoginPage() {
           <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgb(15,23,42,0.06)] sm:p-10">
             <div className="mb-1 flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-indigo-500 to-indigo-700">
-                <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5 text-white">
-                  <path d="M12 3 3 7.5 12 12l9-4.5L12 3Z" fill="currentColor" opacity="0.9" />
-                  <path d="M3 12.5 12 17l9-4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M3 17 12 21.5 21 17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <Logo className="h-3.5 w-3.5 text-white" />
               </div>
               <span className="text-xs font-semibold text-slate-500">SmartHR</span>
             </div>
