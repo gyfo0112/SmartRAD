@@ -2,6 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
+
+interface LoginResponse {
+  accessToken: string;
+  tokenType: string;
+  employeeId: number;
+  employeeNo: string;
+  name: string;
+}
+
+interface ErrorResponse {
+  code: string;
+  message: string;
+}
 
 const STATS = [
   { value: "2,400+", label: "도입 기업" },
@@ -49,6 +65,7 @@ const FEATURES = [
 ];
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -67,14 +84,23 @@ export default function LoginPage() {
 
     setIsSubmitting(true);
     try {
-      // TODO: 백엔드 인증 API 연동 (POST /api/auth/login)
-      // const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // if (!res.ok) throw new Error("로그인에 실패했습니다.");
-      // const data = await res.json();
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const body: ErrorResponse = await res.json();
+        throw new Error(body.message || "로그인에 실패했습니다.");
+      }
+
+      const data: LoginResponse = await res.json();
+      const storage = rememberMe ? window.localStorage : window.sessionStorage;
+      storage.setItem("accessToken", data.accessToken);
+      storage.setItem("employeeName", data.name);
+
+      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "로그인 중 오류가 발생했습니다.");
     } finally {
