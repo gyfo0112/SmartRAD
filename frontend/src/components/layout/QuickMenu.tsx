@@ -88,7 +88,7 @@ export default function QuickMenu() {
   return (
     <aside
       aria-label="빠른 메뉴"
-      className="fixed right-5 top-4/5 z-40 hidden -translate-y-1/2 flex-col items-center lg:flex xl:right-8"
+      className="fixed right-5 bottom-10 z-40 hidden flex-col items-center lg:flex xl:right-8"
     >
       <div className="flex flex-col gap-4">
         {quickMenus.map((menu) => {
