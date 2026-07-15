@@ -41,6 +41,9 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
   const [departments, setDepartments] = useState<any[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [sortBy, setSortBy] = useState("name");
+  const [searchInput, setSearchInput] = useState("");
+  const [keyword, setKeyword] = useState("");
 
   useEffect(() => {
     fetchDepartments();
@@ -48,7 +51,12 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
 
   useEffect(() => {
     fetchEmployees();
-  }, [page, selectedDepartment, selectedStatus, refreshKey]);
+  }, [page, selectedDepartment, selectedStatus, sortBy, keyword, refreshKey]);
+
+  const runSearch = () => {
+    setPage(0);
+    setKeyword(searchInput.trim());
+  };
 
   const fetchDepartments = async () => {
     try {
@@ -61,12 +69,15 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
     }
   };
 
+  const sortParam = sortBy === "position" ? "position.level,asc" : "name,asc";
+
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      let url = `${API_BASE_URL}/employees?page=${page}&size=5`;
+      let url = `${API_BASE_URL}/employees?page=${page}&size=5&sort=${sortParam}`;
       if (selectedDepartment) url += `&departmentId=${selectedDepartment}`;
       if (selectedStatus) url += `&status=${selectedStatus}`;
+      if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
       const res = await fetch(url);
       if (res.ok) {
         const json = await res.json();
@@ -125,27 +136,44 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
           </span>
         </div>
         <div className="relative">
-          <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="검색..." 
+          <button
+            onClick={runSearch}
+            aria-label="검색"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500"
+          >
+            <MagnifyingGlassIcon className="w-5 h-5" />
+          </button>
+          <input
+            type="text"
+            placeholder="검색..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
             className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all w-64"
           />
         </div>
       </div>
 
       <div className="p-4 flex gap-2">
-        <select 
-          value={selectedDepartment} 
-          onChange={(e) => { setSelectedDepartment(e.target.value); setPage(0); }} 
+        <select
+          value={sortBy}
+          onChange={(e) => { setSortBy(e.target.value); setPage(0); }}
+          className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 text-gray-600 bg-white hover:bg-gray-50 cursor-pointer outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="name">이름순</option>
+          <option value="position">직급순</option>
+        </select>
+        <select
+          value={selectedDepartment}
+          onChange={(e) => { setSelectedDepartment(e.target.value); setPage(0); }}
           className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 text-gray-600 bg-white hover:bg-gray-50 cursor-pointer outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">부서 전체</option>
           {departments.map(d => <option key={d.departmentId} value={d.departmentId}>{d.departmentName}</option>)}
         </select>
-        <select 
-          value={selectedStatus} 
-          onChange={(e) => { setSelectedStatus(e.target.value); setPage(0); }} 
+        <select
+          value={selectedStatus}
+          onChange={(e) => { setSelectedStatus(e.target.value); setPage(0); }}
           className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 text-gray-600 bg-white hover:bg-gray-50 cursor-pointer outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">재직 상태 전체</option>

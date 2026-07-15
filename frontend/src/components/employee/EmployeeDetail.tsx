@@ -22,15 +22,45 @@ interface EmployeeDetailData {
   employmentTypeName: string;
 }
 
+interface LeaveBalance {
+  leaveTypeName: string;
+  remainDays: number;
+}
+
+function formatTenure(hireDate: string | null) {
+  if (!hireDate) return "-";
+  const hire = new Date(hireDate);
+  if (Number.isNaN(hire.getTime())) return "-";
+
+  const now = new Date();
+  let years = now.getFullYear() - hire.getFullYear();
+  let months = now.getMonth() - hire.getMonth();
+  if (now.getDate() < hire.getDate()) months -= 1;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  if (years < 0) return "-";
+
+  return `${years}년 ${months}개월`;
+}
+
+function formatDays(days: number) {
+  return Number.isInteger(days) ? `${days}일` : `${days.toFixed(1)}일`;
+}
+
 export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick, refreshKey }: { employeeId: number | null, onEditClick?: (data: EmployeeDetailData) => void, onDeleteClick?: (id: number) => void, refreshKey?: number }) {
   const [data, setData] = useState<EmployeeDetailData | null>(null);
+  const [annualLeaveDays, setAnnualLeaveDays] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (employeeId) {
       fetchDetail();
+      fetchLeaveBalance();
     } else {
       setData(null);
+      setAnnualLeaveDays(null);
     }
   }, [employeeId, refreshKey]);
 
@@ -46,6 +76,22 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
       console.error("Failed to fetch detail", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLeaveBalance = async () => {
+    try {
+      const token = window.localStorage.getItem("accessToken") ?? window.sessionStorage.getItem("accessToken");
+      const res = await fetch(`${API_BASE_URL}/leave-balances?employeeId=${employeeId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        const balances: LeaveBalance[] = await res.json();
+        const annual = balances.find((b) => b.leaveTypeName === "연차");
+        setAnnualLeaveDays(annual ? annual.remainDays : null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch leave balance", error);
     }
   };
 
@@ -111,12 +157,12 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
           
           <div className="flex flex-col gap-2 items-end">
              <div className="text-sm font-bold text-blue-600 bg-white px-3 py-1.5 rounded-md shadow-sm border border-blue-50">
-                <span className="text-gray-500 font-medium mr-2">근속 기간</span> 
-                {/* Dummy duration */} 3년 4개월
+                <span className="text-gray-500 font-medium mr-2">근속 기간</span>
+                {formatTenure(data.hireDate)}
              </div>
              <div className="text-sm font-bold text-emerald-600 bg-white px-3 py-1.5 rounded-md shadow-sm border border-emerald-50 mt-2">
-                <span className="text-emerald-500 font-medium mr-2">잔여 연차</span> 
-                {/* Dummy leave */} 12일
+                <span className="text-emerald-500 font-medium mr-2">잔여 연차</span>
+                {annualLeaveDays !== null ? formatDays(annualLeaveDays) : "-"}
              </div>
           </div>
         </div>

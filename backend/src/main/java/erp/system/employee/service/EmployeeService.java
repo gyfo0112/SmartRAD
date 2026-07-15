@@ -13,6 +13,7 @@ import erp.system.employee.entity.Employee;
 import erp.system.employee.repository.EmployeeRepository;
 import erp.system.employmenttype.entity.EmploymentType;
 import erp.system.employmenttype.repository.EmploymentTypeRepository;
+import erp.system.leave.service.EmployeeLeaveBalanceService;
 import erp.system.position.entity.Position;
 import erp.system.position.repository.PositionRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class EmployeeService {
     private final PositionRepository positionRepository;
     private final EmploymentTypeRepository employmentTypeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmployeeLeaveBalanceService employeeLeaveBalanceService;
 
     public EmployeeResponse getById(Long employeeId){
         return EmployeeResponse.from(findActive(employeeId));
@@ -87,7 +89,10 @@ public class EmployeeService {
                 .password(passwordEncoder.encode(request.password()))
                 .build();
 
-        return EmployeeResponse.from(employeeRepository.save(employee));
+        Employee savedEmployee = employeeRepository.save(employee);
+        employeeLeaveBalanceService.grantDefaultAnnualLeave(savedEmployee);
+
+        return EmployeeResponse.from(savedEmployee);
     }
 
     @Transactional
@@ -115,7 +120,7 @@ public class EmployeeService {
     @Transactional
     public void delete(Long employeeId) {
         Employee employee = findActive(employeeId);
-        employeeRepository.delete(employee);
+        employee.markDeleted();
     }
 
     @Transactional
