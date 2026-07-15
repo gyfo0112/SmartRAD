@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
+
 // types
 export interface Employee {
   employeeId: number;
@@ -49,7 +51,7 @@ export default function EmployeeList({ onSelectEmployee, selectedId }: EmployeeL
 
   const fetchDepartments = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/departments`);
+      const res = await fetch(`${API_BASE_URL}/departments`);
       if (res.ok) {
         setDepartments(await res.json());
       }
@@ -61,7 +63,7 @@ export default function EmployeeList({ onSelectEmployee, selectedId }: EmployeeL
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/employees?page=${page}&size=5`;
+      let url = `${API_BASE_URL}/employees?page=${page}&size=5`;
       if (selectedDepartment) url += `&departmentId=${selectedDepartment}`;
       if (selectedStatus) url += `&status=${selectedStatus}`;
       const res = await fetch(url);

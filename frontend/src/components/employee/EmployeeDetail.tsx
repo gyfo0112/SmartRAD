@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { UserIcon, PencilSquareIcon, TrashIcon, ClockIcon, CurrencyDollarIcon, DocumentTextIcon, BuildingOfficeIcon, BriefcaseIcon, IdentificationIcon } from "@heroicons/react/24/outline";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
+
 interface EmployeeDetailData {
   employeeId: number;
   employeeNo: string;
@@ -34,7 +36,7 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick 
   const fetchDetail = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/employees/${employeeId}`);
+      const res = await fetch(`${API_BASE_URL}/employees/${employeeId}`);
       if (res.ok) {
         const json = await res.json();
         setData(json);

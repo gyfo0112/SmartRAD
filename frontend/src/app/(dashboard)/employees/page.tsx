@@ -6,6 +6,8 @@ import EmployeeList from "@/components/employee/EmployeeList";
 import EmployeeDetail from "@/components/employee/EmployeeDetail";
 import EmployeeEditModal from "@/components/employee/EmployeeEditModal";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
+
 export default function EmployeesPage() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
   const [editEmployee, setEditEmployee] = useState<any | null>(null);
@@ -14,7 +16,7 @@ export default function EmployeesPage() {
   const handleDelete = async (id: number) => {
     if (confirm("정말로 이 직원을 삭제하시겠습니까?")) {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/employees/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/employees/${id}`, {
           method: "DELETE",
         });
         if (res.ok) {

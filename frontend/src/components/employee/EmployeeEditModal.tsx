@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
+
 export default function EmployeeEditModal({ employee, onClose, onSave }: any) {
   const [formData, setFormData] = useState({
     ...employee,
@@ -23,7 +25,7 @@ export default function EmployeeEditModal({ employee, onClose, onSave }: any) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/employees/${employee.employeeId}`, {
+      const res = await fetch(`${API_BASE_URL}/employees/${employee.employeeId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
