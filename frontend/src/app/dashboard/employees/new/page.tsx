@@ -121,6 +121,7 @@ export default function NewEmployeePage() {
   const [profileImage, setProfileImage] = useState<{ name: string; preview: string } | null>(null);
   const [attachedDocuments, setAttachedDocuments] = useState<{ id: string; name: string; size: string }[]>([]);
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const updateEmployee = (field: keyof typeof emptyEmployee) => (value: string) => {
     setEmployee((currentEmployee) => ({ ...currentEmployee, [field]: value }));
@@ -193,8 +194,18 @@ export default function NewEmployeePage() {
               <p className="text-xs text-indigo-500">필수 항목을 모두 입력한 뒤 저장하기를 눌러 등록을 완료하세요.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm font-bold text-indigo-700">
-            등록 모드 <span className="h-7 w-12 rounded-full bg-indigo-500 after:ml-6 after:mt-1 after:block after:h-5 after:w-5 after:rounded-full after:bg-white" /> <span className="text-slate-400">수정 모드</span>
+          <div className="flex items-center gap-2 text-sm font-bold">
+            <span className={isEditMode ? "text-slate-400" : "text-indigo-700"}>등록 모드</span>
+            <button
+              type="button"
+              aria-label={isEditMode ? "등록 모드로 전환" : "수정 모드로 전환"}
+              aria-pressed={isEditMode}
+              onClick={() => setIsEditMode((currentMode) => !currentMode)}
+              className={`h-7 w-12 rounded-full transition-colors after:mt-1 after:block after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all ${
+                isEditMode ? "bg-slate-500 after:ml-6" : "bg-indigo-500 after:ml-1"
+              }`}
+            />
+            <span className={isEditMode ? "text-indigo-700" : "text-slate-400"}>수정 모드</span>
           </div>
         </div>
 
