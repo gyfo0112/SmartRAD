@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -58,6 +58,21 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
     setKeyword(searchInput.trim());
   };
 
+  const clearSearch = () => {
+    setSearchInput("");
+    setKeyword("");
+    setPage(0);
+  };
+
+  const resetFilters = () => {
+    setSearchInput("");
+    setKeyword("");
+    setSortBy("name");
+    setSelectedDepartment("");
+    setSelectedStatus("");
+    setPage(0);
+  };
+
   const fetchDepartments = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/departments`);
@@ -69,7 +84,7 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
     }
   };
 
-  const sortParam = sortBy === "position" ? "position.level,asc" : "name,asc";
+  const sortParam = sortBy === "position" ? "position.level,desc" : "name,asc";
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -149,12 +164,21 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
-            className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all w-64"
+            className="pl-9 pr-9 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all w-64"
           />
+          {searchInput && (
+            <button
+              onClick={clearSearch}
+              aria-label="검색어 지우기"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <XMarkIcon className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="p-4 flex gap-2">
+      <div className="p-4 flex items-center gap-2">
         <select
           value={sortBy}
           onChange={(e) => { setSortBy(e.target.value); setPage(0); }}
@@ -181,6 +205,13 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
           <option value="LEAVE">휴직</option>
           <option value="RESIGNED">퇴사</option>
         </select>
+        <button
+          onClick={resetFilters}
+          title="검색/필터 초기화"
+          className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 bg-white hover:bg-gray-50"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="flex-1 overflow-x-auto">
