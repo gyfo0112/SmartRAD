@@ -30,9 +30,10 @@ interface PageData {
 interface EmployeeListProps {
   onSelectEmployee: (id: number) => void;
   selectedId: number | null;
+  refreshKey?: number;
 }
 
-export default function EmployeeList({ onSelectEmployee, selectedId }: EmployeeListProps) {
+export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey }: EmployeeListProps) {
   const [data, setData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -47,7 +48,7 @@ export default function EmployeeList({ onSelectEmployee, selectedId }: EmployeeL
 
   useEffect(() => {
     fetchEmployees();
-  }, [page, selectedDepartment, selectedStatus]);
+  }, [page, selectedDepartment, selectedStatus, refreshKey]);
 
   const fetchDepartments = async () => {
     try {

@@ -37,14 +37,14 @@ export default function EmployeesPage() {
       <EmployeeStats />
       
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
-        <EmployeeList 
-          key={`list-${refreshKey}`}
-          onSelectEmployee={setSelectedEmployeeId} 
-          selectedId={selectedEmployeeId} 
+        <EmployeeList
+          refreshKey={refreshKey}
+          onSelectEmployee={setSelectedEmployeeId}
+          selectedId={selectedEmployeeId}
         />
-        <EmployeeDetail 
-          key={`detail-${refreshKey}`}
-          employeeId={selectedEmployeeId} 
+        <EmployeeDetail
+          refreshKey={refreshKey}
+          employeeId={selectedEmployeeId}
           onEditClick={setEditEmployee}
           onDeleteClick={handleDelete}
         />

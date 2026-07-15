@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { UserIcon, PencilSquareIcon, TrashIcon, ClockIcon, CurrencyDollarIcon, DocumentTextIcon, BuildingOfficeIcon, BriefcaseIcon, IdentificationIcon } from "@heroicons/react/24/outline";
+import { getEmployeeStatusLabel, getEmployeeStatusBadgeClasses } from "@/lib/employeeStatus";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -21,7 +22,7 @@ interface EmployeeDetailData {
   employmentTypeName: string;
 }
 
-export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick }: { employeeId: number | null, onEditClick?: (data: EmployeeDetailData) => void, onDeleteClick?: (id: number) => void }) {
+export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick, refreshKey }: { employeeId: number | null, onEditClick?: (data: EmployeeDetailData) => void, onDeleteClick?: (id: number) => void, refreshKey?: number }) {
   const [data, setData] = useState<EmployeeDetailData | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +32,7 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick 
     } else {
       setData(null);
     }
-  }, [employeeId]);
+  }, [employeeId, refreshKey]);
 
   const fetchDetail = async () => {
     setLoading(true);
@@ -96,8 +97,8 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick 
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h3 className="text-2xl font-bold text-gray-900">{data.name}</h3>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-white border ${data.employeeStatusCode === 'ACTIVE' ? 'border-emerald-200 text-emerald-600 before:bg-emerald-500' : 'border-gray-200 text-gray-600 before:bg-gray-400'} before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full`}>
-                  {data.employeeStatusCode === 'ACTIVE' ? '재직중' : data.employeeStatusCode}
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-white border ${getEmployeeStatusBadgeClasses(data.employeeStatusCode)} before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full`}>
+                  {getEmployeeStatusLabel(data.employeeStatusCode)}
                 </span>
               </div>
               <div className="flex items-center gap-4 text-sm text-gray-500 font-medium">

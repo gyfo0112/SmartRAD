@@ -2,6 +2,8 @@ package erp.system.employee.dto;
 
 import erp.system.employee.entity.Employee;
 
+import java.time.LocalDate;
+
 public record EmployeeSummaryResponse (
         Long employeeId,
         String employeeNo,
@@ -9,7 +11,9 @@ public record EmployeeSummaryResponse (
         String departmentName,
         String positionName,
         String employeeStatusCode,
-        String email
+        String email,
+        LocalDate hireDate,
+        LocalDate resignationDate
 ){
 
     public static EmployeeSummaryResponse from(Employee employee) {
@@ -20,7 +24,9 @@ public record EmployeeSummaryResponse (
                 employee.getDepartment() != null ? employee.getDepartment().getDepartmentName() : null,
                 employee.getPosition() != null ? employee.getPosition().getPositionName() : null,
                 employee.getEmployeeStatusCode(),
-                employee.getEmail()
+                employee.getEmail(),
+                employee.getHireDate(),
+                employee.getResignationDate()
         );
     }
 }
