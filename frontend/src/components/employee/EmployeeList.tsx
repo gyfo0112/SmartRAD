@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
@@ -31,9 +30,6 @@ interface PageData {
 interface EmployeeListProps {
   onSelectEmployee: (id: number) => void;
   selectedId: number | null;
-}
-
-export default function EmployeeList({ onSelectEmployee, selectedId }: EmployeeListProps) {
   refreshKey?: number;
 }
 
@@ -55,7 +51,6 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
 
   useEffect(() => {
     fetchEmployees();
-  }, [page, selectedDepartment, selectedStatus]);
   }, [page, selectedDepartment, selectedStatus, sortBy, keyword, refreshKey]);
 
   const runSearch = () => {
@@ -89,12 +84,6 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
     }
   };
 
-  const fetchEmployees = async () => {
-    setLoading(true);
-    try {
-      let url = `${API_BASE_URL}/employees?page=${page}&size=5`;
-      if (selectedDepartment) url += `&departmentId=${selectedDepartment}`;
-      if (selectedStatus) url += `&status=${selectedStatus}`;
   const sortParam = sortBy === "position" ? "position.level,desc" : "name,asc";
 
   const fetchEmployees = async () => {
@@ -164,19 +153,6 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
           </span>
         </div>
         <div className="relative">
-          <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="검색..." 
-            className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all w-64"
-          />
-        </div>
-      </div>
-
-      <div className="p-4 flex gap-2">
-        <select 
-          value={selectedDepartment} 
-          onChange={(e) => { setSelectedDepartment(e.target.value); setPage(0); }} 
           <button
             onClick={runSearch}
             aria-label="검색"
@@ -221,9 +197,6 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey 
           <option value="">부서 전체</option>
           {departments.map(d => <option key={d.departmentId} value={d.departmentId}>{d.departmentName}</option>)}
         </select>
-        <select 
-          value={selectedStatus} 
-          onChange={(e) => { setSelectedStatus(e.target.value); setPage(0); }} 
         <select
           value={selectedStatus}
           onChange={(e) => { setSelectedStatus(e.target.value); setPage(0); }}

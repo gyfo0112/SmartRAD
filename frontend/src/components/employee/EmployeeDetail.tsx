@@ -22,8 +22,6 @@ interface EmployeeDetailData {
   employmentTypeName: string;
 }
 
-export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick }: { employeeId: number | null, onEditClick?: (data: EmployeeDetailData) => void, onDeleteClick?: (id: number) => void }) {
-  const [data, setData] = useState<EmployeeDetailData | null>(null);
 interface LeaveBalance {
   leaveTypeName: string;
   remainDays: number;
@@ -59,10 +57,6 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
   useEffect(() => {
     if (employeeId) {
       fetchDetail();
-    } else {
-      setData(null);
-    }
-  }, [employeeId]);
       fetchLeaveBalance();
     } else {
       setData(null);
@@ -149,8 +143,6 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h3 className="text-2xl font-bold text-gray-900">{data.name}</h3>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-white border ${data.employeeStatusCode === 'ACTIVE' ? 'border-emerald-200 text-emerald-600 before:bg-emerald-500' : 'border-gray-200 text-gray-600 before:bg-gray-400'} before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full`}>
-                  {data.employeeStatusCode === 'ACTIVE' ? '재직중' : data.employeeStatusCode}
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-white border ${getEmployeeStatusBadgeClasses(data.employeeStatusCode)} before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full`}>
                   {getEmployeeStatusLabel(data.employeeStatusCode)}
                 </span>
@@ -165,12 +157,6 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
           
           <div className="flex flex-col gap-2 items-end">
              <div className="text-sm font-bold text-blue-600 bg-white px-3 py-1.5 rounded-md shadow-sm border border-blue-50">
-                <span className="text-gray-500 font-medium mr-2">근속 기간</span> 
-                {/* Dummy duration */} 3년 4개월
-             </div>
-             <div className="text-sm font-bold text-emerald-600 bg-white px-3 py-1.5 rounded-md shadow-sm border border-emerald-50 mt-2">
-                <span className="text-emerald-500 font-medium mr-2">잔여 연차</span> 
-                {/* Dummy leave */} 12일
                 <span className="text-gray-500 font-medium mr-2">근속 기간</span>
                 {formatTenure(data.hireDate)}
              </div>

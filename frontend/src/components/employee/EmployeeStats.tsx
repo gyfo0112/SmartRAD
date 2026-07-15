@@ -1,11 +1,3 @@
-import { UsersIcon, UserPlusIcon, UserMinusIcon, CalendarIcon } from "@heroicons/react/24/outline";
-
-export default function EmployeeStats() {
-  const stats = [
-    { label: "전체 직원", value: "248명", icon: UsersIcon, color: "text-blue-500", bg: "bg-blue-50" },
-    { label: "이번달 입사", value: "12명", icon: UserPlusIcon, color: "text-emerald-500", bg: "bg-emerald-50" },
-    { label: "이번달 퇴사", value: "3명", icon: UserMinusIcon, color: "text-orange-500", bg: "bg-orange-50" },
-    { label: "금일 결근", value: "5명", icon: CalendarIcon, color: "text-rose-500", bg: "bg-rose-50" },
 "use client";
 
 import { useEffect, useState } from "react";
@@ -116,7 +108,6 @@ export default function EmployeeStats({ refreshKey }: { refreshKey?: number }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {stats.map((stat, index) => {
       {cards.map((stat, index) => {
         const Icon = stat.icon;
         return (

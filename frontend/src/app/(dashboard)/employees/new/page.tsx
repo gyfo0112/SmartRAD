@@ -1,7 +1,6 @@
 "use client";
 
 import { type ChangeEvent, useState } from "react";
-import DashboardShell from "../../DashboardShell";
 
 type Option = {
   label: string;
@@ -170,22 +169,8 @@ export default function NewEmployeePage() {
   };
 
   return (
-    <DashboardShell activePath="/dashboard/employees/new">
-      <header className="sticky top-0 z-10 flex min-h-[60px] items-center justify-between border-b border-slate-200 bg-white px-8">
-        <div>
-          <h1 className="text-xl font-extrabold">신규 직원 등록</h1>
-          <p className="mt-1 text-xs text-slate-400">
-            홈 · 인사 관리 · <span className="text-indigo-500">신규 직원 등록</span>
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="h-9 w-9 rounded-lg border border-slate-200 text-slate-500">♧</button>
-          <button className="h-9 rounded-lg border border-slate-200 px-4 text-sm font-semibold">취소</button>
-          <button className="h-9 rounded-lg bg-indigo-600 px-6 text-sm font-bold text-white shadow-sm">✓ 저장하기</button>
-        </div>
-      </header>
-
-      <main className="p-8 pb-24">
+    <div className="max-w-[1600px] mx-auto pb-8">
+      <div className="space-y-6">
         <div className="mb-4 flex items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-200 text-indigo-700">♧</div>
@@ -302,10 +287,8 @@ export default function NewEmployeePage() {
             </Card>
           </aside>
         </div>
-      </main>
 
-      <footer className="fixed bottom-0 right-0 left-0 z-20 border-t border-slate-200 bg-white px-8 py-3 md:left-[210px]">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-4">
           <p className="text-xs text-slate-400">ⓘ * 표시 항목은 모두 입력해야 저장이 가능합니다.</p>
           <div className="flex gap-3">
             <button className="h-10 rounded-lg border border-slate-200 px-5 text-sm">취소</button>
@@ -315,7 +298,7 @@ export default function NewEmployeePage() {
             <button className="h-10 rounded-lg bg-indigo-600 px-7 text-sm font-bold text-white">✓ 저장하기</button>
           </div>
         </div>
-      </footer>
-    </DashboardShell>
+      </div>
+    </div>
   );
 }
