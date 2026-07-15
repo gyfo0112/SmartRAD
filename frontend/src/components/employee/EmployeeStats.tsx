@@ -35,7 +35,7 @@ function todayString() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-export default function EmployeeStats() {
+export default function EmployeeStats({ refreshKey }: { refreshKey?: number }) {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function EmployeeStats() {
     };
 
     fetchStats();
-  }, []);
+  }, [refreshKey]);
 
   const cards = [
     {
