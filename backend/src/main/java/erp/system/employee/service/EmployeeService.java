@@ -79,6 +79,7 @@ public class EmployeeService {
                 .department(resolveDepartment(request.departmentId()))
                 .position(resolvePosition(request.positionId()))
                 .employmentType(resolveEmploymentType(request.employmentTypeId()))
+                .manager(resolveManager(request.managerId()))
                 .name(request.name())
                 .birthDate(request.birthDate())
                 .phone(request.phone())
@@ -90,6 +91,7 @@ public class EmployeeService {
                 .accountNumber(request.accountNumber())
                 .accountHolder(request.accountHolder())
                 .password(passwordEncoder.encode(request.password()))
+                .profileImage(request.profileImage())
                 .build();
 
         Employee savedEmployee = employeeRepository.save(employee);
@@ -168,5 +170,13 @@ public class EmployeeService {
         }
         return employmentTypeRepository.findById(employmentTypeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYMENT_TYPE_NOT_FOUND));
+    }
+
+    private Employee resolveManager(Long managerId) {
+        if (managerId == null) {
+            return null;
+        }
+        return employeeRepository.findById(managerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
     }
 }

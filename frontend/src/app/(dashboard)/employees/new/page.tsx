@@ -80,15 +80,6 @@ const Card = ({ title, badge, children }: { title: string; badge?: string; child
   </section>
 );
 
-const existingEmployees: Option[] = [
-  { label: "김서연 (인사팀 팀장)", value: "emp-hr-001" },
-  { label: "이도현 (디자인팀 팀장)", value: "emp-design-001" },
-  { label: "박준혁 (개발팀 팀장)", value: "emp-dev-001" },
-  { label: "최유진 (기획팀 팀장)", value: "emp-planning-001" },
-  { label: "정민수 (마케팅팀 팀장)", value: "emp-marketing-001" },
-  { label: "한지우 (영업팀 팀장)", value: "emp-sales-001" },
-];
-
 const emptyEmployee = {
   name: "",
   birthDate: "",
@@ -106,6 +97,7 @@ export default function NewEmployeePage() {
   const [employee, setEmployee] = useState(emptyEmployee);
   const [departments, setDepartments] = useState<Option[]>([]);
   const [positions, setPositions] = useState<Option[]>([]);
+  const [managers, setManagers] = useState<Option[]>([]);
   const [profileImage, setProfileImage] = useState<{ name: string; preview: string } | null>(null);
   const [attachedDocuments, setAttachedDocuments] = useState<{ id: string; name: string; size: string }[]>([]);
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -118,9 +110,10 @@ export default function NewEmployeePage() {
       try {
         const token = window.localStorage.getItem("accessToken") ?? window.sessionStorage.getItem("accessToken");
         const authHeaders: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-        const [departmentsRes, positionsRes] = await Promise.all([
+        const [departmentsRes, positionsRes, employeesRes] = await Promise.all([
           fetch(`${API_BASE_URL}/departments`),
           fetch(`${API_BASE_URL}/positions`, { headers: authHeaders }),
+          fetch(`${API_BASE_URL}/employees?page=0&size=1000`),
         ]);
         if (departmentsRes.ok) {
           const data = await departmentsRes.json();
@@ -129,6 +122,15 @@ export default function NewEmployeePage() {
         if (positionsRes.ok) {
           const data = await positionsRes.json();
           setPositions(data.map((p: { positionId: number; positionName: string }) => ({ label: p.positionName, value: String(p.positionId) })));
+        }
+        if (employeesRes.ok) {
+          const data = await employeesRes.json();
+          setManagers(
+            data.content.map((e: { employeeId: number; name: string; departmentName: string | null; positionName: string | null }) => ({
+              label: `${e.name}${e.departmentName ? ` (${e.departmentName}${e.positionName ? ` ${e.positionName}` : ""})` : ""}`,
+              value: String(e.employeeId),
+            }))
+          );
         }
       } catch (err) {
         console.error("Failed to fetch department/position options", err);
@@ -157,12 +159,14 @@ export default function NewEmployeePage() {
         body: JSON.stringify({
           departmentId: Number(employee.department),
           positionId: Number(employee.position),
+          managerId: employee.manager ? Number(employee.manager) : null,
           name: employee.name,
           birthDate: employee.birthDate,
           phone: employee.phone,
           email: employee.email,
           hireDate: employee.hireDate || null,
           password: employee.birthDate.replaceAll("-", ""),
+          profileImage: profileImage?.preview ?? null,
         }),
       });
 
@@ -290,7 +294,7 @@ export default function NewEmployeePage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <Select label="부서" name="department" value={employee.department} onChange={updateEmployee("department")} options={departments} placeholder="부서를 선택하세요" required />
                 <Select label="직급" name="position" value={employee.position} onChange={updateEmployee("position")} options={positions} placeholder="직급을 선택하세요" required />
-                <Select label="직속 관리자" name="manager" value={employee.manager} onChange={updateEmployee("manager")} options={existingEmployees} placeholder="DB 등록 직원을 선택하세요" />
+                <Select label="직속 관리자" name="manager" value={employee.manager} onChange={updateEmployee("manager")} options={managers} placeholder="DB 등록 직원을 선택하세요" />
                 <Input label="입사일" name="hireDate" value={employee.hireDate} onChange={updateEmployee("hireDate")} placeholder="YYYY-MM-DD" type="date" />
               </div>
             </Card>

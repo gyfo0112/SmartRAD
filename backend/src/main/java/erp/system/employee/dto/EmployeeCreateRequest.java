@@ -10,6 +10,7 @@ public record EmployeeCreateRequest (
         Long departmentId,
         Long positionId,
         Long employmentTypeId,
+        Long managerId,
         @NotBlank(message = "이름은 필수입니다.") @Size(max = 100) String name,
         LocalDate birthDate,
         String phone,
@@ -20,6 +21,7 @@ public record EmployeeCreateRequest (
         String bankName,
         String accountNumber,
         String accountHolder,
-        @NotBlank(message = "비밀번호는 필수입니다.") @Size(min = 4, max = 100) String password
+        @NotBlank(message = "비밀번호는 필수입니다.") @Size(min = 4, max = 100) String password,
+        String profileImage
 ){
 }

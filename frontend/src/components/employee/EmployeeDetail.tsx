@@ -20,6 +20,9 @@ interface EmployeeDetailData {
   positionName: string;
   employmentTypeId: number | null;
   employmentTypeName: string;
+  managerId: number | null;
+  managerName: string | null;
+  profileImage: string | null;
 }
 
 interface LeaveBalance {
@@ -137,9 +140,14 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
         {/* Profile Card */}
         <div className="bg-[#F8FAFC] border border-blue-100 rounded-xl p-6 flex items-start justify-between mb-6">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 bg-blue-500 text-white rounded-full flex items-center justify-center text-3xl font-bold shadow-md">
-              {data.name ? data.name.charAt(0) : '?'}
-            </div>
+            {data.profileImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={data.profileImage} alt={`${data.name} 프로필 사진`} className="w-20 h-20 rounded-full object-cover shadow-md" />
+            ) : (
+              <div className="w-20 h-20 bg-blue-500 text-white rounded-full flex items-center justify-center text-3xl font-bold shadow-md">
+                {data.name ? data.name.charAt(0) : '?'}
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h3 className="text-2xl font-bold text-gray-900">{data.name}</h3>
@@ -205,6 +213,10 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
               <div className="flex justify-between">
                 <span className="text-gray-500 font-medium">고용 형태</span>
                 <span className="text-gray-900 font-medium">{data.employmentTypeName || '-'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 font-medium">직속 관리자</span>
+                <span className="text-gray-900 font-medium">{data.managerName || '-'}</span>
               </div>
             </div>
           </div>

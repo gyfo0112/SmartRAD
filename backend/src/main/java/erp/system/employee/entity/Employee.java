@@ -41,6 +41,10 @@ public class Employee extends BaseEntity {
     @JoinColumn(name = "employment_type_id")
     private EmploymentType employmentType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private Employee manager;
+
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
@@ -80,15 +84,20 @@ public class Employee extends BaseEntity {
     @Column(name = "password", nullable = false, length = 100)
     private String password;
 
+    @Column(name = "profile_image", columnDefinition = "LONGTEXT")
+    private String profileImage;
+
 
     @Builder
     public Employee(String employeeNo, Department department, Position position, EmploymentType employmentType,
-                    String name, LocalDate birthDate, String phone, String email, String address, LocalDate hireDate,
-                    String employeeStatusCode, String bankName, String accountNumber, String accountHolder, String password) {
+                    Employee manager, String name, LocalDate birthDate, String phone, String email, String address, LocalDate hireDate,
+                    String employeeStatusCode, String bankName, String accountNumber, String accountHolder, String password,
+                    String profileImage) {
         this.employeeNo = employeeNo;
         this.department = department;
         this.position = position;
         this.employmentType = employmentType;
+        this.manager = manager;
         this.name = name;
         this.birthDate = birthDate;
         this.phone = phone;
@@ -100,6 +109,7 @@ public class Employee extends BaseEntity {
         this.accountNumber = accountNumber;
         this.accountHolder = accountHolder;
         this.password = password;
+        this.profileImage = profileImage;
     }
 
 

@@ -15,6 +15,8 @@ public record EmployeeResponse (
         String positionName,
         Long employmentTypeId,
         String employmentTypeName,
+        Long managerId,
+        String managerName,
         String name,
         LocalDate birthDate,
         String phone,
@@ -27,6 +29,7 @@ public record EmployeeResponse (
         String accountNumber,
         String accountHolder,
         BigDecimal baseSalary,
+        String profileImage,
         boolean active,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
@@ -41,6 +44,8 @@ public record EmployeeResponse (
                 employee.getPosition() != null ? employee.getPosition().getPositionName() : null,
                 employee.getEmploymentType() != null ? employee.getEmploymentType().getEmploymentTypeId() : null,
                 employee.getEmploymentType() != null ? employee.getEmploymentType().getEmploymentTypeName() : null,
+                employee.getManager() != null ? employee.getManager().getEmployeeId() : null,
+                employee.getManager() != null ? employee.getManager().getName() : null,
                 employee.getName(),
                 employee.getBirthDate(),
                 employee.getPhone(),
@@ -53,6 +58,7 @@ public record EmployeeResponse (
                 employee.getAccountNumber(),
                 employee.getAccountHolder(),
                 employee.getBaseSalary(),
+                employee.getProfileImage(),
                 employee.isActive(),
                 employee.getCreatedAt(),
                 employee.getUpdatedAt()
