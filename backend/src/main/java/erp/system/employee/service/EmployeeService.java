@@ -116,6 +116,9 @@ public class EmployeeService {
     public void delete(Long employeeId) {
         Employee employee = findActive(employeeId);
         employeeRepository.delete(employee);
+    }
+
+    @Transactional
     public EmployeeResponse updateBaseSalary(Long employeeId, EmployeeBaseSalaryUpdateRequest request) {
         Employee employee = findActive(employeeId);
         employee.updateBaseSalary(request.baseSalary());

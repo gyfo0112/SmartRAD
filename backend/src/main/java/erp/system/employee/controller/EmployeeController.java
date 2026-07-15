@@ -60,6 +60,8 @@ public class EmployeeController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         employeeService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{id}/base-salary")
     public EmployeeResponse updateBaseSalary(@PathVariable Long id, @Valid @RequestBody EmployeeBaseSalaryUpdateRequest request) {
         return employeeService.updateBaseSalary(id, request);
