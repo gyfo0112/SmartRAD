@@ -10,7 +10,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ClockIcon,
-  PlusIcon,
   UserPlusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
