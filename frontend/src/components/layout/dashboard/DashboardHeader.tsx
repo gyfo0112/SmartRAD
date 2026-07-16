@@ -38,6 +38,7 @@ export default function DashboardHeader() {
   const isDailyAttendance = pathname === "/attendance/daily";
   const isMonthlyAttendance = pathname === "/attendance/monthly";
   const isLeaveApproval = pathname === "/leave/approve";
+  const isLeaveUsage = pathname === "/leave/status";
   const [monthlySelection, setMonthlySelection] = useState(currentMonth);
 
   useEffect(() => {
@@ -151,6 +152,8 @@ export default function DashboardHeader() {
               승인 대기만 보기
             </button>
           </>
+        ) : isLeaveUsage ? (
+          <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("leave:usage-report"))} className="flex h-9 items-center gap-2 rounded-md border border-gray-200 bg-white px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"><ArrowDownTrayIcon className="h-4 w-4" />리포트 출력</button>
         ) : (
           <button
             type="button"
