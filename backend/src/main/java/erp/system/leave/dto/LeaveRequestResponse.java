@@ -10,6 +10,11 @@ public record LeaveRequestResponse(
         Long leaveRequestId,
         Long employeeId,
         String employeeName,
+        String employeeNo,
+        Long departmentId,
+        String departmentName,
+        String positionName,
+        String email,
         Long leaveTypeId,
         String leaveTypeName,
         LocalDate startDate,
@@ -19,13 +24,21 @@ public record LeaveRequestResponse(
         String status,
         Long approverId,
         String approverName,
+        String rejectionReason,
+        LocalDateTime processedAt,
         LocalDateTime createdAt
 ) {
     public static LeaveRequestResponse from(LeaveRequest leaveRequest) {
+        var employee = leaveRequest.getEmployee();
         return new LeaveRequestResponse(
                 leaveRequest.getLeaveRequestId(),
-                leaveRequest.getEmployee().getEmployeeId(),
-                leaveRequest.getEmployee().getName(),
+                employee.getEmployeeId(),
+                employee.getName(),
+                employee.getEmployeeNo(),
+                employee.getDepartment() != null ? employee.getDepartment().getDepartmentId() : null,
+                employee.getDepartment() != null ? employee.getDepartment().getDepartmentName() : null,
+                employee.getPosition() != null ? employee.getPosition().getPositionName() : null,
+                employee.getEmail(),
                 leaveRequest.getLeaveType().getLeaveTypeId(),
                 leaveRequest.getLeaveType().getLeaveTypeName(),
                 leaveRequest.getStartDate(),
@@ -35,6 +48,8 @@ public record LeaveRequestResponse(
                 leaveRequest.getStatus(),
                 leaveRequest.getApprover() != null ? leaveRequest.getApprover().getEmployeeId() : null,
                 leaveRequest.getApprover() != null ? leaveRequest.getApprover().getName() : null,
+                leaveRequest.getRejectionReason(),
+                leaveRequest.getProcessedAt(),
                 leaveRequest.getCreatedAt()
         );
     }
