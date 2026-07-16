@@ -33,6 +33,8 @@ public enum ErrorCode {
     BASE_SALARY_NOT_SET(HttpStatus.BAD_REQUEST, "기본급이 설정되지 않았습니다."),
     ALREADY_PAID_PAYROLL(HttpStatus.CONFLICT, "이미 지급 처리된 급여입니다."),
     PAYROLL_NOT_CALCULATED(HttpStatus.BAD_REQUEST, "급여 계산이 완료되지 않았습니다."),
+    PAYROLL_INVALID_STATUS(HttpStatus.BAD_REQUEST, "현재 상태에서는 처리할 수 없습니다."),
+    PAYROLL_ACCOUNT_NOT_REGISTERED(HttpStatus.BAD_REQUEST, "급여 계좌 정보가 등록되지 않았습니다."),
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "공지사항을 찾을 수 없습니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
 

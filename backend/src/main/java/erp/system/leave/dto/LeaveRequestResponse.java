@@ -1,9 +1,10 @@
 package erp.system.leave.dto;
 
+import erp.system.common.util.SoftDeleteAware;
+import erp.system.department.entity.Department;
 import erp.system.employee.entity.Employee;
 import erp.system.leave.entity.LeaveRequest;
-import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.proxy.HibernateProxy;
+import erp.system.position.entity.Position;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,17 +37,21 @@ public record LeaveRequestResponse(
     public static LeaveRequestResponse from(LeaveRequest leaveRequest) {
         Employee rawEmployee = leaveRequest.getEmployee();
         Employee rawApprover = leaveRequest.getApprover();
-        Employee employee = resolve(rawEmployee);
-        Employee approver = resolve(rawApprover);
+        Employee employee = SoftDeleteAware.resolve(rawEmployee, Employee::getName);
+        Employee approver = SoftDeleteAware.resolve(rawApprover, Employee::getName);
+        Department department = employee != null
+                ? SoftDeleteAware.resolve(employee.getDepartment(), Department::getDepartmentName) : null;
+        Position position = employee != null
+                ? SoftDeleteAware.resolve(employee.getPosition(), Position::getPositionName) : null;
 
         return new LeaveRequestResponse(
                 leaveRequest.getLeaveRequestId(),
-                identifierOf(rawEmployee),
+                SoftDeleteAware.identifierOf(rawEmployee, () -> rawEmployee.getEmployeeId()),
                 employee != null ? employee.getName() : DELETED_EMPLOYEE_LABEL,
                 employee != null ? employee.getEmployeeNo() : null,
-                employee != null && employee.getDepartment() != null ? employee.getDepartment().getDepartmentId() : null,
-                employee != null && employee.getDepartment() != null ? employee.getDepartment().getDepartmentName() : null,
-                employee != null && employee.getPosition() != null ? employee.getPosition().getPositionName() : null,
+                SoftDeleteAware.identifierOf(department, () -> department.getDepartmentId()),
+                department != null ? department.getDepartmentName() : null,
+                position != null ? position.getPositionName() : null,
                 employee != null ? employee.getEmail() : null,
                 leaveRequest.getLeaveType().getLeaveTypeId(),
                 leaveRequest.getLeaveType().getLeaveTypeName(),
@@ -55,32 +60,11 @@ public record LeaveRequestResponse(
                 leaveRequest.getLeaveDays(),
                 leaveRequest.getReason(),
                 leaveRequest.getStatus(),
-                rawApprover != null ? identifierOf(rawApprover) : null,
+                rawApprover != null ? SoftDeleteAware.identifierOf(rawApprover, () -> rawApprover.getEmployeeId()) : null,
                 rawApprover != null ? (approver != null ? approver.getName() : DELETED_EMPLOYEE_LABEL) : null,
                 leaveRequest.getRejectionReason(),
                 leaveRequest.getProcessedAt(),
                 leaveRequest.getCreatedAt()
         );
-    }
-
-    // 탈퇴(소프트 삭제)한 직원이 남긴 과거 휴가 신청도 화면에 그대로 표시되어야 하므로,
-    // Employee의 전역 @SQLRestriction(deleted=false)로 인해 지연 로딩이 실패하는 경우를 방어한다.
-    private static Employee resolve(Employee employee) {
-        if (employee == null) {
-            return null;
-        }
-        try {
-            employee.getName();
-            return employee;
-        } catch (EntityNotFoundException e) {
-            return null;
-        }
-    }
-
-    private static Long identifierOf(Employee employee) {
-        if (employee instanceof HibernateProxy proxy) {
-            return (Long) proxy.getHibernateLazyInitializer().getIdentifier();
-        }
-        return employee.getEmployeeId();
     }
 }
