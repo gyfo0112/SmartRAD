@@ -89,6 +89,35 @@ public class Attendance extends BaseEntity {
                 .build();
     }
 
+    public static Attendance manualEntry(Employee employee, LocalDate workDate, LocalDateTime checkInTime,
+                                          LocalDateTime checkOutTime, String attendanceStatusCode) {
+        Attendance attendance = new Attendance();
+        attendance.employee = employee;
+        attendance.workDate = workDate;
+        attendance.applyManual(checkInTime, checkOutTime, attendanceStatusCode);
+        return attendance;
+    }
+
+    public void applyManual(LocalDateTime checkInTime, LocalDateTime checkOutTime, String attendanceStatusCode) {
+        this.checkInTime = checkInTime;
+        this.checkOutTime = checkOutTime;
+        this.attendanceStatusCode = attendanceStatusCode;
+
+        if (checkInTime != null && checkOutTime != null) {
+            this.workMinutes = (int) Math.max(0, Duration.between(checkInTime, checkOutTime).toMinutes());
+            this.lateMinutes = (int) Math.max(0, Duration.between(STANDARD_START_TIME, checkInTime.toLocalTime()).toMinutes());
+            this.earlyLeaveMinutes = (int) Math.max(0, Duration.between(checkOutTime.toLocalTime(), STANDARD_END_TIME).toMinutes());
+            this.overtimeMinutes = Math.max(0, this.workMinutes - STANDARD_WORK_MINUTES);
+            this.nightWorkMinutes = calculateNightWorkMinutes(checkOutTime);
+        } else {
+            this.workMinutes = null;
+            this.lateMinutes = null;
+            this.earlyLeaveMinutes = null;
+            this.overtimeMinutes = null;
+            this.nightWorkMinutes = null;
+        }
+    }
+
     public void checkOut(LocalDateTime checkOutTime) {
         this.checkOutTime = checkOutTime;
         this.workMinutes = (int) Math.max(0, Duration.between(this.checkInTime, checkOutTime).toMinutes());

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AttendanceRegisterModal from "./AttendanceRegisterModal";
 import AttendanceSidePanel from "./AttendanceSidePanel";
 import AttendanceStats from "./AttendanceStats";
 import AttendanceTable from "./AttendanceTable";
@@ -30,6 +31,8 @@ export default function AttendanceDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +55,7 @@ export default function AttendanceDashboard() {
     }
     load();
     return () => { cancelled = true; };
-  }, [date]);
+  }, [date, refreshKey]);
 
   const rows = useMemo(() => {
     const employeeMap = new Map(employees.map((employee) => [employee.employeeId, employee]));
@@ -79,7 +82,34 @@ export default function AttendanceDashboard() {
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a"); anchor.href = url; anchor.download = `attendance-${date}.csv`; document.body.appendChild(anchor); anchor.click(); anchor.remove(); URL.revokeObjectURL(url);
   }, [date, filteredRows]);
-  const registerNotice = useCallback(() => window.alert("근태 등록 기능 준비 중입니다."), []);
+  const registerNotice = useCallback(() => setShowRegisterModal(true), []);
+  const handleRegisterSaved = useCallback(() => { setShowRegisterModal(false); setRefreshKey((key) => key + 1); }, []);
+
+  const sendAbsentNotice = useCallback(async () => {
+    const absentRows = rows.filter((row) => row.normalizedStatus === "absent");
+    if (absentRows.length === 0) {
+      window.alert("오늘 결근자가 없습니다.");
+      return;
+    }
+    const content = absentRows
+      .map((row) => `- ${row.employeeName}${row.departmentName ? ` (${row.departmentName}${row.positionName ? ` ${row.positionName}` : ""})` : ""}`)
+      .join("\n");
+    try {
+      const res = await fetch(`${API_BASE_URL}/notices`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({
+          title: `[결근자 알림] ${date} 결근자 명단`,
+          content: `${date} 기준 결근자는 총 ${absentRows.length}명입니다.\n\n${content}`,
+          pinned: false,
+        }),
+      });
+      if (!res.ok) throw new Error("failed");
+      window.alert("결근자 알림이 공지사항에 등록되었습니다.");
+    } catch {
+      window.alert("결근자 알림 발송에 실패했습니다.");
+    }
+  }, [rows, date]);
 
   useEffect(() => {
     const handleExportEvent = () => exportCsv();
@@ -99,8 +129,16 @@ export default function AttendanceDashboard() {
       <AttendanceStats counts={counts} />
       <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_290px]">
         <AttendanceTable rows={rows} departments={departments} date={date} loading={loading} error={error} onDateChange={setDate} onFilteredRowsChange={handleFilteredRowsChange} />
-        <AttendanceSidePanel counts={{ ...counts, totalEmployees: activeEmployees.length }} lastUpdated={lastUpdated} onRegister={registerNotice} />
+        <AttendanceSidePanel counts={{ ...counts, totalEmployees: activeEmployees.length }} lastUpdated={lastUpdated} onRegister={registerNotice} onSendAbsentNotice={sendAbsentNotice} />
       </div>
+      {showRegisterModal && (
+        <AttendanceRegisterModal
+          employees={activeEmployees}
+          defaultDate={date}
+          onClose={() => setShowRegisterModal(false)}
+          onSaved={handleRegisterSaved}
+        />
+      )}
     </div>
   );
 }

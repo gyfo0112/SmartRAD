@@ -9,9 +9,9 @@ import {
 } from "@heroicons/react/24/outline";
 import type { AttendanceCounts } from "./types";
 
-interface Props { counts: AttendanceCounts; lastUpdated: string | null; onRegister: () => void; }
+interface Props { counts: AttendanceCounts; lastUpdated: string | null; onRegister: () => void; onSendAbsentNotice: () => void; }
 
-export default function AttendanceSidePanel({ counts, lastUpdated, onRegister }: Props) {
+export default function AttendanceSidePanel({ counts, lastUpdated, onRegister, onSendAbsentNotice }: Props) {
   const chartTotal = counts.normal + counts.late + counts.absent + counts.leave;
   let offset = 0;
   const segments = [
@@ -47,7 +47,7 @@ export default function AttendanceSidePanel({ counts, lastUpdated, onRegister }:
       <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="mb-4 text-base font-bold text-gray-900">빠른 작업</h2><div className="space-y-2">
           <button type="button" onClick={onRegister} className={`${actionClass} border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100`}><span className="flex items-center gap-2"><ClockIcon className="h-4 w-4" />수동 출근 등록</span><span aria-hidden="true">›</span></button>
-          <button type="button" onClick={() => window.alert("결근자 알림 기능 준비 중입니다.")} className={`${actionClass} border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100`}><span className="flex items-center gap-2"><BellAlertIcon className="h-4 w-4" />결근자 알림 발송</span><span aria-hidden="true">›</span></button>
+          <button type="button" onClick={onSendAbsentNotice} className={`${actionClass} border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100`}><span className="flex items-center gap-2"><BellAlertIcon className="h-4 w-4" />결근자 알림 발송</span><span aria-hidden="true">›</span></button>
           <button type="button" onClick={() => window.print()} className={`${actionClass} border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100`}><span className="flex items-center gap-2"><DocumentArrowDownIcon className="h-4 w-4" />근태 보고서 출력</span><span aria-hidden="true">›</span></button>
         </div>
       </section>
