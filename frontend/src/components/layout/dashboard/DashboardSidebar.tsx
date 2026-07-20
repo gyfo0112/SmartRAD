@@ -5,18 +5,11 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { dashboardMenuGroups as menuGroups } from "@/lib/dashboardMenu";
+import { clearAuthStorage } from "@/lib/auth";
 import Logo from "@/components/ui/Logo";
 
 function getStoredValue(key: string) {
   return window.localStorage.getItem(key) ?? window.sessionStorage.getItem(key);
-}
-
-function clearAuthStorage() {
-  for (const storage of [window.localStorage, window.sessionStorage]) {
-    storage.removeItem("accessToken");
-    storage.removeItem("employeeName");
-    storage.removeItem("employeeEmail");
-  }
 }
 
 export default function DashboardSidebar() {
