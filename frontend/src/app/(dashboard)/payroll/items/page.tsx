@@ -45,6 +45,7 @@ export default function PayrollItemsPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [showModal, setShowModal] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [itemName, setItemName] = useState("");
   const [itemTypeCode, setItemTypeCode] = useState<"EARNING" | "DEDUCTION">("EARNING");
   const [taxable, setTaxable] = useState(true);
@@ -79,13 +80,26 @@ export default function PayrollItemsPage() {
     .filter((item) => item.itemTypeCode === "DEDUCTION" && item.active)
     .reduce((sum, item) => sum + (item.defaultAmount ?? 0), 0);
 
-  const openModal = () => {
+  const openCreateModal = () => {
+    setEditingItemId(null);
     setItemName("");
     setItemTypeCode("EARNING");
     setTaxable(true);
     setFixed(true);
     setDefaultAmount("");
     setRate("");
+    setModalError("");
+    setShowModal(true);
+  };
+
+  const openEditModal = (item: PayrollItemMaster) => {
+    setEditingItemId(item.payrollItemMasterId);
+    setItemName(item.itemName);
+    setItemTypeCode(item.itemTypeCode === "DEDUCTION" ? "DEDUCTION" : "EARNING");
+    setTaxable(item.taxable);
+    setFixed(item.fixed);
+    setDefaultAmount(item.defaultAmount != null ? String(item.defaultAmount) : "");
+    setRate(item.rate != null ? String(item.rate * 100) : "");
     setModalError("");
     setShowModal(true);
   };
@@ -124,34 +138,38 @@ export default function PayrollItemsPage() {
     }
   };
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     if (!itemName.trim()) {
       setModalError("항목명을 입력해주세요.");
       return;
     }
     setSaving(true);
     setModalError("");
+    const isEdit = editingItemId != null;
     try {
-      const res = await fetch(`${API_BASE_URL}/payroll-items`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({
-          itemName: itemName.trim(),
-          itemTypeCode,
-          taxable,
-          fixed,
-          defaultAmount: defaultAmount.trim() ? Number(defaultAmount) : null,
-          rate: rate.trim() ? Number(rate) / 100 : null,
-        }),
-      });
+      const res = await fetch(
+        isEdit ? `${API_BASE_URL}/payroll-items/${editingItemId}` : `${API_BASE_URL}/payroll-items`,
+        {
+          method: isEdit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json", ...authHeaders() },
+          body: JSON.stringify({
+            itemName: itemName.trim(),
+            itemTypeCode,
+            taxable,
+            fixed,
+            defaultAmount: defaultAmount.trim() ? Number(defaultAmount) : null,
+            rate: rate.trim() ? Number(rate) / 100 : null,
+          }),
+        },
+      );
       if (!res.ok) {
         const body: ErrorResponse = await res.json();
-        throw new Error(body.message || "급여항목 등록에 실패했습니다.");
+        throw new Error(body.message || `급여항목 ${isEdit ? "수정" : "등록"}에 실패했습니다.`);
       }
       setShowModal(false);
       await fetchItems();
     } catch (error) {
-      setModalError(error instanceof Error ? error.message : "급여항목 등록에 실패했습니다.");
+      setModalError(error instanceof Error ? error.message : `급여항목 ${isEdit ? "수정" : "등록"}에 실패했습니다.`);
     } finally {
       setSaving(false);
     }
@@ -166,7 +184,7 @@ export default function PayrollItemsPage() {
         </div>
         <button
           type="button"
-          onClick={openModal}
+          onClick={openCreateModal}
           className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
         >
           <PlusIcon className="h-4 w-4" />
@@ -242,13 +260,22 @@ export default function PayrollItemsPage() {
                     </button>
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={() => deleteItem(item)}
-                      className="rounded-md border border-rose-200 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
-                    >
-                      삭제
-                    </button>
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(item)}
+                        className="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteItem(item)}
+                        className="rounded-md border border-rose-200 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -261,7 +288,7 @@ export default function PayrollItemsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
           <section className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-              <h2 className="text-lg font-extrabold text-slate-900">급여항목 등록</h2>
+              <h2 className="text-lg font-extrabold text-slate-900">{editingItemId != null ? "급여항목 수정" : "급여항목 등록"}</h2>
               <button type="button" onClick={() => setShowModal(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
                 <XMarkIcon className="h-5 w-5" />
               </button>
@@ -329,7 +356,7 @@ export default function PayrollItemsPage() {
               </button>
               <button
                 type="button"
-                onClick={handleCreate}
+                onClick={handleSave}
                 disabled={saving}
                 className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
               >

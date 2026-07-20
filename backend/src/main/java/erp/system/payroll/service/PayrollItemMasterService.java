@@ -40,6 +40,14 @@ public class PayrollItemMasterService {
     }
 
     @Transactional
+    public PayrollItemMasterResponse update(Long payrollItemMasterId, PayrollItemMasterCreateRequest request) {
+        PayrollItemMaster item = findActive(payrollItemMasterId);
+        item.update(request.itemName(), request.itemTypeCode(), request.taxable(), request.fixed(),
+                request.defaultAmount(), request.rate());
+        return PayrollItemMasterResponse.from(item);
+    }
+
+    @Transactional
     public void delete(Long payrollItemMasterId) {
         PayrollItemMaster item = findActive(payrollItemMasterId);
         item.markDeleted();

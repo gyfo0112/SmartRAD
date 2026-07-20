@@ -29,6 +29,11 @@ public class PayrollItemMasterController {
         return ResponseEntity.status(HttpStatus.CREATED).body(payrollItemMasterService.create(request));
     }
 
+    @PutMapping("/{id}")
+    public PayrollItemMasterResponse update(@PathVariable Long id, @Valid @RequestBody PayrollItemMasterCreateRequest request) {
+        return payrollItemMasterService.update(id, request);
+    }
+
     @PatchMapping("/{id}/active")
     public PayrollItemMasterResponse updateActive(@PathVariable Long id, @Valid @RequestBody PayrollItemActiveUpdateRequest request) {
         return payrollItemMasterService.updateActive(id, request.active());

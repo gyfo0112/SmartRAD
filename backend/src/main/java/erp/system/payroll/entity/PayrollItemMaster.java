@@ -62,4 +62,14 @@ public class PayrollItemMaster extends BaseEntity {
         this.defaultAmount = defaultAmount;
         this.rate = rate;
     }
+
+    public void update(String itemName, String itemTypeCode, boolean taxable, boolean fixed,
+                        BigDecimal defaultAmount, BigDecimal rate) {
+        this.itemName = itemName;
+        this.itemTypeCode = itemTypeCode;
+        this.taxable = taxable;
+        this.fixed = fixed;
+        this.defaultAmount = defaultAmount;
+        this.rate = rate;
+    }
 }
