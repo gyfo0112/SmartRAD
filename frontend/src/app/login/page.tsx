@@ -2,11 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/ui/Logo";
 import SectionBadge from "@/components/ui/SectionBadge";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
+const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY ?? "";
+
+declare global {
+  interface Window {
+    Kakao: {
+      init: (key: string) => void;
+      isInitialized: () => boolean;
+      Auth: {
+        login: (options: {
+          success: (authObj: { access_token: string }) => void;
+          fail: (error: unknown) => void;
+        }) => void;
+      };
+    };
+  }
+}
 
 interface LoginResponse {
   accessToken: string;
@@ -15,6 +32,16 @@ interface LoginResponse {
   employeeNo: string;
   name: string;
   email: string;
+}
+
+interface KakaoLoginResponse {
+  linked: boolean;
+  accessToken: string | null;
+  tokenType: string | null;
+  employeeId: number | null;
+  employeeNo: string | null;
+  name: string | null;
+  email: string | null;
 }
 
 interface ErrorResponse {
@@ -76,6 +103,20 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [kakaoAccessToken, setKakaoAccessToken] = useState<string | null>(null);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [employeeNoInput, setEmployeeNoInput] = useState("");
+  const [linkSubmitting, setLinkSubmitting] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
+
+  const persistLoginAndRedirect = (data: LoginResponse) => {
+    const storage = rememberMe ? window.localStorage : window.sessionStorage;
+    storage.setItem("accessToken", data.accessToken);
+    storage.setItem("employeeName", data.name);
+    storage.setItem("employeeEmail", data.email);
+    router.push("/dashboard");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -99,16 +140,96 @@ export default function LoginPage() {
       }
 
       const data: LoginResponse = await res.json();
-      const storage = rememberMe ? window.localStorage : window.sessionStorage;
-      storage.setItem("accessToken", data.accessToken);
-      storage.setItem("employeeName", data.name);
-      storage.setItem("employeeEmail", data.email);
-
-      router.push("/dashboard");
+      persistLoginAndRedirect(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "로그인 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleKakaoLogin = () => {
+    setError(null);
+    if (typeof window === "undefined" || !window.Kakao) {
+      setError("카카오 SDK를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+    if (!window.Kakao.isInitialized()) {
+      window.Kakao.init(KAKAO_JS_KEY);
+    }
+
+    window.Kakao.Auth.login({
+      success: async (authObj) => {
+        setIsSubmitting(true);
+        try {
+          const res = await fetch(`${API_BASE_URL}/auth/kakao`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ kakaoAccessToken: authObj.access_token }),
+          });
+
+          if (!res.ok) {
+            const body: ErrorResponse = await res.json();
+            throw new Error(body.message || "카카오 로그인에 실패했습니다.");
+          }
+
+          const data: KakaoLoginResponse = await res.json();
+          if (data.linked && data.accessToken && data.employeeNo && data.name && data.email) {
+            persistLoginAndRedirect({
+              accessToken: data.accessToken,
+              tokenType: data.tokenType ?? "Bearer",
+              employeeId: data.employeeId ?? 0,
+              employeeNo: data.employeeNo,
+              name: data.name,
+              email: data.email,
+            });
+          } else {
+            setKakaoAccessToken(authObj.access_token);
+            setEmployeeNoInput("");
+            setLinkError(null);
+            setShowLinkModal(true);
+          }
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "카카오 로그인 중 오류가 발생했습니다.");
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
+      fail: (err) => {
+        console.error("Kakao login failed", err);
+        setError("카카오 로그인이 취소되었거나 실패했습니다.");
+      },
+    });
+  };
+
+  const handleKakaoLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!kakaoAccessToken || !employeeNoInput.trim()) {
+      setLinkError("사번을 입력해주세요.");
+      return;
+    }
+
+    setLinkSubmitting(true);
+    setLinkError(null);
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/kakao/link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kakaoAccessToken, employeeNo: employeeNoInput.trim() }),
+      });
+
+      if (!res.ok) {
+        const body: ErrorResponse = await res.json();
+        throw new Error(body.message || "계정 연동에 실패했습니다.");
+      }
+
+      const data: LoginResponse = await res.json();
+      setShowLinkModal(false);
+      persistLoginAndRedirect(data);
+    } catch (err) {
+      setLinkError(err instanceof Error ? err.message : "계정 연동 중 오류가 발생했습니다.");
+    } finally {
+      setLinkSubmitting(false);
     }
   };
 
@@ -342,6 +463,27 @@ export default function LoginPage() {
               </button>
             </form>
 
+            <div className="mt-6 flex items-center gap-3">
+              <div className="h-px flex-1 bg-brand-border-light" />
+              <span className="text-xs font-medium text-brand-muted">또는</span>
+              <div className="h-px flex-1 bg-brand-border-light" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleKakaoLogin}
+              disabled={isSubmitting}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-3.5 text-sm font-semibold text-[#191600] shadow-sm transition-colors hover:bg-[#f5dc00] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5">
+                <path
+                  d="M12 3.5C6.98 3.5 3 6.86 3 11.03c0 2.66 1.72 5 4.34 6.36-.19.7-.7 2.6-.8 3-.13.5.18.5.38.36.16-.1 2.53-1.7 3.56-2.4.5.07 1.01.11 1.52.11 5.02 0 9-3.36 9-7.53S17.02 3.5 12 3.5Z"
+                  fill="currentColor"
+                />
+              </svg>
+              카카오로 로그인
+            </button>
+
             <p className="mt-6 text-center text-sm text-brand-muted">
               계정이 없으신가요?{" "}
               <Link href="/signup" className="font-semibold text-brand-primary hover:text-brand-primary-dark">
@@ -351,6 +493,57 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {showLinkModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-brand-navy">사번 확인</h3>
+            <p className="mt-1.5 text-sm text-brand-muted">
+              처음 연동하는 카카오 계정입니다. 본인의 사번을 입력하면 기존 계정과 연동됩니다.
+            </p>
+            <form onSubmit={handleKakaoLink} className="mt-4 flex flex-col gap-3">
+              <input
+                autoFocus
+                value={employeeNoInput}
+                onChange={(e) => setEmployeeNoInput(e.target.value)}
+                placeholder="사번을 입력하세요 (예: E2026001)"
+                className="w-full rounded-xl border border-brand-border-light bg-brand-soft px-4 py-3 text-sm text-brand-navy placeholder:text-brand-muted outline-none transition-colors focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/20"
+              />
+              {linkError && (
+                <p role="alert" className="text-sm text-red-500">
+                  {linkError}
+                </p>
+              )}
+              <div className="mt-1 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowLinkModal(false)}
+                  className="flex-1 rounded-xl border border-brand-border-light py-2.5 text-sm font-semibold text-brand-muted transition-colors hover:bg-brand-soft"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={linkSubmitting}
+                  className="flex-1 rounded-xl bg-[#FEE500] py-2.5 text-sm font-semibold text-[#191600] transition-colors hover:bg-[#f5dc00] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {linkSubmitting ? "연동 중..." : "연동하기"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <Script
+        src="https://t1.kakaocdn.net/kakao_js_sdk/v1/kakao.min.js"
+        strategy="afterInteractive"
+        onLoad={() => {
+          if (window.Kakao && !window.Kakao.isInitialized()) {
+            window.Kakao.init(KAKAO_JS_KEY);
+          }
+        }}
+      />
     </div>
   );
 }

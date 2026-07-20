@@ -1,5 +1,8 @@
 package erp.system.auth.controller;
 
+import erp.system.auth.dto.KakaoLinkRequest;
+import erp.system.auth.dto.KakaoLoginRequest;
+import erp.system.auth.dto.KakaoLoginResponse;
 import erp.system.auth.dto.LoginRequest;
 import erp.system.auth.dto.LoginResponse;
 import erp.system.auth.service.AuthService;
@@ -20,5 +23,15 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/kakao")
+    public KakaoLoginResponse kakaoLogin(@Valid @RequestBody KakaoLoginRequest request) {
+        return authService.kakaoLogin(request);
+    }
+
+    @PostMapping("/kakao/link")
+    public KakaoLoginResponse kakaoLink(@Valid @RequestBody KakaoLinkRequest request) {
+        return authService.kakaoLink(request);
     }
 }

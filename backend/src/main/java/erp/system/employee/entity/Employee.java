@@ -84,6 +84,9 @@ public class Employee extends BaseEntity {
     @Column(name = "password", nullable = false, length = 100)
     private String password;
 
+    @Column(name = "kakao_id", unique = true, length = 50)
+    private String kakaoId;
+
     @Column(name = "profile_image", columnDefinition = "LONGTEXT")
     private String profileImage;
 
@@ -135,6 +138,10 @@ public class Employee extends BaseEntity {
 
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
+    }
+
+    public void linkKakao(String kakaoId) {
+        this.kakaoId = kakaoId;
     }
 
     public void updateBaseSalary(BigDecimal baseSalary) {

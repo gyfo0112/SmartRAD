@@ -1,8 +1,13 @@
 package erp.system.auth.service;
 
+import erp.system.auth.dto.KakaoLinkRequest;
+import erp.system.auth.dto.KakaoLoginRequest;
+import erp.system.auth.dto.KakaoLoginResponse;
 import erp.system.auth.dto.LoginRequest;
 import erp.system.auth.dto.LoginResponse;
 import erp.system.auth.jwt.JwtTokenProvider;
+import erp.system.auth.kakao.KakaoApiClient;
+import erp.system.auth.kakao.KakaoUserInfo;
 import erp.system.common.exception.BusinessException;
 import erp.system.common.exception.ErrorCode;
 import erp.system.employee.entity.Employee;
@@ -20,6 +25,7 @@ public class AuthService {
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final KakaoApiClient kakaoApiClient;
 
     public LoginResponse login(LoginRequest request) {
         Employee employee = employeeRepository.findByEmployeeNoOrEmail(request.email(), request.email())
@@ -35,5 +41,46 @@ public class AuthService {
 
         String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo());
         return LoginResponse.of(accessToken, employee);
+    }
+
+    public KakaoLoginResponse kakaoLogin(KakaoLoginRequest request) {
+        String kakaoId = resolveKakaoId(request.kakaoAccessToken());
+
+        return employeeRepository.findByKakaoId(kakaoId)
+                .filter(Employee::isLoginable)
+                .map(employee -> {
+                    String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo());
+                    return KakaoLoginResponse.linked(accessToken, employee);
+                })
+                .orElseGet(KakaoLoginResponse::notLinked);
+    }
+
+    @Transactional
+    public KakaoLoginResponse kakaoLink(KakaoLinkRequest request) {
+        String kakaoId = resolveKakaoId(request.kakaoAccessToken());
+
+        if (employeeRepository.findByKakaoId(kakaoId).isPresent()) {
+            throw new BusinessException(ErrorCode.KAKAO_ALREADY_LINKED);
+        }
+
+        Employee employee = employeeRepository.findByEmployeeNoOrEmail(request.employeeNo(), request.employeeNo())
+                .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
+
+        if (employee.getKakaoId() != null) {
+            throw new BusinessException(ErrorCode.EMPLOYEE_ALREADY_LINKED);
+        }
+        if (!employee.isLoginable()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
+        }
+
+        employee.linkKakao(kakaoId);
+
+        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo());
+        return KakaoLoginResponse.linked(accessToken, employee);
+    }
+
+    private String resolveKakaoId(String kakaoAccessToken) {
+        KakaoUserInfo userInfo = kakaoApiClient.getUserInfo(kakaoAccessToken);
+        return String.valueOf(userInfo.id());
     }
 }
