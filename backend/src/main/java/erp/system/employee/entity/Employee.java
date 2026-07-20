@@ -22,6 +22,9 @@ public class Employee extends BaseEntity {
     public static final String STATUS_ACTIVE = "ACTIVE";
     public static final String STATUS_RESIGNED = "RESIGNED";
 
+    public static final String ROLE_ADMIN = "ADMIN";
+    public static final String ROLE_EMPLOYEE = "EMPLOYEE";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "employee_id")
@@ -69,6 +72,9 @@ public class Employee extends BaseEntity {
     @Column(name = "employee_status_code", length = 30)
     private String employeeStatusCode;
 
+    @Column(name = "role_code", nullable = false, length = 30, columnDefinition = "varchar(30) not null default 'EMPLOYEE'")
+    private String roleCode;
+
     @Column(name = "bank_name", length = 100)
     private String bankName;
 
@@ -108,11 +114,16 @@ public class Employee extends BaseEntity {
         this.address = address;
         this.hireDate = hireDate;
         this.employeeStatusCode = employeeStatusCode == null ? STATUS_ACTIVE : employeeStatusCode;
+        this.roleCode = ROLE_EMPLOYEE;
         this.bankName = bankName;
         this.accountNumber = accountNumber;
         this.accountHolder = accountHolder;
         this.password = password;
         this.profileImage = profileImage;
+    }
+
+    public boolean isAdmin() {
+        return ROLE_ADMIN.equals(this.roleCode);
     }
 
 

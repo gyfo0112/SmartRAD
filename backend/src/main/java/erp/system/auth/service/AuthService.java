@@ -40,7 +40,7 @@ public class AuthService {
             throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
         }
 
-        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo());
+        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode());
         return LoginResponse.of(accessToken, employee);
     }
 
@@ -50,7 +50,7 @@ public class AuthService {
         return employeeRepository.findByKakaoId(kakaoId)
                 .filter(Employee::isLoginable)
                 .map(employee -> {
-                    String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo());
+                    String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode());
                     return KakaoLoginResponse.linked(accessToken, employee);
                 })
                 .orElseGet(KakaoLoginResponse::notLinked);
@@ -76,7 +76,7 @@ public class AuthService {
 
         employee.linkKakao(kakaoId);
 
-        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo());
+        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode());
         return KakaoLoginResponse.linked(accessToken, employee);
     }
 

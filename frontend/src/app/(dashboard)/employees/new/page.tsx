@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
+function authHeaders(): HeadersInit {
+  const token = window.localStorage.getItem("accessToken") ?? window.sessionStorage.getItem("accessToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 type Option = {
   label: string;
   value: string;
@@ -155,7 +160,7 @@ export default function NewEmployeePage() {
     try {
       const res = await fetch(`${API_BASE_URL}/employees`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           departmentId: Number(employee.department),
           positionId: Number(employee.position),

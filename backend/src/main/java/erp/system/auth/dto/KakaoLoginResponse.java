@@ -9,7 +9,8 @@ public record KakaoLoginResponse(
         Long employeeId,
         String employeeNo,
         String name,
-        String email
+        String email,
+        String role
 ) {
     public static KakaoLoginResponse linked(String accessToken, Employee employee) {
         return new KakaoLoginResponse(
@@ -19,11 +20,12 @@ public record KakaoLoginResponse(
                 employee.getEmployeeId(),
                 employee.getEmployeeNo(),
                 employee.getName(),
-                employee.getEmail()
+                employee.getEmail(),
+                employee.getRoleCode()
         );
     }
 
     public static KakaoLoginResponse notLinked() {
-        return new KakaoLoginResponse(false, null, null, null, null, null, null);
+        return new KakaoLoginResponse(false, null, null, null, null, null, null, null);
     }
 }

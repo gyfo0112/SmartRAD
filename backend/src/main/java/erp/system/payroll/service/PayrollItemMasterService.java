@@ -1,5 +1,7 @@
 package erp.system.payroll.service;
 
+import erp.system.common.exception.BusinessException;
+import erp.system.common.exception.ErrorCode;
 import erp.system.payroll.dto.PayrollItemMasterCreateRequest;
 import erp.system.payroll.dto.PayrollItemMasterResponse;
 import erp.system.payroll.entity.PayrollItemMaster;
@@ -35,5 +37,31 @@ public class PayrollItemMasterService {
                 .build();
 
         return PayrollItemMasterResponse.from(payrollItemMasterRepository.save(item));
+    }
+
+    @Transactional
+    public PayrollItemMasterResponse update(Long payrollItemMasterId, PayrollItemMasterCreateRequest request) {
+        PayrollItemMaster item = findActive(payrollItemMasterId);
+        item.update(request.itemName(), request.itemTypeCode(), request.taxable(), request.fixed(),
+                request.defaultAmount(), request.rate());
+        return PayrollItemMasterResponse.from(item);
+    }
+
+    @Transactional
+    public void delete(Long payrollItemMasterId) {
+        PayrollItemMaster item = findActive(payrollItemMasterId);
+        item.markDeleted();
+    }
+
+    @Transactional
+    public PayrollItemMasterResponse updateActive(Long payrollItemMasterId, boolean active) {
+        PayrollItemMaster item = findActive(payrollItemMasterId);
+        item.setActive(active);
+        return PayrollItemMasterResponse.from(item);
+    }
+
+    private PayrollItemMaster findActive(Long payrollItemMasterId) {
+        return payrollItemMasterRepository.findById(payrollItemMasterId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAYROLL_ITEM_NOT_FOUND));
     }
 }

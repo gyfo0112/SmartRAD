@@ -25,13 +25,14 @@ public class JwtTokenProvider {
         this.validityInMilliseconds = validityInSeconds * 1000;
     }
 
-    public String createToken(Long employeeId, String employeeNo) {
+    public String createToken(Long employeeId, String employeeNo, String roleCode) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
                 .subject(String.valueOf(employeeId))
                 .claim("employeeNo", employeeNo)
+                .claim("role", roleCode)
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(key)
@@ -40,6 +41,10 @@ public class JwtTokenProvider {
 
     public Long getEmployeeId(String token) {
         return Long.valueOf(parseClaims(token).getSubject());
+    }
+
+    public String getRole(String token) {
+        return parseClaims(token).get("role", String.class);
     }
 
     public boolean validateToken(String token) {
