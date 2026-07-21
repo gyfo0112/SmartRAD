@@ -253,13 +253,7 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 mb-6 lg:grid-cols-2">
-        <DepartmentHeadcountChart data={departmentData} loading={loading} />
-        <TodayAttendanceChart data={attendanceStatusData} loading={loading} />
-        <PayrollTrendChart data={payrollTrendData} loading={chartsLoading} />
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">최근 공지사항</h2>
           <Link href="/notices" className="text-sm font-medium text-blue-600 hover:text-blue-700">
@@ -293,6 +287,12 @@ export default function AdminDashboard() {
             ))
           )}
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 mb-6 lg:grid-cols-2">
+        <DepartmentHeadcountChart data={departmentData} loading={loading} />
+        <TodayAttendanceChart data={attendanceStatusData} loading={loading} />
+        <PayrollTrendChart data={payrollTrendData} loading={chartsLoading} />
       </div>
 
       {viewingNotice && (
