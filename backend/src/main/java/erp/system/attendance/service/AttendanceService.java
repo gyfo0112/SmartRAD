@@ -10,6 +10,8 @@ import erp.system.common.exception.ErrorCode;
 import erp.system.common.file.FileStorageService;
 import erp.system.employee.entity.Employee;
 import erp.system.employee.repository.EmployeeRepository;
+import erp.system.notification.entity.Notification;
+import erp.system.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final EmployeeRepository employeeRepository;
     private final FileStorageService fileStorageService;
+    private final NotificationService notificationService;
 
     public List<AttendanceResponse> getDaily(LocalDate workDate) {
         return attendanceRepository.findAllByWorkDateOrderByEmployee_EmployeeIdAsc(workDate).stream()
@@ -115,6 +118,16 @@ public class AttendanceService {
         }
 
         attendance.updateReason(reason, attachmentUrl, attachmentName);
+
+        if (!isAdmin) {
+            notificationService.notifyAdmins(
+                    Notification.TYPE_ATTENDANCE_CORRECTION,
+                    "근태 사유 제출",
+                    attendance.getEmployee().getName() + "님이 " + attendance.getWorkDate() + " 근태 사유를 제출했습니다.",
+                    "/attendance/daily"
+            );
+        }
+
         return AttendanceResponse.from(attendance);
     }
 }

@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation"
 
 import {
   ArrowDownTrayIcon,
-  BellIcon,
   PlusIcon,
   ClockIcon,
   ArrowPathIcon,
@@ -13,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline"
 
 import { dashboardMenuGroups } from "@/lib/dashboardMenu"
+import NotificationBell from "./NotificationBell"
 
 const flatItems = dashboardMenuGroups.flatMap((group) =>
   group.items.map((item) => ({ ...item, groupTitle: group.title })),
@@ -82,9 +82,7 @@ export default function DashboardHeader() {
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50">
-          <BellIcon className="w-5 h-5" />
-        </button>
+        <NotificationBell />
 
         {isSelfAttendance ? (
           <button
