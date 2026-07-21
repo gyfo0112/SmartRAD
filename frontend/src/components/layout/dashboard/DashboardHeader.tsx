@@ -35,6 +35,7 @@ export default function DashboardHeader() {
     flatItems.find((item) => item.href === pathname) ?? flatItems[0]
   const isDailyAttendance = pathname === "/attendance/daily"
   const isMonthlyAttendance = pathname === "/attendance/monthly"
+  const isMyAttendance = pathname === "/attendance/my"
   const isLeaveApproval = pathname === "/leave/approve"
   const isLeaveUsage = pathname === "/leave/status"
   const [monthlySelection, setMonthlySelection] = useState(currentMonth)
@@ -78,7 +79,7 @@ export default function DashboardHeader() {
         <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50">
           <BellIcon className="w-5 h-5" />
         </button>
-        {pathname === "/appointments" ? (
+        {isMyAttendance ? null : pathname === "/appointments" ? (
           <button
             type="button"
             onClick={() =>
