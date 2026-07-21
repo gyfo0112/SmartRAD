@@ -28,10 +28,10 @@ interface NoticeDetail extends Notice {
 
 interface Attendance {
   attendanceId: number;
-  date: string;
+  workDate: string;
   checkInTime: string | null;
   checkOutTime: string | null;
-  status: string;
+  attendanceStatusCode: string;
 }
 
 interface LeaveBalance {
@@ -84,8 +84,8 @@ function currentYearMonthString() {
 
 function formatTime(timeStr: string | null | undefined) {
   if (!timeStr) return "-";
-  // timeStr e.g. "09:00:00"
-  return timeStr.substring(0, 5);
+  // timeStr e.g. "2026-07-21T09:00:00.123456"
+  return timeStr.substring(11, 16);
 }
 
 export default function EmployeeDashboard() {
@@ -124,7 +124,7 @@ export default function EmployeeDashboard() {
         ]);
 
         const attendances: Attendance[] = attendanceRes.ok ? await attendanceRes.json() : [];
-        const todayAtt = attendances.find(a => a.date === todayString()) || null;
+        const todayAtt = attendances.find(a => a.workDate === todayString()) || null;
 
         const leaveBalances: LeaveBalance[] = (leaveRes && leaveRes.ok) ? await leaveRes.json() : [];
         const totalRemainLeave = leaveBalances.reduce((acc, curr) => acc + curr.remainDays, 0);

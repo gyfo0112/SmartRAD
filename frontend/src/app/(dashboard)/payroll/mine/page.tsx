@@ -139,7 +139,7 @@ export default function MyPayrollPage() {
   };
 
   return (
-    <div className="payroll-statement-print mx-auto max-w-7xl space-y-4 text-slate-800">
+    <div className="payroll-statement-print mx-auto max-w-[1600px] space-y-4 text-slate-800">
       <section>
         <h2 className="text-xl font-bold text-slate-900">내 급여 명세서</h2>
         <p className="mt-1 text-sm text-slate-500">매월 지급된 본인의 급여 명세서를 조회하고 인쇄할 수 있습니다.</p>
