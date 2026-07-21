@@ -29,6 +29,18 @@ docker compose up -d --build
 
 그 외 `user004@example.com` ~ `user050@example.com` 형태로 사원 계정이 다수 시드되어 있습니다(전부 동일 비밀번호).
 
+## AI 비서 기능 (선택)
+
+우측 하단 채팅 위젯에서 본인의 연차/급여/근태를 자연어로 물어볼 수 있는 기능입니다. Anthropic API 키가 없으면 자동으로 "AI 비서 기능이 아직 설정되지 않았습니다" 안내만 뜨고 나머지 기능엔 영향이 없습니다.
+
+사용하려면:
+1. [console.anthropic.com](https://console.anthropic.com)에서 가입 후 API Keys 메뉴에서 키 발급 (결제수단 등록 필요할 수 있음)
+2. 프로젝트 루트에 `.env` 파일 생성 (git에 안 올라감):
+   ```
+   ANTHROPIC_API_KEY=sk-ant-여기에-발급받은-키
+   ```
+3. `docker compose up -d --build backend`로 재기동
+
 ## 개발 시 참고
 
 - 백엔드 코드를 수정하면 `docker compose build backend && docker compose up -d backend`로 재빌드해야 반영됩니다.
