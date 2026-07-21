@@ -1,5 +1,6 @@
 import {
   UsersIcon,
+  UserIcon,
   HomeIcon,
   UserPlusIcon,
   ArrowPathIcon,
@@ -27,6 +28,7 @@ export const dashboardMenuGroups = [
   {
     title: "인사 관리",
     items: [
+      { name: "내 정보(프로필) 조회", href: "/profile", icon: UserIcon, adminOnly: false },
       { name: "직원 목록 조회", href: "/employees", icon: UsersIcon, adminOnly: false },
       { name: "신규 직원 등록", href: "/employees/new", icon: UserPlusIcon, adminOnly: true },
       { name: "인사 발령 관리", href: "/appointments", icon: ArrowPathIcon, adminOnly: true },
