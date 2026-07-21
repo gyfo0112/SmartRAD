@@ -33,7 +33,7 @@ interface ErrorResponse {
   message: string;
 }
 
-type DisplayStatus = "출근 전" | "근무 중" | "퇴근 완료" | "지각" | "조퇴" | "결근";
+type DisplayStatus = "출근 전" | "근무 중" | "퇴근 완료" | "지각" | "조퇴" | "추가근무" | "결근";
 
 const STATUS_STYLES: Record<DisplayStatus, string> = {
   "출근 전": "bg-slate-100 text-slate-600 ring-slate-200",
@@ -41,6 +41,7 @@ const STATUS_STYLES: Record<DisplayStatus, string> = {
   "퇴근 완료": "bg-emerald-50 text-emerald-700 ring-emerald-200",
   지각: "bg-amber-50 text-amber-700 ring-amber-200",
   조퇴: "bg-orange-50 text-orange-700 ring-orange-200",
+  추가근무: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   결근: "bg-rose-50 text-rose-700 ring-rose-200",
 };
 
@@ -102,6 +103,7 @@ function getDisplayStatus(record: AttendanceResponse | null): DisplayStatus {
   if (record.attendanceStatusCode === "ABSENT") return "결근";
   if (record.attendanceStatusCode === "EARLY_LEAVE") return "조퇴";
   if (record.attendanceStatusCode === "LATE") return "지각";
+  if (record.attendanceStatusCode === "OVERTIME") return "추가근무";
   if (record.checkOutTime) return "퇴근 완료";
   if (record.checkInTime) return "근무 중";
   return "출근 전";
@@ -136,12 +138,12 @@ export default function SelfAttendancePage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/attendances?date=${today}`, {
+      const res = await fetch(`${API_BASE_URL}/attendances/me?yearMonth=${today.slice(0, 7)}`, {
         headers: authHeaders(),
       });
       if (!res.ok) throw new Error("오늘의 근태 정보를 불러오지 못했습니다.");
       const data = (await res.json()) as AttendanceResponse[];
-      setRecord(data.find((item) => item.employeeId === employeeId) ?? null);
+      setRecord(data.find((item) => item.workDate === today) ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "오늘의 근태 정보를 불러오지 못했습니다.");
     } finally {
@@ -185,6 +187,7 @@ export default function SelfAttendancePage() {
       }
       await fetchToday();
     } catch (err) {
+      await fetchToday();
       setError(err instanceof Error ? err.message : "출근 체크에 실패했습니다.");
     } finally {
       setProcessing(false);
@@ -206,6 +209,7 @@ export default function SelfAttendancePage() {
       }
       await fetchToday();
     } catch (err) {
+      await fetchToday();
       setError(err instanceof Error ? err.message : "퇴근 체크에 실패했습니다.");
     } finally {
       setProcessing(false);

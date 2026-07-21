@@ -21,19 +21,20 @@ interface AttendanceResponse {
   attendanceStatusCode: string;
 }
 
-type Filter = "ALL" | "NORMAL" | "LATE" | "EARLY_LEAVE" | "ABSENT";
-type Status = "정상" | "지각" | "조퇴" | "결근" | "근무 중" | "미등록";
+type Filter = "ALL" | "NORMAL" | "LATE" | "EARLY_LEAVE" | "OVERTIME" | "ABSENT";
+type Status = "정상" | "지각" | "조퇴" | "추가근무" | "결근" | "근무 중" | "미등록";
 
 const filters: { value: Filter; label: string }[] = [
   { value: "ALL", label: "전체" }, { value: "NORMAL", label: "정상" },
   { value: "LATE", label: "지각" }, { value: "EARLY_LEAVE", label: "조퇴" },
-  { value: "ABSENT", label: "결근" },
+  { value: "OVERTIME", label: "추가근무" }, { value: "ABSENT", label: "결근" },
 ];
 
 const statusStyle: Record<Status, string> = {
   정상: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   지각: "bg-orange-50 text-orange-700 ring-orange-200",
   조퇴: "bg-violet-50 text-violet-700 ring-violet-200",
+  추가근무: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   결근: "bg-rose-50 text-rose-700 ring-rose-200",
   "근무 중": "bg-blue-50 text-blue-700 ring-blue-200",
   미등록: "bg-gray-100 text-gray-600 ring-gray-200",
@@ -73,7 +74,7 @@ function weekday(value: string) {
 
 function getStatus(record: AttendanceResponse): Status {
   if (record.checkInTime && !record.checkOutTime && record.attendanceStatusCode !== "ABSENT") return "근무 중";
-  return ({ NORMAL: "정상", LATE: "지각", EARLY_LEAVE: "조퇴", ABSENT: "결근" } as Record<string, Status>)[record.attendanceStatusCode] ?? "미등록";
+  return ({ NORMAL: "정상", LATE: "지각", EARLY_LEAVE: "조퇴", OVERTIME: "추가근무", ABSENT: "결근" } as Record<string, Status>)[record.attendanceStatusCode] ?? "미등록";
 }
 
 function StatusBadge({ record }: { record: AttendanceResponse }) {
