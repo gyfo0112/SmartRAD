@@ -10,6 +10,8 @@ import erp.system.common.exception.BusinessException;
 import erp.system.common.exception.ErrorCode;
 import erp.system.employee.entity.Employee;
 import erp.system.employee.repository.EmployeeRepository;
+import erp.system.notification.entity.Notification;
+import erp.system.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class EmployeeAllowanceService {
     private final EmployeeAllowanceRepository employeeAllowanceRepository;
     private final EmployeeRepository employeeRepository;
     private final AllowanceRepository allowanceRepository;
+    private final NotificationService notificationService;
 
     public List<EmployeeAllowanceResponse> getByEmployee(Long employeeId) {
         return employeeAllowanceRepository.findAllByEmployee_EmployeeId(employeeId).stream()
@@ -46,7 +49,15 @@ public class EmployeeAllowanceService {
                 .endDate(request.endDate())
                 .build();
 
-        return EmployeeAllowanceResponse.from(employeeAllowanceRepository.save(employeeAllowance));
+        EmployeeAllowance saved = employeeAllowanceRepository.save(employeeAllowance);
+        notificationService.notify(
+                employee.getEmployeeId(),
+                Notification.TYPE_ALLOWANCE_CHANGED,
+                "수당 정보 변경",
+                "\"" + allowance.getAllowanceName() + "\" 수당 정보가 등록되었습니다.",
+                "/payroll/mine"
+        );
+        return EmployeeAllowanceResponse.from(saved);
     }
 
     @Transactional
@@ -56,7 +67,17 @@ public class EmployeeAllowanceService {
                 .orElse(null);
 
         if (existing != null) {
+            boolean amountChanged = existing.getAmount().compareTo(request.amount()) != 0;
             existing.updateAmount(request.amount(), request.startDate(), request.endDate());
+            if (amountChanged) {
+                notificationService.notify(
+                        existing.getEmployee().getEmployeeId(),
+                        Notification.TYPE_ALLOWANCE_CHANGED,
+                        "수당 정보 변경",
+                        "\"" + existing.getAllowance().getAllowanceName() + "\" 수당 정보가 변경되었습니다.",
+                        "/payroll/mine"
+                );
+            }
             return EmployeeAllowanceResponse.from(existing);
         }
 

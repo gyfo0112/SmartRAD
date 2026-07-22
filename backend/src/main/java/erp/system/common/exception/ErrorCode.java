@@ -18,6 +18,7 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     APPOINTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "발령 이력을 찾을 수 없습니다."),
     EVENT_SUPPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "경조비 신청 내역을 찾을 수 없습니다."),
+    INVALID_EVENT_SUPPORT_STATUS(HttpStatus.BAD_REQUEST, "현재 상태에서는 처리할 수 없습니다."),
     CERTIFICATE_ISSUE_NOT_FOUND(HttpStatus.NOT_FOUND, "증명서 발급 내역을 찾을 수 없습니다."),
     ATTENDANCE_NOT_FOUND(HttpStatus.NOT_FOUND, "근태 기록을 찾을 수 없습니다."),
     ALREADY_CHECKED_IN(HttpStatus.CONFLICT, "이미 출근 처리되었습니다."),
