@@ -22,6 +22,8 @@ import erp.system.payroll.entity.PayrollItemMaster;
 import erp.system.payroll.repository.PayrollDetailRepository;
 import erp.system.payroll.repository.PayrollItemMasterRepository;
 import erp.system.payroll.repository.PayrollRepository;
+import erp.system.notification.entity.Notification;
+import erp.system.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +54,7 @@ public class PayrollService {
     private final EmployeeAllowanceRepository employeeAllowanceRepository;
     private final AttendanceRepository attendanceRepository;
     private final PayrollFailureRecorder payrollFailureRecorder;
+    private final NotificationService notificationService;
 
     public List<PayrollResponse> getList(Long employeeId, YearMonth payrollYearMonth) {
         return payrollRepository.findAll((root, query, cb) -> {
@@ -257,6 +260,16 @@ public class PayrollService {
             throw new BusinessException(ErrorCode.PAYROLL_ACCOUNT_NOT_REGISTERED);
         }
         payroll.pay(LocalDate.now());
+        String yearMonthLabel = payroll.getPayrollYearMonth().length() == 6
+                ? payroll.getPayrollYearMonth().substring(0, 4) + "년 " + Integer.parseInt(payroll.getPayrollYearMonth().substring(4, 6)) + "월"
+                : payroll.getPayrollYearMonth();
+        notificationService.notify(
+                employee.getEmployeeId(),
+                Notification.TYPE_PAYROLL_PAID,
+                "급여 지급 완료",
+                yearMonthLabel + " 급여가 지급되었습니다.",
+                "/payroll/mine"
+        );
         return payroll;
     }
 

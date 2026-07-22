@@ -9,6 +9,8 @@ import erp.system.common.exception.BusinessException;
 import erp.system.common.exception.ErrorCode;
 import erp.system.employee.entity.Employee;
 import erp.system.employee.repository.EmployeeRepository;
+import erp.system.notification.entity.Notification;
+import erp.system.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,7 @@ public class EmployeeCertificateIssueService {
 
     private final EmployeeCertificateIssueRepository certificateIssueRepository;
     private final EmployeeRepository employeeRepository;
+    private final NotificationService notificationService;
 
     public List<EmployeeCertificateIssueResponse> getByEmployee(Long employeeId) {
         return certificateIssueRepository.findAllByEmployee_EmployeeIdOrderByApplicationDateDesc(employeeId).stream()
@@ -83,13 +86,27 @@ public class EmployeeCertificateIssueService {
                 .memo(memo)
                 .build();
 
-        return EmployeeCertificateIssueResponse.from(certificateIssueRepository.save(issue));
+        EmployeeCertificateIssue saved = certificateIssueRepository.save(issue);
+        notificationService.notifyAdmins(
+                Notification.TYPE_CERTIFICATE_REQUESTED,
+                "증명서 발급 신청",
+                employee.getName() + "님이 증명서 발급을 신청했습니다.",
+                "/certificates"
+        );
+        return EmployeeCertificateIssueResponse.from(saved);
     }
 
     @Transactional
     public EmployeeCertificateIssueResponse approve(Long id) {
         EmployeeCertificateIssue issue = findActive(id);
         issue.approve();
+        notificationService.notify(
+                issue.getEmployee().getEmployeeId(),
+                Notification.TYPE_CERTIFICATE_APPROVED,
+                "증명서 승인",
+                "신청하신 증명서 발급이 승인되었습니다.",
+                "/certificates/my"
+        );
         return EmployeeCertificateIssueResponse.from(issue);
     }
 
@@ -97,6 +114,13 @@ public class EmployeeCertificateIssueService {
     public EmployeeCertificateIssueResponse reject(Long id, String memo) {
         EmployeeCertificateIssue issue = findActive(id);
         issue.reject(memo);
+        notificationService.notify(
+                issue.getEmployee().getEmployeeId(),
+                Notification.TYPE_CERTIFICATE_REJECTED,
+                "증명서 반려",
+                "신청하신 증명서 발급이 반려되었습니다." + (memo != null && !memo.isBlank() ? " 사유: " + memo : ""),
+                "/certificates/my"
+        );
         return EmployeeCertificateIssueResponse.from(issue);
     }
 
@@ -104,6 +128,13 @@ public class EmployeeCertificateIssueService {
     public EmployeeCertificateIssueResponse issue(Long id) {
         EmployeeCertificateIssue issue = findActive(id);
         issue.issue();
+        notificationService.notify(
+                issue.getEmployee().getEmployeeId(),
+                Notification.TYPE_CERTIFICATE_ISSUED,
+                "증명서 발급 완료",
+                "신청하신 증명서가 발급되었습니다.",
+                "/certificates/my"
+        );
         return EmployeeCertificateIssueResponse.from(issue);
     }
 
