@@ -67,7 +67,7 @@ export default function DashboardHeader() {
   }
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10 sticky top-0">
+    <header className="sticky top-0 z-10 flex min-h-16 flex-col gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-8">
       <div>
         <h1 className="text-xl font-bold text-gray-900">{current.name}</h1>
         <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
@@ -92,10 +92,32 @@ export default function DashboardHeader() {
             onClick={() =>
               window.dispatchEvent(new CustomEvent("attendance:self-refresh"))
             }
-            className="flex h-10 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 sm:px-4"
+            className="flex h-10 items-center gap-2 rounded-md bg-[#4A5DDF] px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
           >
             <ArrowPathIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">오늘 기록 새로고침</span>
+            <span>새로고침</span>
+          </button>
+        ) : isMyAttendance ? (
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("attendance:my-refresh"))
+            }
+            className="flex h-10 items-center gap-2 rounded-md bg-[#4A5DDF] px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
+          >
+            <ArrowPathIcon className="h-4 w-4" />
+            <span>새로고침</span>
+          </button>
+        ) : isMyLeave ? (
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("leave:my-request"))
+            }
+            className="flex h-10 items-center gap-2 rounded-md bg-[#4A5DDF] px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
+          >
+            <PlusIcon className="h-4 w-4" />
+            <span>휴가 신청</span>
           </button>
         ) : pathname === "/appointments" ? (
           <button
