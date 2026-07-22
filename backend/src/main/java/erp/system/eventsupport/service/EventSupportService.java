@@ -1,5 +1,7 @@
 package erp.system.eventsupport.service;
 
+import erp.system.auditlog.entity.AuditLog;
+import erp.system.auditlog.service.AuditLogService;
 import erp.system.common.exception.BusinessException;
 import erp.system.common.exception.ErrorCode;
 import erp.system.common.file.FileStorageService;
@@ -32,6 +34,7 @@ public class EventSupportService {
     private final EmployeeRepository employeeRepository;
     private final FileStorageService fileStorageService;
     private final NotificationService notificationService;
+    private final AuditLogService auditLogService;
 
     private static String eventTypeLabel(String eventType) {
         return switch (eventType) {
@@ -120,6 +123,13 @@ public class EventSupportService {
                 "/events/my"
         );
 
+        auditLogService.log(
+                approverId,
+                AuditLog.ACTION_EVENT_SUPPORT_APPROVE,
+                "경조비 승인: " + eventSupport.getEmployee().getName() + " (" + eventTypeLabel(eventSupport.getEventType()) + ")",
+                null
+        );
+
         return EventSupportResponse.from(eventSupport);
     }
 
@@ -139,11 +149,18 @@ public class EventSupportService {
                 "/events/my"
         );
 
+        auditLogService.log(
+                approverId,
+                AuditLog.ACTION_EVENT_SUPPORT_REJECT,
+                "경조비 반려: " + eventSupport.getEmployee().getName() + " (" + eventTypeLabel(eventSupport.getEventType()) + ")",
+                rejectionReason
+        );
+
         return EventSupportResponse.from(eventSupport);
     }
 
     @Transactional
-    public EventSupportResponse pay(Long id) {
+    public EventSupportResponse pay(Long id, Long actorId) {
         EventSupport eventSupport = findActive(id);
         eventSupport.pay(LocalDate.now());
 
@@ -153,6 +170,13 @@ public class EventSupportService {
                 "경조비 지급 완료",
                 "신청하신 경조비가 지급되었습니다.",
                 "/events/my"
+        );
+
+        auditLogService.log(
+                actorId,
+                AuditLog.ACTION_EVENT_SUPPORT_PAY,
+                "경조비 지급 처리: " + eventSupport.getEmployee().getName() + " (" + eventTypeLabel(eventSupport.getEventType()) + ")",
+                null
         );
 
         return EventSupportResponse.from(eventSupport);

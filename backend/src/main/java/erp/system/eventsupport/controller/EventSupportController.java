@@ -66,7 +66,7 @@ public class EventSupportController {
     }
 
     @PatchMapping("/{id}/pay")
-    public EventSupportResponse pay(@PathVariable Long id) {
-        return eventSupportService.pay(id);
+    public EventSupportResponse pay(@PathVariable Long id, @AuthenticationPrincipal Long requesterId) {
+        return eventSupportService.pay(id, requesterId);
     }
 }
