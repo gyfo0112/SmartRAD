@@ -14,6 +14,7 @@ public enum ErrorCode {
     POSITION_NOT_FOUND(HttpStatus.NOT_FOUND, "직책을 찾을 수 없습니다."),
     EMPLOYMENT_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "사원타입을 찾을 수 없습니다."),
     EMPLOYEE_NOT_FOUND(HttpStatus.NOT_FOUND, "사원을 찾을 수 없습니다."),
+    EMPLOYEE_DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "첨부 서류를 찾을 수 없습니다."),
     DUPLICATE_EMPLOYEE_NO(HttpStatus.CONFLICT, "이미 사용 중인 사번입니다."),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     APPOINTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "발령 이력을 찾을 수 없습니다."),

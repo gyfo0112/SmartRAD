@@ -59,6 +59,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/employees/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/employees/**").hasRole("ADMIN")
 
+                        // 직원 첨부 서류 - 조회는 본인 또는 관리자(컨트롤러에서 체크), 업로드/삭제는 관리자 전용
+                        .requestMatchers(HttpMethod.GET, "/api/employees/*/documents").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/employees/*/documents").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/employees/*/documents/*").hasRole("ADMIN")
+
                         // 인사 발령 - 본인 이력 조회는 로그인만 하면 가능, 나머지는 관리자 전용
                         .requestMatchers(HttpMethod.GET, "/api/appointments/me").authenticated()
                         .requestMatchers("/api/appointments/**").hasRole("ADMIN")
