@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserIcon, BuildingOfficeIcon, BriefcaseIcon, IdentificationIcon, EnvelopeIcon, PhoneIcon, ClockIcon, CheckBadgeIcon, PencilSquareIcon, DocumentTextIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { UserIcon, BuildingOfficeIcon, BriefcaseIcon, IdentificationIcon, EnvelopeIcon, PhoneIcon, HomeIcon, ClockIcon, CheckBadgeIcon, PencilSquareIcon, DocumentTextIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import { getEmployeeStatusLabel, getEmployeeStatusBadgeClasses } from "@/lib/employeeStatus";
 import { certificateTypeLabel, statusBadge, type CertificateIssueResponse } from "@/components/certificate/types";
 import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
@@ -140,7 +140,12 @@ export default function MyProfile() {
   
   const [activeTab, setActiveTab] = useState<TabType>("appointments");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ phone: "", email: "", address: "" });
+  const [editForm, setEditForm] = useState<{ phone: string; email: string; address: string; profileImage: string | null }>({
+    phone: "",
+    email: "",
+    address: "",
+    profileImage: null,
+  });
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -167,7 +172,7 @@ export default function MyProfile() {
       if (profileRes.ok) {
         const data = await profileRes.json();
         setProfile(data);
-        setEditForm({ phone: data.phone || "", email: data.email || "", address: data.address || "" });
+        setEditForm({ phone: data.phone || "", email: data.email || "", address: data.address || "", profileImage: data.profileImage || null });
       }
       if (appointmentsRes.ok) setAppointments(await appointmentsRes.json());
 
@@ -196,6 +201,16 @@ export default function MyProfile() {
     }
   };
 
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setEditForm((prev) => ({ ...prev, profileImage: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
@@ -214,7 +229,7 @@ export default function MyProfile() {
         bankName: profile.bankName,
         accountNumber: profile.accountNumber,
         accountHolder: profile.accountHolder,
-        profileImage: profile.profileImage
+        profileImage: editForm.profileImage
       };
 
       const res = await fetch(`${API_BASE_URL}/employees/${profile.employeeId}`, {
@@ -323,6 +338,13 @@ export default function MyProfile() {
                 <div>
                   <p className="text-xs text-gray-500 font-medium">연락처</p>
                   <p className="text-sm text-gray-900 mt-0.5">{profile.phone || '-'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <HomeIcon className="w-5 h-5 text-gray-400 mt-0.5" />
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">자택 주소</p>
+                  <p className="text-sm text-gray-900 mt-0.5">{profile.address || '-'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -507,6 +529,34 @@ export default function MyProfile() {
             </>
           }
         >
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-100">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">프로필 사진</h3>
+                  </div>
+                  <div className="p-4 flex items-center gap-4">
+                    {editForm.profileImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={editForm.profileImage} alt="프로필 사진" className="w-16 h-16 rounded-full object-cover shadow-sm border border-gray-100" />
+                    ) : (
+                      <div className="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-2xl font-bold shadow-sm">
+                        {profile.name ? profile.name.charAt(0) : "?"}
+                      </div>
+                    )}
+                    <label className="cursor-pointer px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                      사진 변경
+                      <input type="file" accept="image/*" className="hidden" onChange={handleProfileImageChange} />
+                    </label>
+                    {editForm.profileImage && (
+                      <button
+                        type="button"
+                        onClick={() => setEditForm((prev) => ({ ...prev, profileImage: null }))}
+                        className="px-3 py-1.5 text-sm font-medium text-rose-600 bg-white border border-rose-200 rounded-md hover:bg-rose-50"
+                      >
+                        사진 삭제
+                      </button>
+                    )}
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
                   <input 

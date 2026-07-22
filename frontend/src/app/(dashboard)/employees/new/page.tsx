@@ -1,10 +1,22 @@
 "use client";
 
-import { type ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EMPLOYEE_DOCUMENT_TYPE_OPTIONS, employeeDocumentTypeLabel } from "@/components/employee/documentTypes";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
+
+declare global {
+  interface Window {
+    daum?: {
+      Postcode: new (options: {
+        oncomplete: (data: { roadAddress: string; jibunAddress: string; zonecode: string }) => void;
+        width?: string | number;
+        height?: string | number;
+      }) => { embed: (element: HTMLElement) => void };
+    };
+  }
+}
 
 function authHeaders(): HeadersInit {
   const token = window.localStorage.getItem("accessToken") ?? window.sessionStorage.getItem("accessToken");
@@ -26,16 +38,21 @@ type InputProps = {
   suffix?: string;
   placeholder?: string;
   type?: string;
+  invalid?: boolean;
 };
 
-const Input = ({ label, name, value, onChange, required, muted, suffix, placeholder, type = "text" }: InputProps) => (
+const Input = ({ label, name, value, onChange, required, muted, suffix, placeholder, type = "text", invalid }: InputProps) => (
   <label className="block" htmlFor={name}>
     <span className="mb-2 block text-xs font-bold text-slate-700">
       {label} {required ? <b className="text-rose-500">*</b> : null}
     </span>
     <div
       className={`flex h-10 items-center rounded-lg border px-3 text-sm ${
-        muted ? "border-slate-200 bg-slate-50 text-slate-300" : "border-slate-200 bg-white text-slate-900 focus-within:border-indigo-500"
+        muted
+          ? "border-slate-200 bg-slate-50 text-slate-300"
+          : invalid
+          ? "border-rose-400 bg-rose-50/40 ring-1 ring-rose-200 focus-within:border-rose-500"
+          : "border-slate-200 bg-white text-slate-900 focus-within:border-indigo-500"
       }`}
     >
       <input
@@ -54,7 +71,25 @@ const Input = ({ label, name, value, onChange, required, muted, suffix, placehol
   </label>
 );
 
-const Select = ({ label, name, value, onChange, options, placeholder, required }: { label: string; name: string; value: string; onChange: (value: string) => void; options: Option[]; placeholder: string; required?: boolean }) => (
+const Select = ({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+  placeholder,
+  required,
+  invalid,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Option[];
+  placeholder: string;
+  required?: boolean;
+  invalid?: boolean;
+}) => (
   <label className="block" htmlFor={name}>
     <span className="mb-2 block text-xs font-bold text-slate-700">
       {label} {required ? <b className="text-rose-500">*</b> : null}
@@ -64,7 +99,9 @@ const Select = ({ label, name, value, onChange, options, placeholder, required }
       name={name}
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className={`h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-indigo-500 ${value ? "text-slate-900" : "text-slate-300"}`}
+      className={`h-10 w-full rounded-lg border bg-white px-3 text-sm outline-none ${
+        invalid ? "border-rose-400 bg-rose-50/40 ring-1 ring-rose-200 focus:border-rose-500" : "border-slate-200 focus:border-indigo-500"
+      } ${value ? "text-slate-900" : "text-slate-300"}`}
     >
       <option value="">{placeholder}</option>
       {options.map((option) => (
@@ -76,8 +113,106 @@ const Select = ({ label, name, value, onChange, options, placeholder, required }
   </label>
 );
 
+const SearchableSelect = ({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Option[];
+  placeholder: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selected = options.find((option) => option.value === value);
+  const filtered = query.trim()
+    ? options.filter((option) => option.label.toLowerCase().includes(query.trim().toLowerCase()))
+    : options;
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <span className="mb-2 block text-xs font-bold text-slate-700">{label}</span>
+      <div className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm focus-within:border-indigo-500">
+        <input
+          type="text"
+          value={open ? query : selected?.label ?? ""}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            if (!open) setOpen(true);
+          }}
+          onFocus={() => {
+            setQuery("");
+            setOpen(true);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setOpen(false);
+              event.currentTarget.blur();
+            }
+          }}
+          placeholder={placeholder}
+          className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-300"
+        />
+        {value ? (
+          <button
+            type="button"
+            onClick={() => {
+              onChange("");
+              setQuery("");
+            }}
+            className="shrink-0 text-slate-400 hover:text-slate-600"
+            aria-label="선택 해제"
+          >
+            ×
+          </button>
+        ) : null}
+      </div>
+      {open ? (
+        <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+          {filtered.length === 0 ? (
+            <p className="px-3 py-2 text-xs text-slate-400">검색 결과가 없습니다.</p>
+          ) : (
+            filtered.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  setQuery("");
+                  setOpen(false);
+                }}
+                className={`block w-full truncate px-3 py-2 text-left text-sm hover:bg-indigo-50 ${
+                  option.value === value ? "bg-indigo-50 font-semibold text-indigo-600" : "text-slate-700"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 const Card = ({ title, badge, children }: { title: string; badge?: string; children: React.ReactNode }) => (
-  <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+  <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
     <div className="flex h-14 items-center justify-between border-b border-slate-200 px-6">
       <h2 className="text-base font-extrabold text-slate-950">{title}</h2>
       {badge ? <span className="rounded-full bg-slate-50 px-3 py-1 text-[11px] text-slate-400">{badge}</span> : null}
@@ -92,33 +227,52 @@ const emptyEmployee = {
   phone: "",
   email: "",
   address: "",
+  addressDetail: "",
   gender: "",
   department: "",
   position: "",
+  employmentType: "",
   manager: "",
   hireDate: "",
 };
+
+const REQUIRED_FIELDS: { key: keyof typeof emptyEmployee; label: string }[] = [
+  { key: "name", label: "이름" },
+  { key: "birthDate", label: "생년월일" },
+  { key: "gender", label: "성별" },
+  { key: "phone", label: "연락처" },
+  { key: "email", label: "이메일" },
+  { key: "address", label: "주소" },
+  { key: "department", label: "부서" },
+  { key: "position", label: "직급" },
+];
 
 export default function NewEmployeePage() {
   const router = useRouter();
   const [employee, setEmployee] = useState(emptyEmployee);
   const [departments, setDepartments] = useState<Option[]>([]);
   const [positions, setPositions] = useState<Option[]>([]);
+  const [employmentTypes, setEmploymentTypes] = useState<Option[]>([]);
   const [managers, setManagers] = useState<Option[]>([]);
   const [profileImage, setProfileImage] = useState<{ name: string; preview: string } | null>(null);
   const [documentFiles, setDocumentFiles] = useState<Record<string, File>>({});
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [profileImageInputKey, setProfileImageInputKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Set<string>>(new Set());
+  const [addressSearchOpen, setAddressSearchOpen] = useState(false);
+  const addressLayerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const token = window.localStorage.getItem("accessToken") ?? window.sessionStorage.getItem("accessToken");
         const authHeaders: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-        const [departmentsRes, positionsRes, employeesRes] = await Promise.all([
+        const [departmentsRes, positionsRes, employmentTypesRes, employeesRes] = await Promise.all([
           fetch(`${API_BASE_URL}/departments`),
           fetch(`${API_BASE_URL}/positions`, { headers: authHeaders }),
+          fetch(`${API_BASE_URL}/employment-types`, { headers: authHeaders }),
           fetch(`${API_BASE_URL}/employees?page=0&size=1000`),
         ]);
         if (departmentsRes.ok) {
@@ -128,6 +282,10 @@ export default function NewEmployeePage() {
         if (positionsRes.ok) {
           const data = await positionsRes.json();
           setPositions(data.map((p: { positionId: number; positionName: string }) => ({ label: p.positionName, value: String(p.positionId) })));
+        }
+        if (employmentTypesRes.ok) {
+          const data = await employmentTypesRes.json();
+          setEmploymentTypes(data.map((t: { employmentTypeId: number; employmentTypeName: string }) => ({ label: t.employmentTypeName, value: String(t.employmentTypeId) })));
         }
         if (employeesRes.ok) {
           const data = await employeesRes.json();
@@ -146,16 +304,60 @@ export default function NewEmployeePage() {
     fetchOptions();
   }, []);
 
+  useEffect(() => {
+    if (document.getElementById("daum-postcode-script")) return;
+    const script = document.createElement("script");
+    script.id = "daum-postcode-script";
+    script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (!addressSearchOpen || !addressLayerRef.current || !window.daum?.Postcode) return;
+    addressLayerRef.current.innerHTML = "";
+    new window.daum.Postcode({
+      oncomplete: (data) => {
+        updateEmployee("address")(data.roadAddress || data.jibunAddress);
+        setAddressSearchOpen(false);
+        document.getElementById("addressDetail")?.focus();
+      },
+      width: "100%",
+      height: "100%",
+    }).embed(addressLayerRef.current);
+  }, [addressSearchOpen]);
+
+  const openAddressSearch = () => {
+    if (!window.daum?.Postcode) {
+      window.alert("주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+    setAddressSearchOpen(true);
+  };
+
   const updateEmployee = (field: keyof typeof emptyEmployee) => (value: string) => {
     setEmployee((currentEmployee) => ({ ...currentEmployee, [field]: value }));
+    if (value && fieldErrors.has(field)) {
+      setFieldErrors((current) => {
+        const next = new Set(current);
+        next.delete(field);
+        return next;
+      });
+    }
   };
 
   const handleSave = async () => {
-    if (!employee.name || !employee.birthDate || !employee.gender || !employee.phone || !employee.email || !employee.address || !employee.department || !employee.position) {
+    const missing = REQUIRED_FIELDS.filter((field) => !employee[field.key]);
+    if (missing.length > 0) {
+      setFieldErrors(new Set(missing.map((field) => field.key)));
       setError("필수 항목을 모두 입력해주세요.");
+      const target = document.getElementById(missing[0].key);
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+      target?.focus();
       return;
     }
 
+    setFieldErrors(new Set());
     setError(null);
     setIsSubmitting(true);
     try {
@@ -165,12 +367,15 @@ export default function NewEmployeePage() {
         body: JSON.stringify({
           departmentId: Number(employee.department),
           positionId: Number(employee.position),
+          employmentTypeId: employee.employmentType ? Number(employee.employmentType) : null,
           managerId: employee.manager ? Number(employee.manager) : null,
           name: employee.name,
           birthDate: employee.birthDate,
           phone: employee.phone,
           email: employee.email,
-          address: employee.address || null,
+          address: employee.address
+            ? `${employee.address}${employee.addressDetail ? ` ${employee.addressDetail}` : ""}`
+            : null,
           hireDate: employee.hireDate || null,
           password: employee.birthDate.replaceAll("-", ""),
           profileImage: profileImage?.preview ?? null,
@@ -221,6 +426,12 @@ export default function NewEmployeePage() {
     setProfileImage(null);
     setDocumentFiles({});
     setFileInputKey((currentKey) => currentKey + 1);
+    setProfileImageInputKey((currentKey) => currentKey + 1);
+  };
+
+  const removeProfileImage = () => {
+    setProfileImage(null);
+    setProfileImageInputKey((currentKey) => currentKey + 1);
   };
 
   const handleProfileImageChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -262,7 +473,7 @@ export default function NewEmployeePage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-200 text-indigo-700">♧</div>
           <div>
             <p className="text-sm font-extrabold">신규 직원 등록</p>
-            <p className="text-xs text-indigo-500">필수 항목을 모두 입력한 뒤 저장하기를 눌러 등록을 완료하세요.</p>
+            <p className="text-xs text-indigo-500">필수 항목을 모두 입력한 뒤 등록하기를 눌러 등록을 완료하세요.</p>
           </div>
         </div>
 
@@ -270,14 +481,14 @@ export default function NewEmployeePage() {
           <div className="space-y-4">
             <Card title="①  기본 정보" badge="* 표시 항목은 필수입니다">
               <div className="grid gap-4 md:grid-cols-2">
-                <Input label="이름" name="name" value={employee.name} onChange={updateEmployee("name")} required placeholder="이름을 입력하세요" />
-                <Input label="직원 번호" name="employeeNumber" value="" onChange={() => undefined} muted placeholder="저장 시 자동 생성됩니다" />
-                <Input label="생년월일" name="birthDate" value={employee.birthDate} onChange={updateEmployee("birthDate")} required placeholder="YYYY-MM-DD" type="date" />
-                <div>
+                <Input label="이름" name="name" value={employee.name} onChange={updateEmployee("name")} required placeholder="이름을 입력하세요" invalid={fieldErrors.has("name")} />
+                <Input label="직원 번호" name="employeeNumber" value="" onChange={() => undefined} muted placeholder="등록 시 자동 생성됩니다" />
+                <Input label="생년월일" name="birthDate" value={employee.birthDate} onChange={updateEmployee("birthDate")} required placeholder="YYYY-MM-DD" type="date" invalid={fieldErrors.has("birthDate")} />
+                <div id="gender" tabIndex={-1}>
                   <span className="mb-2 block text-xs font-bold text-slate-700">
                     성별 <b className="text-rose-500">*</b>
                   </span>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className={`grid grid-cols-2 gap-2 rounded-lg ${fieldErrors.has("gender") ? "ring-1 ring-rose-300" : ""}`}>
                     {[
                       { label: "남성", value: "male" },
                       { label: "여성", value: "female" },
@@ -290,7 +501,11 @@ export default function NewEmployeePage() {
                           aria-pressed={selected}
                           onClick={() => updateEmployee("gender")(gender.value)}
                           className={`h-10 rounded-lg border text-sm font-bold transition ${
-                            selected ? "border-indigo-500 bg-indigo-50 text-indigo-600" : "border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:text-indigo-500"
+                            selected
+                              ? "border-indigo-500 bg-indigo-50 text-indigo-600"
+                              : fieldErrors.has("gender")
+                              ? "border-rose-400 bg-rose-50/40 text-slate-500 hover:border-rose-300"
+                              : "border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:text-indigo-500"
                           }`}
                         >
                           {gender.label}
@@ -299,19 +514,53 @@ export default function NewEmployeePage() {
                     })}
                   </div>
                 </div>
-                <Input label="연락처" name="phone" value={employee.phone} onChange={updateEmployee("phone")} required placeholder="010-0000-0000" type="tel" />
-                <Input label="이메일" name="email" value={employee.email} onChange={updateEmployee("email")} required placeholder="email@example.com" type="email" />
+                <Input label="연락처" name="phone" value={employee.phone} onChange={updateEmployee("phone")} required placeholder="010-0000-0000" type="tel" invalid={fieldErrors.has("phone")} />
+                <Input label="이메일" name="email" value={employee.email} onChange={updateEmployee("email")} required placeholder="email@example.com" type="email" invalid={fieldErrors.has("email")} />
                 <div className="md:col-span-2">
-                  <Input label="주소" name="address" value={employee.address} onChange={updateEmployee("address")} required placeholder="주소를 입력하세요" />
+                  <span className="mb-2 block text-xs font-bold text-slate-700">
+                    주소 <b className="text-rose-500">*</b>
+                  </span>
+                  <div className="flex gap-2">
+                    <div
+                      id="address"
+                      tabIndex={-1}
+                      className={`flex h-10 flex-1 items-center rounded-lg border px-3 text-sm ${
+                        fieldErrors.has("address")
+                          ? "border-rose-400 bg-rose-50/40 ring-1 ring-rose-200"
+                          : "border-slate-200 bg-slate-50"
+                      }`}
+                    >
+                      <span className={employee.address ? "text-slate-900" : "text-slate-300"}>
+                        {employee.address || "주소 검색 버튼을 눌러주세요"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openAddressSearch}
+                      className="h-10 shrink-0 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-indigo-300 hover:text-indigo-600"
+                    >
+                      주소 검색
+                    </button>
+                  </div>
+                  <div className="mt-3">
+                    <Input
+                      label="상세주소 (선택)"
+                      name="addressDetail"
+                      value={employee.addressDetail}
+                      onChange={updateEmployee("addressDetail")}
+                      placeholder="상세주소를 입력하세요"
+                    />
+                  </div>
                 </div>
               </div>
             </Card>
 
             <Card title="②  소속 및 고용 정보">
               <div className="grid gap-4 md:grid-cols-2">
-                <Select label="부서" name="department" value={employee.department} onChange={updateEmployee("department")} options={departments} placeholder="부서를 선택하세요" required />
-                <Select label="직급" name="position" value={employee.position} onChange={updateEmployee("position")} options={positions} placeholder="직급을 선택하세요" required />
-                <Select label="직속 관리자" name="manager" value={employee.manager} onChange={updateEmployee("manager")} options={managers} placeholder="DB 등록 직원을 선택하세요" />
+                <Select label="부서" name="department" value={employee.department} onChange={updateEmployee("department")} options={departments} placeholder="부서를 선택하세요" required invalid={fieldErrors.has("department")} />
+                <Select label="직급" name="position" value={employee.position} onChange={updateEmployee("position")} options={positions} placeholder="직급을 선택하세요" required invalid={fieldErrors.has("position")} />
+                <Select label="고용형태" name="employmentType" value={employee.employmentType} onChange={updateEmployee("employmentType")} options={employmentTypes} placeholder="고용형태를 선택하세요" />
+                <SearchableSelect label="직속 관리자" value={employee.manager} onChange={updateEmployee("manager")} options={managers} placeholder="이름, 부서, 직급으로 검색" />
                 <Input label="입사일" name="hireDate" value={employee.hireDate} onChange={updateEmployee("hireDate")} placeholder="YYYY-MM-DD" type="date" />
               </div>
             </Card>
@@ -329,10 +578,21 @@ export default function NewEmployeePage() {
                 <p className="mt-4 text-sm font-bold">사진을 업로드하세요</p>
                 <p className="text-xs text-slate-400">JPG, PNG 최대 2MB</p>
                 {profileImage ? <p className="mt-2 truncate text-xs font-semibold text-indigo-600">{profileImage.name}</p> : null}
-                <label className="mt-4 flex h-9 w-full cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-sm hover:border-indigo-300 hover:text-indigo-600">
-                  ⇧ 파일 선택
-                  <input key={`profile-${fileInputKey}`} type="file" accept="image/png,image/jpeg" onChange={handleProfileImageChange} className="sr-only" />
-                </label>
+                <div className="mt-4 flex gap-2">
+                  <label className="flex h-9 flex-1 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-sm hover:border-indigo-300 hover:text-indigo-600">
+                    ⇧ 파일 선택
+                    <input key={`profile-${profileImageInputKey}`} type="file" accept="image/png,image/jpeg" onChange={handleProfileImageChange} className="sr-only" />
+                  </label>
+                  {profileImage ? (
+                    <button
+                      type="button"
+                      onClick={removeProfileImage}
+                      className="flex h-9 items-center justify-center rounded-lg border border-rose-200 px-3 text-sm text-rose-600 hover:bg-rose-50"
+                    >
+                      삭제
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </Card>
             <Card title="서류 첨부" badge="종류별 첨부">
@@ -382,7 +642,7 @@ export default function NewEmployeePage() {
 
         <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-4">
           <p className="text-xs text-slate-400">
-            {error ? <span className="font-bold text-rose-500">{error}</span> : "ⓘ * 표시 항목은 모두 입력해야 저장이 가능합니다."}
+            {error ? <span className="font-bold text-rose-500">{error}</span> : "ⓘ * 표시 항목은 모두 입력해야 등록이 가능합니다."}
           </p>
           <div className="flex gap-3">
             <button type="button" onClick={() => router.push("/employees")} className="h-10 rounded-lg border border-slate-200 px-5 text-sm">취소</button>
@@ -390,11 +650,36 @@ export default function NewEmployeePage() {
               초기화
             </button>
             <button type="button" onClick={handleSave} disabled={isSubmitting} className="h-10 rounded-lg bg-indigo-600 px-7 text-sm font-bold text-white disabled:opacity-50">
-              {isSubmitting ? "저장 중..." : "✓ 저장하기"}
+              {isSubmitting ? "등록 중..." : "✓ 등록하기"}
             </button>
           </div>
         </div>
       </div>
+
+      {addressSearchOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setAddressSearchOpen(false)}
+        >
+          <div
+            className="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-xl bg-white shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <h3 className="text-sm font-bold text-slate-900">주소 검색</h3>
+              <button
+                type="button"
+                onClick={() => setAddressSearchOpen(false)}
+                className="text-slate-400 hover:text-slate-600"
+                aria-label="주소 검색 닫기"
+              >
+                ×
+              </button>
+            </div>
+            <div ref={addressLayerRef} className="h-[450px] w-full" />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

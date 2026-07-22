@@ -62,6 +62,11 @@ export default function AttendanceTable({ rows, departments, date, loading, erro
 
   useEffect(() => { onFilteredRowsChange(filteredRows); }, [filteredRows, onFilteredRowsChange]);
 
+  useEffect(() => {
+    const paramKeyword = new URLSearchParams(window.location.search).get("keyword");
+    if (paramKeyword) { setSearchInput(paramKeyword); setKeyword(paramKeyword); }
+  }, []);
+
   const runSearch = () => { setKeyword(searchInput.trim()); setPage(0); setCheckedIds([]); };
   const resetFilters = () => {
     const now = new Date();

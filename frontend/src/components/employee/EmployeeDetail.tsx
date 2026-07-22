@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserIcon, PencilSquareIcon, TrashIcon, ClockIcon, CurrencyDollarIcon, DocumentTextIcon, BuildingOfficeIcon, BriefcaseIcon, IdentificationIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import { UserIcon, PencilSquareIcon, TrashIcon, ClockIcon, CurrencyDollarIcon, BuildingOfficeIcon, BriefcaseIcon, IdentificationIcon } from "@heroicons/react/24/outline";
 import { getEmployeeStatusLabel, getEmployeeStatusBadgeClasses } from "@/lib/employeeStatus";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
@@ -59,6 +60,7 @@ function formatDays(days: number) {
 }
 
 export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick, refreshKey, role }: { employeeId: number | null, onEditClick?: (data: EmployeeDetailData) => void, onDeleteClick?: (id: number) => void, refreshKey?: number, role?: string | null }) {
+  const router = useRouter();
   const [data, setData] = useState<EmployeeDetailData | null>(null);
   const [annualLeaveDays, setAnnualLeaveDays] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -242,18 +244,20 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
         {role === "ADMIN" && (
           <div>
             <h4 className="text-xs font-bold text-gray-400 mb-3">관련 페이지로 이동</h4>
-            <div className="grid grid-cols-3 gap-3">
-              <button className="flex items-center justify-center gap-2 py-3 rounded-lg border border-blue-200 bg-blue-50/50 text-blue-700 font-bold hover:bg-blue-50 transition-colors text-sm">
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => router.push(`/attendance/daily?keyword=${encodeURIComponent(data.name)}`)}
+                className="flex items-center justify-center gap-2 py-3 rounded-lg border border-blue-200 bg-blue-50/50 text-blue-700 font-bold hover:bg-blue-50 transition-colors text-sm"
+              >
                 <ClockIcon className="w-5 h-5" />
                 근태 현황 보기 &gt;
               </button>
-              <button className="flex items-center justify-center gap-2 py-3 rounded-lg border border-emerald-200 bg-emerald-50/50 text-emerald-700 font-bold hover:bg-emerald-50 transition-colors text-sm">
+              <button
+                onClick={() => router.push(`/payroll/basic?keyword=${encodeURIComponent(data.name)}`)}
+                className="flex items-center justify-center gap-2 py-3 rounded-lg border border-emerald-200 bg-emerald-50/50 text-emerald-700 font-bold hover:bg-emerald-50 transition-colors text-sm"
+              >
                 <CurrencyDollarIcon className="w-5 h-5" />
                 급여 정보 보기 &gt;
-              </button>
-              <button className="flex items-center justify-center gap-2 py-3 rounded-lg border border-orange-200 bg-orange-50/50 text-orange-700 font-bold hover:bg-orange-50 transition-colors text-sm">
-                <DocumentTextIcon className="w-5 h-5" />
-                증명서 발급 &gt;
               </button>
             </div>
           </div>

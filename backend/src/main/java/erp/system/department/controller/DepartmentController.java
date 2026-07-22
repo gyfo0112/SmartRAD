@@ -41,7 +41,7 @@ public class DepartmentController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        departmentService.delete(id);
+    public void delete(@PathVariable Long id, @RequestParam(required = false) Long reassignToDepartmentId) {
+        departmentService.delete(id, reassignToDepartmentId);
     }
 }

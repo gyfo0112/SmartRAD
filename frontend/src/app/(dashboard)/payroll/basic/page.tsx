@@ -240,6 +240,14 @@ export default function PayrollBasicPage() {
   }, []);
 
   useEffect(() => {
+    const paramKeyword = new URLSearchParams(window.location.search).get("keyword");
+    if (paramKeyword) {
+      setDraftFilters((current) => ({ ...current, keyword: paramKeyword }));
+      setAppliedFilters((current) => ({ ...current, keyword: paramKeyword }));
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchEmploymentTypes = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/employment-types`, { headers: authHeaders() });
