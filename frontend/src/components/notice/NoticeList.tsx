@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MagnifyingGlassIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, MegaphoneIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import type { NoticeDetail, NoticePage, NoticeSummary } from "./types";
 import { useSummarize } from "@/lib/useSummarize";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 const PAGE_SIZE = 10;
@@ -296,21 +297,22 @@ export default function NoticeList({ refreshKey, onActionComplete, onEdit }: Pro
       </div>
 
       {viewingNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true">
-          <div className="max-h-[85vh] w-full max-w-2xl overflow-auto rounded-xl bg-white shadow-xl">
-            <div className="flex items-start justify-between gap-4 border-b border-gray-200 p-5">
-              <div>
-                {viewingNotice.pinned && <span className="mr-1.5 text-orange-500">📌</span>}
-                <h2 className="inline text-lg font-bold text-gray-900">{viewingNotice.title}</h2>
-                <p className="mt-2 text-sm text-gray-500">
-                  {viewingNotice.writerName} · {formatDate(viewingNotice.createdAt)} · 조회 {viewingNotice.viewCount}
-                </p>
-              </div>
-              <button type="button" onClick={closeView} aria-label="닫기" className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-6">
+        <Modal
+          icon={MegaphoneIcon}
+          title={<>{viewingNotice.pinned && <span className="mr-1.5 text-orange-500">📌</span>}{viewingNotice.title}</>}
+          subtitle={`${viewingNotice.writerName} · ${formatDate(viewingNotice.createdAt)} · 조회 ${viewingNotice.viewCount}`}
+          onClose={closeView}
+          maxWidth="2xl"
+          bodyClassName="max-h-[70vh] overflow-y-auto p-6"
+          footer={
+            <>
+              <ModalCancelButton onClick={closeView}>닫기</ModalCancelButton>
+              <ModalPrimaryButton type="button" onClick={() => { const notice = viewingNotice; closeView(); onEdit(notice); }}>
+                수정하기
+              </ModalPrimaryButton>
+            </>
+          }
+        >
               <div className="flex items-center justify-between gap-3">
                 <button
                   type="button"
@@ -330,19 +332,7 @@ export default function NoticeList({ refreshKey, onActionComplete, onEdit }: Pro
               <div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
                 {viewingNotice.content}
               </div>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-gray-200 p-4">
-              <button type="button" onClick={closeView} className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">닫기</button>
-              <button
-                type="button"
-                onClick={() => { const notice = viewingNotice; closeView(); onEdit(notice); }}
-                className="rounded-md bg-[#4A5DDF] px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                수정하기
-              </button>
-            </div>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

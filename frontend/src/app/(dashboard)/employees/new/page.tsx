@@ -2,6 +2,7 @@
 
 import { type ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { EMPLOYEE_DOCUMENT_TYPE_OPTIONS, employeeDocumentTypeLabel } from "@/components/employee/documentTypes";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -105,7 +106,7 @@ export default function NewEmployeePage() {
   const [positions, setPositions] = useState<Option[]>([]);
   const [managers, setManagers] = useState<Option[]>([]);
   const [profileImage, setProfileImage] = useState<{ name: string; preview: string } | null>(null);
-  const [attachedDocuments, setAttachedDocuments] = useState<{ id: string; name: string; size: string }[]>([]);
+  const [documentFiles, setDocumentFiles] = useState<Record<string, File>>({});
   const [fileInputKey, setFileInputKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -181,7 +182,32 @@ export default function NewEmployeePage() {
         throw new Error(body.message || "등록에 실패했습니다.");
       }
 
-      alert("직원이 등록되었습니다.\n초기 비밀번호는 생년월일 8자리입니다.");
+      const created = await res.json();
+      const failedDocumentLabels: string[] = [];
+
+      for (const [documentType, file] of Object.entries(documentFiles)) {
+        const formData = new FormData();
+        formData.append("documentType", documentType);
+        formData.append("file", file);
+        try {
+          const documentRes = await fetch(`${API_BASE_URL}/employees/${created.employeeId}/documents`, {
+            method: "POST",
+            headers: authHeaders(),
+            body: formData,
+          });
+          if (!documentRes.ok) {
+            failedDocumentLabels.push(employeeDocumentTypeLabel(documentType));
+          }
+        } catch {
+          failedDocumentLabels.push(employeeDocumentTypeLabel(documentType));
+        }
+      }
+
+      alert(
+        failedDocumentLabels.length > 0
+          ? `직원이 등록되었습니다.\n초기 비밀번호는 생년월일 8자리입니다.\n다음 서류는 업로드에 실패했습니다: ${failedDocumentLabels.join(", ")}`
+          : "직원이 등록되었습니다.\n초기 비밀번호는 생년월일 8자리입니다."
+      );
       router.push("/employees");
     } catch (err) {
       setError(err instanceof Error ? err.message : "등록 중 오류가 발생했습니다.");
@@ -193,7 +219,7 @@ export default function NewEmployeePage() {
   const resetForm = () => {
     setEmployee(emptyEmployee);
     setProfileImage(null);
-    setAttachedDocuments([]);
+    setDocumentFiles({});
     setFileInputKey((currentKey) => currentKey + 1);
   };
 
@@ -215,21 +241,18 @@ export default function NewEmployeePage() {
     reader.readAsDataURL(file);
   };
 
-  const handleDocumentChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-
-    setAttachedDocuments((currentDocuments) => [
-      ...currentDocuments,
-      ...files.map((file) => ({
-        id: `${file.name}-${file.size}-${file.lastModified}`,
-        name: file.name,
-        size: `${Math.max(1, Math.round(file.size / 1024)).toLocaleString()} KB`,
-      })),
-    ]);
+  const handleDocumentFileChange = (documentType: string) => (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setDocumentFiles((current) => ({ ...current, [documentType]: file }));
   };
 
-  const removeDocument = (documentId: string) => {
-    setAttachedDocuments((currentDocuments) => currentDocuments.filter((document) => document.id !== documentId));
+  const removeDocumentFile = (documentType: string) => {
+    setDocumentFiles((current) => {
+      const next = { ...current };
+      delete next[documentType];
+      return next;
+    });
   };
 
   return (
@@ -312,30 +335,47 @@ export default function NewEmployeePage() {
                 </label>
               </div>
             </Card>
-            <Card title="서류 첨부" badge="선택사항">
-              <label className="block cursor-pointer rounded-xl border border-indigo-200 bg-slate-50 p-6 text-center hover:border-indigo-300 hover:bg-indigo-50/50">
-                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500">⇧</div>
-                <p className="text-sm font-bold">파일을 드래그하거나</p>
-                <p className="text-xs text-slate-400">클릭하여 업로드하세요</p>
-                <span className="mt-3 inline-flex rounded-lg bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-600">파일 선택</span>
-                <input key={`documents-${fileInputKey}`} type="file" multiple onChange={handleDocumentChange} className="sr-only" />
-              </label>
-              {attachedDocuments.length > 0 ? (
-                <div className="mt-3 space-y-2">
-                  {attachedDocuments.map((document) => (
-                    <div key={document.id} className="flex items-center justify-between rounded-lg border border-slate-200 p-3 text-xs">
-                      <span className="min-w-0 font-bold">
-                        ▣ <span className="break-all">{document.name}</span>
-                        <br />
-                        <small className="ml-5 font-normal text-slate-400">{document.size}</small>
-                      </span>
-                      <button type="button" onClick={() => removeDocument(document.id)} className="ml-3 text-rose-400 hover:text-rose-600" aria-label={`${document.name} 삭제`}>
-                        ×
-                      </button>
+            <Card title="서류 첨부" badge="종류별 첨부">
+              <div className="space-y-2">
+                {EMPLOYEE_DOCUMENT_TYPE_OPTIONS.map((docType) => {
+                  const file = documentFiles[docType.value];
+                  return (
+                    <div key={docType.value} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-700">
+                          {docType.label} {docType.required ? <b className="text-rose-500">*</b> : null}
+                        </p>
+                        {file ? (
+                          <p className="mt-1 truncate text-xs font-semibold text-indigo-600">{file.name}</p>
+                        ) : (
+                          <p className="mt-1 text-xs text-slate-400">선택된 파일 없음</p>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <label className="cursor-pointer rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:border-indigo-300 hover:text-indigo-600">
+                          {file ? "재선택" : "파일 선택"}
+                          <input
+                            key={`document-${docType.value}-${fileInputKey}`}
+                            type="file"
+                            onChange={handleDocumentFileChange(docType.value)}
+                            className="sr-only"
+                          />
+                        </label>
+                        {file ? (
+                          <button
+                            type="button"
+                            onClick={() => removeDocumentFile(docType.value)}
+                            className="text-rose-400 hover:text-rose-600"
+                            aria-label={`${docType.label} 삭제`}
+                          >
+                            ×
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              ) : null}
+                  );
+                })}
+              </div>
             </Card>
           </aside>
         </div>

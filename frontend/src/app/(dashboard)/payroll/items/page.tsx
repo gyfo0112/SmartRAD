@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { BanknotesIcon, PlusIcon } from "@heroicons/react/24/outline";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -285,15 +286,15 @@ export default function PayrollItemsPage() {
       </section>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
-          <section className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-              <h2 className="text-lg font-extrabold text-slate-900">{editingItemId != null ? "급여항목 수정" : "급여항목 등록"}</h2>
-              <button type="button" onClick={() => setShowModal(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="space-y-4 px-6 py-5">
+        <Modal
+          icon={BanknotesIcon}
+          title={editingItemId != null ? "급여항목 수정" : "급여항목 등록"}
+          onClose={() => setShowModal(false)}
+          footer={<>
+            <ModalCancelButton onClick={() => setShowModal(false)} />
+            <ModalPrimaryButton onClick={handleSave} disabled={saving}>{saving ? "저장 중..." : "저장"}</ModalPrimaryButton>
+          </>}
+        >
               <label className="space-y-1 text-sm font-semibold text-slate-700">
                 <span>항목명</span>
                 <input
@@ -349,22 +350,7 @@ export default function PayrollItemsPage() {
               {modalError && (
                 <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">{modalError}</p>
               )}
-            </div>
-            <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4">
-              <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? "저장 중..." : "저장"}
-              </button>
-            </div>
-          </section>
-        </div>
+        </Modal>
       )}
     </div>
   );

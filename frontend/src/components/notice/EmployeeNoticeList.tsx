@@ -7,12 +7,13 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MagnifyingGlassIcon,
+  MegaphoneIcon,
   PaperClipIcon,
   SparklesIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import type { NoticeDetail, NoticePage, NoticeSummary } from "./types";
 import { useSummarize } from "@/lib/useSummarize";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 const PAGE_SIZE = 10;
@@ -148,7 +149,7 @@ export default function EmployeeNoticeList() {
         <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2"><p className="text-xs text-slate-400">총 {totalElements}건{canManage && ` · ${checkedIds.length}건 선택`}</p><div className="flex gap-1"><button type="button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} className="rounded border border-slate-200 p-1 text-slate-400 disabled:opacity-40"><ChevronLeftIcon className="h-3.5 w-3.5" /></button><span className="rounded bg-indigo-600 px-2 py-1 text-xs font-bold text-white">{page + 1}</span><button type="button" disabled={page >= totalPages - 1} onClick={() => setPage((value) => value + 1)} className="rounded border border-slate-200 p-1 text-slate-400 disabled:opacity-40"><ChevronRightIcon className="h-3.5 w-3.5" /></button></div></div>
       </section>
 
-      {viewingNotice && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true"><div className="max-h-[85vh] w-full max-w-2xl overflow-auto rounded-xl bg-white shadow-xl"><div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5"><div><h2 className="text-lg font-bold text-slate-900">{viewingNotice.pinned && "📌 "}{viewingNotice.title}</h2><p className="mt-2 text-sm text-slate-500">{viewingNotice.writerName} · {formatDate(viewingNotice.createdAt)} · 조회 {viewingNotice.viewCount}</p></div><button type="button" onClick={closeView} aria-label="닫기" className="rounded p-1 text-slate-400 hover:bg-slate-100"><XMarkIcon className="h-5 w-5" /></button></div><div className="p-6"><button type="button" onClick={() => summarize(viewingNotice.content)} disabled={summarizing} className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 disabled:opacity-60"><SparklesIcon className="h-3.5 w-3.5" />{summarizing ? "요약 중..." : "AI 요약"}</button>{(summary || summarizeError) && <div className={`mt-3 rounded-lg border px-4 py-3 text-sm ${summarizeError ? "border-rose-200 bg-rose-50 text-rose-600" : "border-indigo-200 bg-indigo-50 text-indigo-700"}`}>{summarizeError || summary}</div>}<div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{viewingNotice.content}</div></div><div className="flex justify-end gap-2 border-t border-slate-200 p-4"><button type="button" onClick={closeView} className="rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600">닫기</button>{canManage && <button type="button" onClick={() => { const notice = viewingNotice; closeView(); onEdit(notice); }} className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white">수정하기</button>}</div></div></div>}
+      {viewingNotice && <Modal icon={MegaphoneIcon} title={<>{viewingNotice.pinned && "📌 "}{viewingNotice.title}</>} subtitle={`${viewingNotice.writerName} · ${formatDate(viewingNotice.createdAt)} · 조회 ${viewingNotice.viewCount}`} onClose={closeView} maxWidth="2xl" bodyClassName="max-h-[70vh] overflow-y-auto p-6" footer={<><ModalCancelButton onClick={closeView}>닫기</ModalCancelButton>{canManage && <ModalPrimaryButton type="button" onClick={() => { const notice = viewingNotice; closeView(); onEdit(notice); }}>수정하기</ModalPrimaryButton>}</>}><button type="button" onClick={() => summarize(viewingNotice.content)} disabled={summarizing} className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 disabled:opacity-60"><SparklesIcon className="h-3.5 w-3.5" />{summarizing ? "요약 중..." : "AI 요약"}</button>{(summary || summarizeError) && <div className={`mt-3 rounded-lg border px-4 py-3 text-sm ${summarizeError ? "border-rose-200 bg-rose-50 text-rose-600" : "border-indigo-200 bg-indigo-50 text-indigo-700"}`}>{summarizeError || summary}</div>}<div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{viewingNotice.content}</div></Modal>}
     </div>
   );
 }

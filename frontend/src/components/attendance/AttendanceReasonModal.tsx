@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 const FILE_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
@@ -66,18 +67,22 @@ export default function AttendanceReasonModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-gray-100 p-5">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-            {description && <p className="mt-1 text-xs text-gray-500">{description}</p>}
-          </div>
-          <button type="button" onClick={onClose} aria-label="닫기" className="text-gray-400 hover:text-gray-600">
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="space-y-4 p-5">
+    <Modal
+      icon={PencilSquareIcon}
+      title={title}
+      subtitle={description}
+      onClose={onClose}
+      footer={
+        <>
+          <ModalCancelButton onClick={onClose} disabled={submitting}>
+            {skipLabel}
+          </ModalCancelButton>
+          <ModalPrimaryButton type="button" onClick={() => void submit()} disabled={submitting}>
+            {submitting ? "저장 중..." : "제출"}
+          </ModalPrimaryButton>
+        </>
+      }
+    >
           <label className="block text-sm font-medium text-gray-700">
             사유
             <textarea
@@ -110,26 +115,6 @@ export default function AttendanceReasonModal({
             )}
           </label>
           {error && <p role="alert" className="rounded-lg bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{error}</p>}
-        </div>
-        <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-            className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-          >
-            {skipLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => void submit()}
-            disabled={submitting}
-            className="rounded-md bg-[#4A5DDF] px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {submitting ? "저장 중..." : "제출"}
-          </button>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

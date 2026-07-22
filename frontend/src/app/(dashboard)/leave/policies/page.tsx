@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { CalendarDaysIcon, PlusIcon } from "@heroicons/react/24/outline";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -199,86 +200,71 @@ export default function LeavePoliciesPage() {
       </section>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
-          <section className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-              <h2 className="text-lg font-extrabold text-slate-900">휴가정책 등록</h2>
-              <button type="button" onClick={() => setShowModal(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="space-y-4 px-6 py-5">
-              <label className="space-y-1 text-sm font-semibold text-slate-700">
-                <span>직책</span>
-                <select
-                  value={positionId}
-                  onChange={(event) => setPositionId(event.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
-                >
-                  {availablePositions.map((position) => (
-                    <option key={position.positionId} value={position.positionId}>
-                      {position.positionName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <label className="space-y-1 text-sm font-semibold text-slate-700">
-                  <span>연차 발생일수</span>
-                  <input
-                    value={annualLeaveDays}
-                    onChange={(event) => setAnnualLeaveDays(event.target.value)}
-                    inputMode="numeric"
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
-                  />
-                </label>
-                <label className="space-y-1 text-sm font-semibold text-slate-700">
-                  <span>이월 한도</span>
-                  <input
-                    value={maxCarryOverDays}
-                    onChange={(event) => setMaxCarryOverDays(event.target.value)}
-                    inputMode="numeric"
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
-                  />
-                </label>
-              </div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={halfDayAllowed}
-                  onChange={(event) => setHalfDayAllowed(event.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-indigo-600"
-                />
-                반차 허용
-              </label>
-              <label className="space-y-1 text-sm font-semibold text-slate-700">
-                <span>비고</span>
-                <input
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
-                  placeholder="선택 입력"
-                />
-              </label>
-              {modalError && (
-                <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">{modalError}</p>
-              )}
-            </div>
-            <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4">
-              <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleCreate}
-                disabled={saving}
-                className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? "저장 중..." : "저장"}
-              </button>
-            </div>
-          </section>
-        </div>
+        <Modal
+          icon={CalendarDaysIcon}
+          title="휴가정책 등록"
+          onClose={() => setShowModal(false)}
+          footer={<>
+            <ModalCancelButton onClick={() => setShowModal(false)} />
+            <ModalPrimaryButton onClick={handleCreate} disabled={saving}>{saving ? "저장 중..." : "저장"}</ModalPrimaryButton>
+          </>}
+        >
+          <label className="space-y-1 text-sm font-semibold text-slate-700">
+            <span>직책</span>
+            <select
+              value={positionId}
+              onChange={(event) => setPositionId(event.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
+            >
+              {availablePositions.map((position) => (
+                <option key={position.positionId} value={position.positionId}>
+                  {position.positionName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="space-y-1 text-sm font-semibold text-slate-700">
+              <span>연차 발생일수</span>
+              <input
+                value={annualLeaveDays}
+                onChange={(event) => setAnnualLeaveDays(event.target.value)}
+                inputMode="numeric"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              />
+            </label>
+            <label className="space-y-1 text-sm font-semibold text-slate-700">
+              <span>이월 한도</span>
+              <input
+                value={maxCarryOverDays}
+                onChange={(event) => setMaxCarryOverDays(event.target.value)}
+                inputMode="numeric"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              />
+            </label>
+          </div>
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <input
+              type="checkbox"
+              checked={halfDayAllowed}
+              onChange={(event) => setHalfDayAllowed(event.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+            />
+            반차 허용
+          </label>
+          <label className="space-y-1 text-sm font-semibold text-slate-700">
+            <span>비고</span>
+            <input
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              placeholder="선택 입력"
+            />
+          </label>
+          {modalError && (
+            <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">{modalError}</p>
+          )}
+        </Modal>
       )}
     </div>
   );

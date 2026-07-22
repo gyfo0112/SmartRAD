@@ -13,6 +13,8 @@ public interface PayrollRepository extends JpaRepository<Payroll, Long>, JpaSpec
 
     Optional<Payroll> findByEmployee_EmployeeIdAndPayrollYearMonth(Long employeeId, String payrollYearMonth);
 
+    List<Payroll> findAllByPayrollYearMonth(String payrollYearMonth);
+
     @Query("""
             SELECT p.payrollYearMonth, SUM(p.totalPayAmount), SUM(p.realPayAmount), COUNT(p)
             FROM Payroll p

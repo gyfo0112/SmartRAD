@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserIcon, BuildingOfficeIcon, BriefcaseIcon, IdentificationIcon, EnvelopeIcon, PhoneIcon, ClockIcon, CheckBadgeIcon, XMarkIcon, PencilSquareIcon, DocumentTextIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { UserIcon, BuildingOfficeIcon, BriefcaseIcon, IdentificationIcon, EnvelopeIcon, PhoneIcon, ClockIcon, CheckBadgeIcon, PencilSquareIcon, DocumentTextIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import { getEmployeeStatusLabel, getEmployeeStatusBadgeClasses } from "@/lib/employeeStatus";
 import { certificateTypeLabel, statusBadge, type CertificateIssueResponse } from "@/components/certificate/types";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -491,20 +492,21 @@ export default function MyProfile() {
 
       {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">개인 연락처 정보 수정</h2>
-              <button 
-                type="button" 
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-            <form onSubmit={handleUpdateInfo}>
-              <div className="p-5 space-y-4">
+        <Modal
+          icon={PencilSquareIcon}
+          title="개인 연락처 정보 수정"
+          onClose={() => setIsEditModalOpen(false)}
+          as="form"
+          onSubmit={handleUpdateInfo}
+          footer={
+            <>
+              <ModalCancelButton onClick={() => setIsEditModalOpen(false)} disabled={isSaving} />
+              <ModalPrimaryButton type="submit" disabled={isSaving}>
+                {isSaving ? "저장 중..." : "저장"}
+              </ModalPrimaryButton>
+            </>
+          }
+        >
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
                   <input 
@@ -535,27 +537,7 @@ export default function MyProfile() {
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
-              </div>
-              <div className="bg-gray-50 px-5 py-4 flex justify-end gap-2 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50"
-                  disabled={isSaving}
-                >
-                  취소
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-md bg-[#4A5DDF] text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-                  disabled={isSaving}
-                >
-                  {isSaving ? "저장 중..." : "저장"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        </Modal>
       )}
     </>
   );

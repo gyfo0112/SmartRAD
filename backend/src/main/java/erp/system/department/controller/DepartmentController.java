@@ -2,6 +2,7 @@ package erp.system.department.controller;
 
 import erp.system.department.dto.DepartmentCreateRequest;
 import erp.system.department.dto.DepartmentResponse;
+import erp.system.department.dto.DepartmentStatsResponse;
 import erp.system.department.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,24 @@ public class DepartmentController {
         return departmentService.getAll();
     }
 
+    @GetMapping("/stats")
+    public List<DepartmentStatsResponse> getStats() {
+        return departmentService.getStats();
+    }
+
     @PostMapping
     public ResponseEntity<DepartmentResponse> create(@Valid @RequestBody DepartmentCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(departmentService.create(request));
+    }
+
+    @PutMapping("/{id}")
+    public DepartmentResponse update(@PathVariable Long id, @Valid @RequestBody erp.system.department.dto.DepartmentUpdateRequest request) {
+        return departmentService.update(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        departmentService.delete(id);
     }
 }

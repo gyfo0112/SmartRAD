@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeftIcon, ArrowPathIcon, ArrowRightIcon, CalendarDaysIcon, CheckCircleIcon, ClockIcon, PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, ArrowPathIcon, ArrowRightIcon, CalendarDaysIcon, CheckCircleIcon, ClockIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import AttendanceReasonModal from "@/components/attendance/AttendanceReasonModal";
+import Modal, { ModalCancelButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -119,6 +120,12 @@ export default function MyAttendancePage() {
     return () => { window.clearTimeout(timer); controller.abort(); };
   }, [fetchRecords]);
 
+  useEffect(() => {
+    const handleRefresh = () => void fetchRecords();
+    window.addEventListener("attendance:my-refresh", handleRefresh);
+    return () => window.removeEventListener("attendance:my-refresh", handleRefresh);
+  }, [fetchRecords]);
+
   const summary = useMemo(() => {
     const total = records.reduce((sum, item) => sum + (item.workMinutes ?? 0), 0);
     const count = (status: Filter) => records.filter((item) => item.attendanceStatusCode === status).length;
@@ -140,7 +147,6 @@ export default function MyAttendancePage() {
         <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} className="h-10 rounded-md border border-gray-200 px-3 text-sm font-medium text-gray-700 outline-none focus:border-blue-500" />
         <button type="button" onClick={() => setMonth(shiftMonth(month, 1))} aria-label="다음 달" className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50"><ArrowRightIcon className="h-4 w-4" /></button>
         <button type="button" onClick={() => setMonth(currentMonth())} className="h-10 rounded-md border border-gray-200 px-3 text-sm font-medium text-gray-600 hover:bg-gray-50">이번 달</button>
-        <button type="button" onClick={() => void fetchRecords()} disabled={loading} className="flex h-10 items-center gap-2 rounded-md bg-[#4A5DDF] px-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"><ArrowPathIcon className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />새로고침</button>
       </div>
     </section>
 
@@ -158,9 +164,22 @@ export default function MyAttendancePage() {
         <div className="divide-y divide-gray-100 md:hidden">{shown.map((item) => <button key={item.attendanceId} type="button" onClick={() => setDetail(item)} className="w-full p-4 text-left hover:bg-gray-50"><div className="flex items-center justify-between"><div><p className="font-semibold">{formatDate(item.workDate)}</p><p className="text-xs text-gray-500">{weekday(item.workDate)}</p></div><StatusBadge record={item} /></div><p className="mt-3 text-sm text-gray-600">{formatTime(item.checkInTime)} → {formatTime(item.checkOutTime)} · {formatMinutes(item.workMinutes)}</p></button>)}</div></>}
     </section>
 
-    {detail && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true"><div className="w-full max-w-md rounded-xl bg-white shadow-xl"><div className="flex items-start justify-between border-b p-5"><div><h2 className="text-lg font-bold">일일 근태 상세</h2><p className="mt-1 text-sm text-gray-500">{formatDate(detail.workDate)} {weekday(detail.workDate)}</p></div><button type="button" onClick={() => setDetail(null)} aria-label="닫기"><XMarkIcon className="h-5 w-5 text-gray-400" /></button></div><dl className="divide-y px-5">{[["날짜", formatDate(detail.workDate)], ["출근 시간", formatTime(detail.checkInTime)], ["퇴근 시간", formatTime(detail.checkOutTime)], ["근무 시간", formatMinutes(detail.workMinutes)]].map(([label, value]) => <div key={label} className="flex justify-between py-4"><dt className="text-sm text-gray-500">{label}</dt><dd className="text-sm font-semibold">{value}</dd></div>)}<div className="flex items-center justify-between py-4"><dt className="text-sm text-gray-500">근태 상태</dt><dd><StatusBadge record={detail} /></dd></div>
-      {needsCorrection(detail.attendanceStatusCode) && <div className="py-4"><dt className="text-sm text-gray-500">사유</dt><dd className="mt-1 text-sm font-medium text-gray-800">{detail.reason || "등록된 사유가 없습니다."}</dd>{detail.attachmentName && <dd className="mt-1 text-xs">{detail.attachmentUrl ? <a href={`${API_BASE_URL.replace(/\/api\/?$/, "")}${detail.attachmentUrl}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{detail.attachmentName}</a> : detail.attachmentName}</dd>}</div>}
-      </dl><div className="flex justify-end gap-2 border-t p-4">{needsCorrection(detail.attendanceStatusCode) && <button type="button" onClick={() => setCorrecting(true)} className="flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100"><PencilSquareIcon className="h-4 w-4" />{detail.reason ? "사유 수정" : "정정"}</button>}<button type="button" onClick={() => setDetail(null)} className="rounded-md border px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">닫기</button></div></div></div>}
+    {detail && <Modal
+      icon={ClockIcon}
+      title="일일 근태 상세"
+      subtitle={`${formatDate(detail.workDate)} ${weekday(detail.workDate)}`}
+      onClose={() => setDetail(null)}
+      maxWidth="md"
+      bodyClassName="max-h-[65vh] overflow-y-auto p-6"
+      footer={<>
+        {needsCorrection(detail.attendanceStatusCode) && <button type="button" onClick={() => setCorrecting(true)} className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-600 hover:bg-blue-100"><PencilSquareIcon className="h-4 w-4" />{detail.reason ? "사유 수정" : "정정"}</button>}
+        <ModalCancelButton onClick={() => setDetail(null)}>닫기</ModalCancelButton>
+      </>}
+    >
+      <dl className="divide-y divide-gray-100">{[["날짜", formatDate(detail.workDate)], ["출근 시간", formatTime(detail.checkInTime)], ["퇴근 시간", formatTime(detail.checkOutTime)], ["근무 시간", formatMinutes(detail.workMinutes)]].map(([label, value]) => <div key={label} className="flex justify-between py-3 first:pt-0"><dt className="text-sm text-gray-500">{label}</dt><dd className="text-sm font-semibold">{value}</dd></div>)}<div className="flex items-center justify-between py-3"><dt className="text-sm text-gray-500">근태 상태</dt><dd><StatusBadge record={detail} /></dd></div>
+      {needsCorrection(detail.attendanceStatusCode) && <div className="py-3"><dt className="text-sm text-gray-500">사유</dt><dd className="mt-1 text-sm font-medium text-gray-800">{detail.reason || "등록된 사유가 없습니다."}</dd>{detail.attachmentName && <dd className="mt-1 text-xs">{detail.attachmentUrl ? <a href={`${API_BASE_URL.replace(/\/api\/?$/, "")}${detail.attachmentUrl}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{detail.attachmentName}</a> : detail.attachmentName}</dd>}</div>}
+      </dl>
+    </Modal>}
 
     {correcting && detail && (
       <AttendanceReasonModal

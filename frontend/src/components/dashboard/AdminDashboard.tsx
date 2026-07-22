@@ -7,11 +7,11 @@ import {
   ClockIcon,
   CheckBadgeIcon,
   MegaphoneIcon,
-  XMarkIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { useSummarize } from "@/lib/useSummarize";
 import { normalizeAttendanceStatus } from "@/components/attendance/types";
+import Modal, { ModalCancelButton } from "@/components/common/Modal";
 import {
   DepartmentHeadcountChart,
   PayrollTrendChart,
@@ -296,21 +296,25 @@ export default function AdminDashboard() {
       </div>
 
       {viewingNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true">
-          <div className="max-h-[85vh] w-full max-w-2xl overflow-auto rounded-xl bg-white shadow-xl">
-            <div className="flex items-start justify-between gap-4 border-b border-gray-200 p-5">
-              <div>
-                {viewingNotice.pinned && <span className="mr-1.5 text-orange-500">📌</span>}
-                <h2 className="inline text-lg font-bold text-gray-900">{viewingNotice.title}</h2>
-                <p className="mt-2 text-sm text-gray-500">
-                  {viewingNotice.writerName} · {viewingNotice.createdAt.substring(0, 10)} · 조회 {viewingNotice.viewCount}
-                </p>
-              </div>
-              <button type="button" onClick={closeNotice} aria-label="닫기" className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-6">
+        <Modal
+          icon={MegaphoneIcon}
+          title={<>{viewingNotice.pinned && <span className="mr-1.5 text-orange-500">📌</span>}{viewingNotice.title}</>}
+          subtitle={`${viewingNotice.writerName} · ${viewingNotice.createdAt.substring(0, 10)} · 조회 ${viewingNotice.viewCount}`}
+          onClose={closeNotice}
+          maxWidth="2xl"
+          bodyClassName="max-h-[70vh] overflow-y-auto p-6"
+          footer={
+            <>
+              <ModalCancelButton onClick={closeNotice}>닫기</ModalCancelButton>
+              <Link
+                href="/notices"
+                className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 text-center text-sm font-medium text-white shadow-sm shadow-blue-200 transition-colors hover:bg-blue-700"
+              >
+                공지사항 관리로 이동
+              </Link>
+            </>
+          }
+        >
               <button
                 type="button"
                 onClick={() => summarize(viewingNotice.content)}
@@ -328,18 +332,7 @@ export default function AdminDashboard() {
               <div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
                 {viewingNotice.content}
               </div>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-gray-200 p-4">
-              <button type="button" onClick={closeNotice} className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">닫기</button>
-              <Link
-                href="/notices"
-                className="inline-flex items-center justify-center rounded-md bg-[#4A5DDF] px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                공지사항 관리로 이동
-              </Link>
-            </div>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

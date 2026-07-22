@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDaysIcon, CheckCircleIcon, ClockIcon, PaperAirplaneIcon, PlusIcon, XCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { CalendarDaysIcon, CheckCircleIcon, ClockIcon, PaperAirplaneIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -125,10 +126,15 @@ export default function MyLeavePage() {
 
   const filtered = useMemo(() => requests.filter((item) => filter === "ALL" || item.status === filter), [filter, requests]);
 
-  const openForm = () => {
+  const openForm = useCallback(() => {
     setForm({ leaveTypeId: leaveTypes[0] ? String(leaveTypes[0].leaveTypeId) : "", startDate: "", endDate: "", reason: "" });
     setFormError(null); setNotice(null); setFormOpen(true);
-  };
+  }, [leaveTypes]);
+
+  useEffect(() => {
+    window.addEventListener("leave:my-request", openForm);
+    return () => window.removeEventListener("leave:my-request", openForm);
+  }, [openForm]);
 
   const submit = async () => {
     if (submitting) return;
@@ -155,7 +161,6 @@ export default function MyLeavePage() {
   ];
 
   return <div className="mx-auto max-w-[1600px] space-y-5">
-    <div className="flex justify-end"><button type="button" onClick={openForm} className="flex w-full items-center justify-center gap-2 rounded-md bg-[#4A5DDF] px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 sm:w-auto"><PlusIcon className="h-4 w-4" />휴가 신청</button></div>
     {notice && <p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{notice}</p>}
 
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{summaryCards.map((card) => { const Icon = card.icon; return <div key={card.label} className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm"><span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${card.style}`}><Icon className="h-5 w-5" /></span><div><p className="text-sm font-medium text-gray-500">{card.label}</p><p className="mt-1 text-2xl font-bold text-gray-900">{loading ? "-" : days(card.value)}</p></div></div>; })}</section>
@@ -172,8 +177,27 @@ export default function MyLeavePage() {
         <div className="divide-y divide-gray-100 md:hidden">{filtered.map((item) => <button key={item.leaveRequestId} type="button" onClick={() => setDetail(item)} className="w-full p-4 text-left hover:bg-gray-50"><div className="flex items-start justify-between gap-3"><div><p className="font-semibold text-gray-900">{item.leaveTypeName} · {days(item.leaveDays)}</p><p className="mt-1 text-xs text-gray-500">{period(item)}</p></div><StatusBadge status={item.status} /></div><p className="mt-3 truncate text-sm text-gray-600">{item.reason || "신청 사유 없음"}</p></button>)}</div></>}
     </section>
 
-    {formOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true"><div className="w-full max-w-lg rounded-xl bg-white shadow-xl"><div className="flex items-center justify-between border-b px-6 py-4"><h2 className="text-lg font-bold">휴가 신청</h2><button type="button" onClick={() => setFormOpen(false)} disabled={submitting} aria-label="닫기"><XMarkIcon className="h-5 w-5 text-gray-400" /></button></div><div className="space-y-4 p-6"><label className="block text-sm font-medium text-gray-700">휴가 유형<select value={form.leaveTypeId} onChange={(event) => setForm({ ...form, leaveTypeId: event.target.value })} className="mt-1 block h-10 w-full rounded-md border border-gray-200 px-3 outline-none focus:border-blue-500"><option value="">선택해주세요</option>{leaveTypes.map((item) => <option key={item.leaveTypeId} value={item.leaveTypeId}>{item.leaveTypeName}</option>)}</select></label><div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium text-gray-700">시작일<input type="date" value={form.startDate} onChange={(event) => setForm({ ...form, startDate: event.target.value })} className="mt-1 block h-10 w-full rounded-md border border-gray-200 px-3 outline-none focus:border-blue-500" /></label><label className="text-sm font-medium text-gray-700">종료일<input type="date" min={form.startDate || undefined} value={form.endDate} onChange={(event) => setForm({ ...form, endDate: event.target.value })} className="mt-1 block h-10 w-full rounded-md border border-gray-200 px-3 outline-none focus:border-blue-500" /></label></div><label className="block text-sm font-medium text-gray-700">신청 사유<textarea maxLength={500} rows={4} value={form.reason} onChange={(event) => setForm({ ...form, reason: event.target.value })} placeholder="필요한 경우 신청 사유를 입력해주세요." className="mt-1 block w-full resize-none rounded-md border border-gray-200 p-3 outline-none focus:border-blue-500" /></label>{formError && <p role="alert" className="rounded-lg bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{formError}</p>}</div><div className="flex justify-end gap-2 border-t px-6 py-4"><button type="button" onClick={() => setFormOpen(false)} disabled={submitting} className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">취소</button><button type="button" onClick={() => void submit()} disabled={submitting} className="rounded-md bg-[#4A5DDF] px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">{submitting ? "신청 중..." : "신청하기"}</button></div></div></div>}
+    {formOpen && <Modal
+      icon={CalendarDaysIcon}
+      title="휴가 신청"
+      onClose={() => setFormOpen(false)}
+      maxWidth="lg"
+      footer={<>
+        <ModalCancelButton onClick={() => setFormOpen(false)} disabled={submitting} />
+        <ModalPrimaryButton onClick={() => void submit()} disabled={submitting}>{submitting ? "신청 중..." : "신청하기"}</ModalPrimaryButton>
+      </>}
+    >
+      <label className="block text-sm font-medium text-gray-700">휴가 유형<select value={form.leaveTypeId} onChange={(event) => setForm({ ...form, leaveTypeId: event.target.value })} className="mt-1 block h-10 w-full rounded-md border border-gray-200 px-3 outline-none focus:border-blue-500"><option value="">선택해주세요</option>{leaveTypes.map((item) => <option key={item.leaveTypeId} value={item.leaveTypeId}>{item.leaveTypeName}</option>)}</select></label><div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium text-gray-700">시작일<input type="date" value={form.startDate} onChange={(event) => setForm({ ...form, startDate: event.target.value })} className="mt-1 block h-10 w-full rounded-md border border-gray-200 px-3 outline-none focus:border-blue-500" /></label><label className="text-sm font-medium text-gray-700">종료일<input type="date" min={form.startDate || undefined} value={form.endDate} onChange={(event) => setForm({ ...form, endDate: event.target.value })} className="mt-1 block h-10 w-full rounded-md border border-gray-200 px-3 outline-none focus:border-blue-500" /></label></div><label className="block text-sm font-medium text-gray-700">신청 사유<textarea maxLength={500} rows={4} value={form.reason} onChange={(event) => setForm({ ...form, reason: event.target.value })} placeholder="필요한 경우 신청 사유를 입력해주세요." className="mt-1 block w-full resize-none rounded-md border border-gray-200 p-3 outline-none focus:border-blue-500" /></label>{formError && <p role="alert" className="rounded-lg bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{formError}</p>}
+    </Modal>}
 
-    {detail && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true"><div className="w-full max-w-lg rounded-xl bg-white shadow-xl"><div className="flex items-center justify-between border-b px-6 py-4"><h2 className="text-lg font-bold">휴가 신청 상세</h2><button type="button" onClick={() => setDetail(null)} aria-label="닫기"><XMarkIcon className="h-5 w-5 text-gray-400" /></button></div><div className="space-y-4 p-6"><div className="grid grid-cols-2 gap-4 text-sm">{[["휴가 유형", detail.leaveTypeName], ["신청 기간", period(detail)], ["사용 일수", days(detail.leaveDays)], ["신청일", formatDate(detail.createdAt)], ["처리일", formatDateTime(detail.processedAt)]].map(([label, value]) => <div key={label}><p className="text-xs font-medium text-gray-500">{label}</p><p className="mt-1 font-semibold text-gray-800">{value}</p></div>)}<div><p className="text-xs font-medium text-gray-500">승인 상태</p><p className="mt-1"><StatusBadge status={detail.status} /></p></div></div><div><p className="text-xs font-medium text-gray-500">신청 사유</p><p className="mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">{detail.reason || "-"}</p></div>{detail.rejectionReason && <div><p className="text-xs font-medium text-gray-500">반려 사유</p><p className="mt-1 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{detail.rejectionReason}</p></div>}</div><div className="flex justify-end border-t px-6 py-4"><button type="button" onClick={() => setDetail(null)} className="rounded-md border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">닫기</button></div></div></div>}
+    {detail && <Modal
+      icon={CalendarDaysIcon}
+      title="휴가 신청 상세"
+      onClose={() => setDetail(null)}
+      maxWidth="lg"
+      footer={<ModalCancelButton onClick={() => setDetail(null)}>닫기</ModalCancelButton>}
+    >
+      <div className="grid grid-cols-2 gap-4 text-sm">{[["휴가 유형", detail.leaveTypeName], ["신청 기간", period(detail)], ["사용 일수", days(detail.leaveDays)], ["신청일", formatDate(detail.createdAt)], ["처리일", formatDateTime(detail.processedAt)]].map(([label, value]) => <div key={label}><p className="text-xs font-medium text-gray-500">{label}</p><p className="mt-1 font-semibold text-gray-800">{value}</p></div>)}<div><p className="text-xs font-medium text-gray-500">승인 상태</p><p className="mt-1"><StatusBadge status={detail.status} /></p></div></div><div><p className="text-xs font-medium text-gray-500">신청 사유</p><p className="mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">{detail.reason || "-"}</p></div>{detail.rejectionReason && <div><p className="text-xs font-medium text-gray-500">반려 사유</p><p className="mt-1 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{detail.rejectionReason}</p></div>}
+    </Modal>}
   </div>;
 }

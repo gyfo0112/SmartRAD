@@ -10,6 +10,8 @@ import erp.system.department.entity.Department;
 import erp.system.department.repository.DepartmentRepository;
 import erp.system.employee.entity.Employee;
 import erp.system.employee.repository.EmployeeRepository;
+import erp.system.notification.entity.Notification;
+import erp.system.notification.service.NotificationService;
 import erp.system.position.entity.Position;
 import erp.system.position.repository.PositionRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,18 @@ public class EmployeeAppointmentService {
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
     private final PositionRepository positionRepository;
+    private final NotificationService notificationService;
+
+    private static String appointmentTypeLabel(String appointmentType) {
+        return switch (appointmentType) {
+            case EmployeeAppointment.TYPE_TRANSFER -> "부서 이동";
+            case EmployeeAppointment.TYPE_PROMOTION -> "직급 승진";
+            case EmployeeAppointment.TYPE_DEMOTION -> "직급 강등";
+            case EmployeeAppointment.TYPE_RESIGNATION -> "퇴사";
+            case EmployeeAppointment.TYPE_REINSTATEMENT -> "복직";
+            default -> appointmentType;
+        };
+    }
 
     public List<EmployeeAppointmentResponse> getByEmployee(Long employeeId) {
         return employeeAppointmentRepository.findAllByEmployee_EmployeeIdOrderByEffectiveDateDesc(employeeId).stream()
@@ -108,6 +122,14 @@ public class EmployeeAppointmentService {
         if (EmployeeAppointment.TYPE_RESIGNATION.equals(request.appointmentType())) {
             employee.resign(request.effectiveDate());
         }
+
+        notificationService.notify(
+                employee.getEmployeeId(),
+                Notification.TYPE_APPOINTMENT_CREATED,
+                "인사 발령 등록",
+                request.effectiveDate() + "자로 [" + appointmentTypeLabel(request.appointmentType()) + "] 발령이 등록되었습니다.",
+                "/profile"
+        );
 
         return EmployeeAppointmentResponse.from(appointment);
     }

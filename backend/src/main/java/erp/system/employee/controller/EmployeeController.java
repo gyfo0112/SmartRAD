@@ -77,7 +77,7 @@ public class EmployeeController {
         if (!isAdmin && !id.equals(requesterId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
-        return employeeService.update(id, request);
+        return employeeService.update(id, request, requesterId, isAdmin);
     }
 
     @DeleteMapping("/{id}")

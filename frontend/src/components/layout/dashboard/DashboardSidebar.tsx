@@ -7,6 +7,7 @@ import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { dashboardMenuGroups as menuGroups } from "@/lib/dashboardMenu";
 import { clearAuthStorage, isAdmin } from "@/lib/auth";
 import Logo from "@/components/ui/Logo";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 function getStoredValue(key: string) {
   return window.localStorage.getItem(key) ?? window.sessionStorage.getItem(key);
@@ -121,26 +122,23 @@ export default function DashboardSidebar() {
     </aside>
 
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-gray-900">
-            <h2 className="text-lg font-bold mb-2">로그아웃</h2>
-            <p className="text-sm text-gray-500 mb-6">정말로 로그아웃 하시겠습니까?</p>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowLogoutConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700"
-              >
-                로그아웃
-              </button>
-            </div>
-          </div>
-        </div>
+        <Modal
+          icon={ArrowRightStartOnRectangleIcon}
+          iconColor="rose"
+          title="로그아웃"
+          subtitle="정말로 로그아웃 하시겠습니까?"
+          onClose={() => setShowLogoutConfirm(false)}
+          maxWidth="sm"
+          bodyClassName="hidden"
+          footer={
+            <>
+              <ModalCancelButton onClick={() => setShowLogoutConfirm(false)} />
+              <ModalPrimaryButton tone="rose" onClick={handleLogout}>로그아웃</ModalPrimaryButton>
+            </>
+          }
+        >
+          {null}
+        </Modal>
       )}
     </>
   );

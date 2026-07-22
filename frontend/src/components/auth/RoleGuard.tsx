@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { ShieldExclamationIcon } from "@heroicons/react/24/outline";
 import { dashboardMenuGroups } from "@/lib/dashboardMenu";
 import { isAdmin } from "@/lib/auth";
+import Modal from "@/components/common/Modal";
 
 const allMenuItems = dashboardMenuGroups.flatMap((group) => group.items);
 
@@ -35,15 +37,16 @@ export default function RoleGuard() {
   if (!blocked) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 px-4"
-      role="dialog"
-      aria-modal="true"
+    <Modal
+      icon={ShieldExclamationIcon}
+      iconColor="rose"
+      title="접근 권한이 없습니다"
+      subtitle="관리자만 접근할 수 있는 페이지입니다."
+      onClose={() => router.replace("/dashboard")}
+      maxWidth="sm"
+      bodyClassName="hidden"
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
-        <h2 className="text-lg font-bold text-slate-900">접근 권한이 없습니다</h2>
-        <p className="mt-2 text-sm text-slate-500">관리자만 접근할 수 있는 페이지입니다.</p>
-      </div>
-    </div>
+      {null}
+    </Modal>
   );
 }

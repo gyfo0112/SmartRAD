@@ -18,6 +18,8 @@ import {
   AdjustmentsHorizontalIcon,
   TagIcon,
   ReceiptPercentIcon,
+  GiftIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 
 export const dashboardMenuGroups = [
@@ -33,6 +35,7 @@ export const dashboardMenuGroups = [
       { name: "내 정보(프로필) 조회", href: "/profile", icon: UserIcon, adminOnly: false },
       { name: "직원 목록 조회", href: "/employees", icon: UsersIcon, adminOnly: false },
       { name: "제증명서 신청/조회", href: "/certificates/my", icon: DocumentTextIcon, adminOnly: false, userOnly: true },
+      { name: "부서 관리", href: "/departments", icon: BuildingOfficeIcon, adminOnly: true },
       { name: "신규 직원 등록", href: "/employees/new", icon: UserPlusIcon, adminOnly: true },
       { name: "인사 발령 관리", href: "/appointments", icon: ArrowPathIcon, adminOnly: true },
       { name: "제증명서 관리", href: "/certificates", icon: DocumentTextIcon, adminOnly: true },
@@ -59,6 +62,8 @@ export const dashboardMenuGroups = [
       { name: "급여 계산", href: "/payroll/calculate", icon: CalculatorIcon, adminOnly: true },
       { name: "급여 지급 처리", href: "/payroll/process", icon: BanknotesIcon, adminOnly: true },
       { name: "급여항목 관리", href: "/payroll/items", icon: TagIcon, adminOnly: true },
+      { name: "경조비 신청", href: "/events/my", icon: GiftIcon, adminOnly: false, userOnly: true },
+      { name: "경조비 관리", href: "/events", icon: GiftIcon, adminOnly: true },
     ]
   },
   {

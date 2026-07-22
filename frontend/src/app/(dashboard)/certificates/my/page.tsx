@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { DocumentPlusIcon, ClockIcon, CheckCircleIcon, XCircleIcon, CheckBadgeIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { certificateTypeLabel, type CertificateIssueResponse, statusBadge } from "@/components/certificate/types";
 import MyCertificateRegisterModal from "@/components/certificate/MyCertificateRegisterModal";
+import Modal, { ModalCancelButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -191,21 +192,15 @@ export default function MyCertificatesPage() {
       )}
 
       {memoModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">{memoModal.title}</h2>
-            </div>
-            <div className="p-5">
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{memoModal.content}</p>
-            </div>
-            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
-              <button onClick={() => setMemoModal(null)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                닫기
-              </button>
-            </div>
-          </div>
-        </div>
+        <Modal
+          icon={DocumentTextIcon}
+          title={memoModal.title}
+          onClose={() => setMemoModal(null)}
+          maxWidth="sm"
+          footer={<ModalCancelButton onClick={() => setMemoModal(null)}>닫기</ModalCancelButton>}
+        >
+          <p className="text-sm text-gray-700 whitespace-pre-wrap">{memoModal.content}</p>
+        </Modal>
       )}
     </div>
   );

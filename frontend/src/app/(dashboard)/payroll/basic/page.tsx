@@ -3,16 +3,17 @@
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
+  BanknotesIcon,
   CheckCircleIcon,
   DocumentArrowUpIcon,
   ExclamationTriangleIcon,
   MagnifyingGlassIcon,
   UserGroupIcon,
   UserMinusIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
@@ -1170,29 +1171,18 @@ export default function PayrollBasicPage() {
       </section>
 
       {selectedEmployee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
-          <section className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900">
-                  급여 기본정보 등록
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  {selectedEmployee.employeeNo} · {selectedEmployee.name} ·{" "}
-                  {selectedEmployee.department}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={closePayrollModal}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                aria-label="급여 기본정보 등록 닫기"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-5 px-6 py-5">
+        <Modal
+          icon={BanknotesIcon}
+          title="급여 기본정보 등록"
+          subtitle={`${selectedEmployee.employeeNo} · ${selectedEmployee.name} · ${selectedEmployee.department}`}
+          onClose={closePayrollModal}
+          maxWidth="2xl"
+          bodyClassName="max-h-[65vh] space-y-5 overflow-y-auto p-6"
+          footer={<>
+            <ModalCancelButton onClick={closePayrollModal} />
+            <ModalPrimaryButton onClick={savePayrollBasicInfo} disabled={saving}>{saving ? "저장 중..." : "저장"}</ModalPrimaryButton>
+          </>}
+        >
               <div className="grid grid-cols-1 gap-4 rounded-xl bg-slate-50 p-4 text-sm md:grid-cols-3">
                 <div>
                   <p className="text-xs font-semibold text-slate-400">직급</p>
@@ -1283,52 +1273,20 @@ export default function PayrollBasicPage() {
                   {modalError}
                 </p>
               )}
-            </div>
-
-            <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4">
-              <button
-                type="button"
-                onClick={closePayrollModal}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={savePayrollBasicInfo}
-                disabled={saving}
-                className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? "저장 중..." : "저장"}
-              </button>
-            </div>
-          </section>
-        </div>
+        </Modal>
       )}
 
       {bulkEmploymentTypeOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
-          <section className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900">
-                  급여형태 변경
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  선택된 {selectedIds.size}명의 급여형태를 일괄 변경합니다.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={closeBulkEmploymentTypeModal}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                aria-label="급여형태 변경 닫기"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4 px-6 py-5">
+        <Modal
+          icon={UserGroupIcon}
+          title="급여형태 변경"
+          subtitle={`선택된 ${selectedIds.size}명의 급여형태를 일괄 변경합니다.`}
+          onClose={closeBulkEmploymentTypeModal}
+          footer={<>
+            <ModalCancelButton onClick={closeBulkEmploymentTypeModal} />
+            <ModalPrimaryButton onClick={saveBulkEmploymentType} disabled={bulkEmploymentTypeSaving}>{bulkEmploymentTypeSaving ? "변경 중..." : "변경"}</ModalPrimaryButton>
+          </>}
+        >
               <label className="space-y-1 text-sm font-semibold text-slate-700">
                 <span>변경할 급여형태</span>
                 <select
@@ -1355,52 +1313,22 @@ export default function PayrollBasicPage() {
                   {bulkEmploymentTypeError}
                 </p>
               )}
-            </div>
-
-            <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4">
-              <button
-                type="button"
-                onClick={closeBulkEmploymentTypeModal}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={saveBulkEmploymentType}
-                disabled={bulkEmploymentTypeSaving}
-                className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {bulkEmploymentTypeSaving ? "변경 중..." : "변경"}
-              </button>
-            </div>
-          </section>
-        </div>
+        </Modal>
       )}
 
       {bulkPayrollOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
-          <section className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900">
-                  급여정보 일괄등록
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  미등록 {bulkPayrollItems.length}명의 연봉/계좌정보를 입력하세요.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={closeBulkPayrollModal}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                aria-label="급여정보 일괄등록 닫기"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+        <Modal
+          icon={DocumentArrowUpIcon}
+          title="급여정보 일괄등록"
+          subtitle={`미등록 ${bulkPayrollItems.length}명의 연봉/계좌정보를 입력하세요.`}
+          onClose={closeBulkPayrollModal}
+          maxWidth="3xl"
+          bodyClassName="max-h-[65vh] space-y-4 overflow-y-auto p-6"
+          footer={<>
+            <ModalCancelButton onClick={closeBulkPayrollModal} />
+            <ModalPrimaryButton onClick={saveBulkPayrollBasic} disabled={bulkPayrollSaving}>{bulkPayrollSaving ? "저장 중..." : "저장"}</ModalPrimaryButton>
+          </>}
+        >
               {bulkPayrollItems.map((item) => (
                 <div
                   key={item.employeeId}
@@ -1485,27 +1413,7 @@ export default function PayrollBasicPage() {
                   {bulkPayrollError}
                 </p>
               )}
-            </div>
-
-            <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4">
-              <button
-                type="button"
-                onClick={closeBulkPayrollModal}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={saveBulkPayrollBasic}
-                disabled={bulkPayrollSaving}
-                className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {bulkPayrollSaving ? "저장 중..." : "저장"}
-              </button>
-            </div>
-          </section>
-        </div>
+        </Modal>
       )}
     </div>
   );

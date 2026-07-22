@@ -22,6 +22,8 @@ import erp.system.employee.repository.EmployeeRepository;
 import erp.system.employmenttype.entity.EmploymentType;
 import erp.system.employmenttype.repository.EmploymentTypeRepository;
 import erp.system.leave.service.EmployeeLeaveBalanceService;
+import erp.system.notification.entity.Notification;
+import erp.system.notification.service.NotificationService;
 import erp.system.position.entity.Position;
 import erp.system.position.repository.PositionRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,17 @@ public class EmployeeService {
     private final EmployeeAllowanceRepository employeeAllowanceRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeLeaveBalanceService employeeLeaveBalanceService;
+    private final NotificationService notificationService;
+
+    private static String employeeStatusLabel(String status) {
+        if (status == null) return "-";
+        return switch (status) {
+            case "ACTIVE" -> "재직중";
+            case "LEAVE" -> "휴직중";
+            case Employee.STATUS_RESIGNED -> "퇴사";
+            default -> status;
+        };
+    }
 
     public EmployeeResponse getById(Long employeeId, Long requesterId, boolean requesterIsAdmin) {
         boolean includeSensitive = requesterIsAdmin || employeeId.equals(requesterId);
@@ -134,8 +147,9 @@ public class EmployeeService {
     }
 
     @Transactional
-    public EmployeeResponse update(Long employeeId, EmployeeUpdateRequest request) {
+    public EmployeeResponse update(Long employeeId, EmployeeUpdateRequest request, Long actorId, boolean actorIsAdmin) {
         Employee employee = findActive(employeeId);
+        String previousStatus = employee.getEmployeeStatusCode();
 
         employee.update(
                 resolveEmploymentType(request.employmentTypeId()),
@@ -153,6 +167,17 @@ public class EmployeeService {
                 request.profileImage()
         );
 
+        boolean actorIsSomeoneElse = actorId != null && !actorId.equals(employeeId);
+        if (actorIsAdmin && actorIsSomeoneElse && !employee.getEmployeeStatusCode().equals(previousStatus)) {
+            notificationService.notify(
+                    employeeId,
+                    Notification.TYPE_EMPLOYEE_STATUS_CHANGED,
+                    "재직 상태 변경",
+                    "재직 상태가 " + employeeStatusLabel(previousStatus) + "에서 " + employeeStatusLabel(employee.getEmployeeStatusCode()) + "(으)로 변경되었습니다.",
+                    "/profile"
+            );
+        }
+
         return EmployeeResponse.from(employee);
     }
 
@@ -165,7 +190,19 @@ public class EmployeeService {
     @Transactional
     public EmployeeResponse updateBaseSalary(Long employeeId, EmployeeBaseSalaryUpdateRequest request) {
         Employee employee = findActive(employeeId);
+        BigDecimal previousSalary = employee.getBaseSalary();
         employee.updateBaseSalary(request.baseSalary());
+
+        if (previousSalary == null || previousSalary.compareTo(request.baseSalary()) != 0) {
+            notificationService.notify(
+                    employeeId,
+                    Notification.TYPE_BASE_SALARY_CHANGED,
+                    "연봉 정보 변경",
+                    "연봉 정보가 변경되었습니다.",
+                    "/payroll/mine"
+            );
+        }
+
         return EmployeeResponse.from(employee);
     }
 

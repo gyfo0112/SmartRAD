@@ -16,6 +16,9 @@ import {
 } from "recharts";
 
 const DEPARTMENT_COLORS = ["#6366f1", "#0891b2", "#16a34a", "#d97706", "#e11d48", "#8b5cf6", "#0ea5e9"];
+const TOOLTIP_CONTENT_STYLE = { backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, boxShadow: "0 4px 12px rgba(15,23,42,0.12)", fontSize: 12, padding: "8px 12px" };
+const TOOLTIP_ITEM_STYLE = { color: "#0f172a" };
+const TOOLTIP_LABEL_STYLE = { color: "#475569", fontWeight: 600, marginBottom: 4 };
 const ATTENDANCE_COLORS: Record<string, string> = {
   정상: "#16a34a",
   지각: "#d97706",
@@ -59,7 +62,7 @@ export function DepartmentHeadcountChart({ data, loading }: { data: DepartmentHe
               <CartesianGrid stroke="#eef2f7" horizontal={false} />
               <XAxis type="number" allowDecimals={false} tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" width={72} tick={{ fill: "#475569", fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(value) => [`${Number(value)}명`, "인원"]} />
+              <Tooltip formatter={(value) => [`${Number(value)}명`, "인원"]} contentStyle={TOOLTIP_CONTENT_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={16}>
                 {data.map((_, index) => (
                   <Cell key={index} fill={DEPARTMENT_COLORS[index % DEPARTMENT_COLORS.length]} />
@@ -91,7 +94,6 @@ export function TodayAttendanceChart({ data, loading }: { data: AttendanceStatus
                     <Cell key={index} fill={total ? ATTENDANCE_COLORS[item.name] ?? DEPARTMENT_COLORS[index % DEPARTMENT_COLORS.length] : "#e5e7eb"} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${Number(value)}명`, ""]} />
               </PieChart>
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
@@ -131,7 +133,7 @@ export function PayrollTrendChart({ data, loading }: { data: PayrollMonthlyPoint
               <CartesianGrid stroke="#eef2f7" vertical={false} />
               <XAxis dataKey="month" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tickFormatter={formatManwon} tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={72} />
-              <Tooltip formatter={(value) => formatManwon(Number(value))} />
+              <Tooltip formatter={(value) => formatManwon(Number(value))} contentStyle={TOOLTIP_CONTENT_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} />
               <Line name="지급 총액" type="monotone" dataKey="totalPayAmount" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} />
               <Line name="실지급액" type="monotone" dataKey="totalRealPayAmount" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>

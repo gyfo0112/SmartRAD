@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { clearAuthStorage } from "@/lib/auth";
+import Modal, { ModalPrimaryButton } from "@/components/common/Modal";
 
 let fetchPatched = false;
 let notifySessionExpired: (() => void) | null = null;
@@ -51,24 +53,17 @@ export default function SessionExpiryHandler() {
   if (!expired) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 px-4"
-      role="dialog"
-      aria-modal="true"
+    <Modal
+      icon={ExclamationTriangleIcon}
+      iconColor="amber"
+      title="세션이 만료되었습니다"
+      subtitle="보안을 위해 자동으로 로그아웃되었습니다. 다시 로그인해 주세요."
+      onClose={handleConfirm}
+      maxWidth="sm"
+      bodyClassName="hidden"
+      footer={<ModalPrimaryButton onClick={handleConfirm}>확인</ModalPrimaryButton>}
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
-        <h2 className="text-lg font-bold text-slate-900">세션이 만료되었습니다</h2>
-        <p className="mt-2 text-sm text-slate-500">
-          보안을 위해 자동으로 로그아웃되었습니다. 다시 로그인해 주세요.
-        </p>
-        <button
-          type="button"
-          onClick={handleConfirm}
-          className="mt-5 w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-        >
-          확인
-        </button>
-      </div>
-    </div>
+      {null}
+    </Modal>
   );
 }

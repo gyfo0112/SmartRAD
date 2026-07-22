@@ -10,10 +10,10 @@ import {
   MagnifyingGlassIcon,
   PlayIcon,
   UserGroupIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import Modal, { ModalCancelButton } from "@/components/common/Modal";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
@@ -227,29 +227,15 @@ function PayrollDetailModal({
   const deductions = data?.details.filter((item) => item.itemTypeCode === "DEDUCTION") ?? [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
-      <section className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-          <div>
-            <h2 className="text-xl font-extrabold text-slate-900">급여 상세 정보</h2>
-            {data && (
-              <p className="mt-1 text-sm text-slate-500">
-                #{data.payroll.employeeId} · {data.payroll.employeeNameSnapshot} ·{" "}
-                {data.payroll.departmentNameSnapshot ?? "미지정"}
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="급여 상세 정보 닫기"
-          >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-5">
+    <Modal
+      icon={BanknotesIcon}
+      title="급여 상세 정보"
+      subtitle={data ? `#${data.payroll.employeeId} · ${data.payroll.employeeNameSnapshot} · ${data.payroll.departmentNameSnapshot ?? "미지정"}` : undefined}
+      onClose={onClose}
+      maxWidth="2xl"
+      bodyClassName="max-h-[65vh] space-y-5 overflow-y-auto p-6"
+      footer={<ModalCancelButton onClick={onClose}>닫기</ModalCancelButton>}
+    >
           {loading && (
             <p className="py-8 text-center text-sm font-semibold text-slate-400">
               상세 정보를 불러오는 중입니다.
@@ -391,19 +377,7 @@ function PayrollDetailModal({
               </div>
             </>
           )}
-        </div>
-
-        <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-          >
-            닫기
-          </button>
-        </div>
-      </section>
-    </div>
+    </Modal>
   );
 }
 
@@ -424,33 +398,14 @@ function PayrollCriteriaModal({ onClose }: { onClose: () => void }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="payroll-criteria-title"
-        className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl"
-      >
-        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-          <div>
-            <h2 id="payroll-criteria-title" className="text-xl font-extrabold text-slate-900">
-              급여 계산 기준 수정
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              기준을 변경한 뒤 해당 직원을 다시 계산하면 변경 사항이 반영됩니다.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="급여 계산 기준 수정 닫기"
-          >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="space-y-3 px-6 py-5">
+    <Modal
+      icon={AdjustmentsHorizontalIcon}
+      title="급여 계산 기준 수정"
+      subtitle="기준을 변경한 뒤 해당 직원을 다시 계산하면 변경 사항이 반영됩니다."
+      onClose={onClose}
+      maxWidth="xl"
+      footer={<ModalCancelButton onClick={onClose}>닫기</ModalCancelButton>}
+    >
           {criteria.map((criterion) => (
             <article
               key={criterion.href}
@@ -472,19 +427,7 @@ function PayrollCriteriaModal({ onClose }: { onClose: () => void }) {
           <p className="rounded-lg bg-amber-50 px-4 py-3 text-xs font-medium leading-5 text-amber-700">
             지급완료된 급여는 재계산할 수 없습니다. 계산완료 또는 검토필요 상태의 급여만 재계산해 주세요.
           </p>
-        </div>
-
-        <div className="flex justify-end border-t border-slate-200 bg-slate-50 px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-          >
-            닫기
-          </button>
-        </div>
-      </section>
-    </div>
+    </Modal>
   );
 }
 

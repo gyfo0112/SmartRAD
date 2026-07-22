@@ -13,10 +13,10 @@ import {
   PaperAirplaneIcon,
   UserGroupIcon,
   XCircleIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import Modal, { ModalCancelButton } from "@/components/common/Modal";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
@@ -214,33 +214,14 @@ function PaymentCriteriaModal({ onClose }: { onClose: () => void }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="payment-criteria-title"
-        className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl"
-      >
-        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-          <div>
-            <h2 id="payment-criteria-title" className="text-xl font-extrabold text-slate-900">
-              급여 지급 기준 수정
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              지급 전 계좌정보와 급여 계산 결과를 확인하고 필요한 기준을 수정하세요.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="급여 지급 기준 수정 닫기"
-          >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="space-y-3 px-6 py-5">
+    <Modal
+      icon={AdjustmentsHorizontalIcon}
+      title="급여 지급 기준 수정"
+      subtitle="지급 전 계좌정보와 급여 계산 결과를 확인하고 필요한 기준을 수정하세요."
+      onClose={onClose}
+      maxWidth="xl"
+      footer={<ModalCancelButton onClick={onClose}>닫기</ModalCancelButton>}
+    >
           {criteria.map((criterion) => (
             <article
               key={criterion.href}
@@ -262,19 +243,7 @@ function PaymentCriteriaModal({ onClose }: { onClose: () => void }) {
           <p className="rounded-lg bg-amber-50 px-4 py-3 text-xs font-medium leading-5 text-amber-700">
             계좌정보가 등록되지 않은 직원은 지급 처리에서 제외됩니다. 지급완료된 급여는 지급 기준을 변경할 수 없습니다.
           </p>
-        </div>
-
-        <div className="flex justify-end border-t border-slate-200 bg-slate-50 px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-          >
-            닫기
-          </button>
-        </div>
-      </section>
-    </div>
+    </Modal>
   );
 }
 
@@ -1234,30 +1203,15 @@ export default function PayrollProcessPage() {
       </section>
 
       {detailOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
-          <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  급여 지급 상세
-                </h3>
-                {detailData && (
-                  <p className="mt-1 text-sm text-slate-500">
-                    {detailData.payroll.employeeNameSnapshot} ·{" "}
-                    {formatMonth(detailData.payroll.payrollYearMonth)}
-                  </p>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={closePayrollDetail}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50"
-              >
-                닫기
-              </button>
-            </div>
-
-            <div className="mt-4">
+        <Modal
+          icon={BanknotesIcon}
+          title="급여 지급 상세"
+          subtitle={detailData ? `${detailData.payroll.employeeNameSnapshot} · ${formatMonth(detailData.payroll.payrollYearMonth)}` : undefined}
+          onClose={closePayrollDetail}
+          maxWidth="2xl"
+          bodyClassName="max-h-[65vh] space-y-5 overflow-y-auto p-6"
+          footer={<ModalCancelButton onClick={closePayrollDetail}>닫기</ModalCancelButton>}
+        >
               {detailLoading && (
                 <p className="py-8 text-center text-sm font-semibold text-slate-400">
                   상세 정보를 불러오는 중입니다.
@@ -1380,9 +1334,7 @@ export default function PayrollProcessPage() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

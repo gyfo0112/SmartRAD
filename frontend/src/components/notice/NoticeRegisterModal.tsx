@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { XMarkIcon, MegaphoneIcon } from "@heroicons/react/24/outline";
+import { MegaphoneIcon } from "@heroicons/react/24/outline";
 import type { NoticeDetail } from "./types";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -62,20 +63,22 @@ export default function NoticeRegisterModal({ notice, onClose, onSaved }: Props)
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <MegaphoneIcon className="w-5 h-5 text-blue-600" />
-            {notice ? "공지사항 수정" : "공지사항 등록"}
-          </h2>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100">
-            <XMarkIcon className="w-5 h-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="p-5 space-y-4 max-h-[65vh] overflow-y-auto">
+    <Modal
+      icon={MegaphoneIcon}
+      title={notice ? "공지사항 수정" : "공지사항 등록"}
+      onClose={onClose}
+      maxWidth="lg"
+      as="form"
+      onSubmit={handleSubmit}
+      footer={
+        <>
+          <ModalCancelButton onClick={onClose} />
+          <ModalPrimaryButton type="submit" disabled={loading}>
+            {loading ? "저장 중..." : "저장"}
+          </ModalPrimaryButton>
+        </>
+      }
+    >
             <div>
               <label className={labelClasses}>제목 *</label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={200} className={inputClasses} placeholder="공지 제목을 입력하세요" />
@@ -92,16 +95,6 @@ export default function NoticeRegisterModal({ notice, onClose, onSaved }: Props)
             </label>
 
             {error && <p className="text-sm font-medium text-rose-500">{error}</p>}
-          </div>
-
-          <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-100 bg-gray-50">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">취소</button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50">
-              {loading ? "저장 중..." : "저장"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

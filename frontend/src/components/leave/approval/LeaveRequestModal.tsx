@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { XMarkIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
+import { CalendarDaysIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import type { LeaveApprovalRow } from "./leaveApprovalTypes";
 import { STATUS_LABELS } from "./leaveApprovalTypes";
 import { useSummarize } from "@/lib/useSummarize";
+import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
 function date(value: string) {
   return value?.slice(0, 10).replaceAll("-", ".") || "-";
@@ -28,13 +29,11 @@ interface Props {
 }
 
 export default function LeaveRequestModal({ mode, row, selectedRows = [], busy, error, onClose, onConfirm }: Props) {
-  const closeRef = useRef<HTMLButtonElement>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionError, setRejectionError] = useState<string | null>(null);
   const { summary, loading: summarizing, error: summarizeError, summarize, reset: resetSummary } = useSummarize();
 
   useEffect(() => {
-    closeRef.current?.focus();
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !busy) onClose();
     };
@@ -63,15 +62,23 @@ export default function LeaveRequestModal({ mode, row, selectedRows = [], busy, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true" aria-labelledby="leave-modal-title">
-      <div className="w-full max-w-lg rounded-xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h2 id="leave-modal-title" className="text-lg font-bold text-gray-900">{title}</h2>
-          <button ref={closeRef} type="button" onClick={onClose} disabled={busy} aria-label="닫기" className="rounded-md p-1 text-gray-400 hover:bg-gray-100">
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="space-y-4 p-6">
+    <Modal
+      icon={CalendarDaysIcon}
+      iconColor={mode === "reject" ? "rose" : "blue"}
+      title={title}
+      maxWidth="lg"
+      onClose={onClose}
+      footer={
+        <>
+          <ModalCancelButton onClick={onClose} disabled={busy}>닫기</ModalCancelButton>
+          {mode !== "detail" && (
+            <ModalPrimaryButton type="button" onClick={handleConfirm} disabled={busy} tone={mode === "reject" ? "rose" : "blue"}>
+              {busy ? "처리 중..." : mode === "bulk" ? "선택 승인" : mode === "reject" ? "반려" : "승인"}
+            </ModalPrimaryButton>
+          )}
+        </>
+      }
+    >
           {mode === "bulk" ? (
             <>
               <p className="text-sm text-gray-600">선택한 <strong className="text-gray-900">{selectedRows.length}건</strong>을 승인하시겠습니까?</p>
@@ -140,22 +147,7 @@ export default function LeaveRequestModal({ mode, row, selectedRows = [], busy, 
             </>
           )}
           {error && <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
-        </div>
-        <div className="flex justify-end gap-2 border-t border-gray-100 px-6 py-4">
-          <button type="button" onClick={onClose} disabled={busy} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">닫기</button>
-          {mode !== "detail" && (
-            <button
-              type="button"
-              onClick={handleConfirm}
-              disabled={busy}
-              className={`rounded-md px-4 py-2 text-sm font-medium text-white disabled:opacity-50 ${mode === "reject" ? "bg-rose-600 hover:bg-rose-700" : "bg-[#4A5DDF] hover:bg-blue-700"}`}
-            >
-              {busy ? "처리 중..." : mode === "bulk" ? "선택 승인" : mode === "reject" ? "반려" : "승인"}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

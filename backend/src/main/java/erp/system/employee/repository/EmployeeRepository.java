@@ -22,4 +22,8 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long>, JpaSpe
 
     @Query(value = "SELECT MAX(CAST(SUBSTRING(employee_no, 6) AS UNSIGNED)) FROM employee WHERE employee_no LIKE CONCAT('E', :year, '%')", nativeQuery = true)
     Integer findMaxEmployeeNoSequence(@Param("year") String year);
+
+    boolean existsByDepartment_DepartmentId(Long departmentId);
+    
+    List<Employee> findAllByDepartment_DepartmentId(Long departmentId);
 }
