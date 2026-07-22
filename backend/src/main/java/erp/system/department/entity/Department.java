@@ -29,14 +29,20 @@ public class Department extends BaseEntity {
     @JoinColumn(name = "parent_department_id")
     private Department parentDepartment;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_head_id")
+    private erp.system.employee.entity.Employee departmentHead;
+
     @Builder
-    public Department(String departmentName, Department parentDepartment) {
+    public Department(String departmentName, Department parentDepartment, erp.system.employee.entity.Employee departmentHead) {
         this.departmentName = departmentName;
         this.parentDepartment = parentDepartment;
+        this.departmentHead = departmentHead;
     }
 
-    public void update(String departmentName, Department parentDepartment) {
+    public void update(String departmentName, Department parentDepartment, erp.system.employee.entity.Employee departmentHead) {
         this.departmentName = departmentName;
         this.parentDepartment = parentDepartment;
+        this.departmentHead = departmentHead;
     }
 }
