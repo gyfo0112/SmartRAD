@@ -2,6 +2,8 @@ package erp.system.department.service;
 
 import erp.system.attendance.entity.Attendance;
 import erp.system.attendance.repository.AttendanceRepository;
+import erp.system.auditlog.entity.AuditLog;
+import erp.system.auditlog.service.AuditLogService;
 import erp.system.common.exception.BusinessException;
 import erp.system.common.exception.ErrorCode;
 import erp.system.department.dto.DepartmentCreateRequest;
@@ -43,6 +45,7 @@ public class DepartmentService {
     private final PayrollRepository payrollRepository;
     private final AttendanceRepository attendanceRepository;
     private final NotificationService notificationService;
+    private final AuditLogService auditLogService;
 
     public List<DepartmentResponse> getAll() {
         return departmentRepository.findAll().stream()
@@ -114,7 +117,7 @@ public class DepartmentService {
     }
 
     @Transactional
-    public DepartmentResponse create(DepartmentCreateRequest request) {
+    public DepartmentResponse create(DepartmentCreateRequest request, Long actorId) {
         Department parent = resolveParent(request.parentDepartmentId());
 
         Department department = Department.builder()
@@ -134,11 +137,18 @@ public class DepartmentService {
             );
         }
 
+        auditLogService.log(
+                actorId,
+                AuditLog.ACTION_DEPARTMENT_CREATE,
+                "부서 생성: " + saved.getDepartmentName() + (parent != null ? " (상위 부서: " + parent.getDepartmentName() + ")" : ""),
+                null
+        );
+
         return DepartmentResponse.from(saved);
     }
 
     @Transactional
-    public DepartmentResponse update(Long id, DepartmentUpdateRequest request) {
+    public DepartmentResponse update(Long id, DepartmentUpdateRequest request, Long actorId) {
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.DEPARTMENT_NOT_FOUND));
 
@@ -190,11 +200,20 @@ public class DepartmentService {
             );
         }
 
+        if (nameChanged || parentChanged) {
+            auditLogService.log(
+                    actorId,
+                    AuditLog.ACTION_DEPARTMENT_UPDATE,
+                    "부서 수정: " + previousName + (nameChanged ? " → " + request.departmentName() : ""),
+                    null
+            );
+        }
+
         return DepartmentResponse.from(department);
     }
 
     @Transactional
-    public void delete(Long id, Long reassignToDepartmentId) {
+    public void delete(Long id, Long reassignToDepartmentId, Long actorId) {
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.DEPARTMENT_NOT_FOUND));
 
@@ -227,6 +246,13 @@ public class DepartmentService {
         }
 
         department.markDeleted();
+
+        auditLogService.log(
+                actorId,
+                AuditLog.ACTION_DEPARTMENT_DELETE,
+                "부서 삭제: " + department.getDepartmentName(),
+                null
+        );
     }
 
     private Department resolveParent(Long parentDepartmentId) {

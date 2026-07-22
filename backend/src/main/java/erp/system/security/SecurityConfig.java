@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/employees/payroll-summary").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/employees/*").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/employees").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/employees/bulk").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/employees/*").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/employees/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/employees/**").hasRole("ADMIN")
@@ -101,6 +102,9 @@ public class SecurityConfig {
 
                         // 공통 마스터데이터(휴가유형/고용형태/부서/직급) 등록 - 관리자 전용
                         .requestMatchers(HttpMethod.POST, "/api/leave-types", "/api/employment-types", "/api/departments", "/api/positions").hasRole("ADMIN")
+
+                        // 관리자 활동 로그 - 관리자 전용
+                        .requestMatchers(HttpMethod.GET, "/api/audit-logs").hasRole("ADMIN")
 
                         // 공지사항 - 등록/수정/삭제는 관리자 전용, 조회는 로그인만 하면 가능
                         .requestMatchers(HttpMethod.POST, "/api/notices").hasRole("ADMIN")

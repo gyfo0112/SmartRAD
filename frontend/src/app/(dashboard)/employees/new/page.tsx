@@ -2,6 +2,7 @@
 
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import * as XLSX from "xlsx";
 import { EMPLOYEE_DOCUMENT_TYPE_OPTIONS, employeeDocumentTypeLabel } from "@/components/employee/documentTypes";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
@@ -263,6 +264,10 @@ export default function NewEmployeePage() {
   const [fieldErrors, setFieldErrors] = useState<Set<string>>(new Set());
   const [addressSearchOpen, setAddressSearchOpen] = useState(false);
   const addressLayerRef = useRef<HTMLDivElement>(null);
+  const [employeeNoToId, setEmployeeNoToId] = useState<Record<string, number>>({});
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{ total: number; success: number; failures: string[] } | null>(null);
+  const bulkInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -295,6 +300,11 @@ export default function NewEmployeePage() {
               value: String(e.employeeId),
             }))
           );
+          const noToId: Record<string, number> = {};
+          data.content.forEach((e: { employeeId: number; employeeNo: string }) => {
+            if (e.employeeNo) noToId[e.employeeNo] = e.employeeId;
+          });
+          setEmployeeNoToId(noToId);
         }
       } catch (err) {
         console.error("Failed to fetch department/position options", err);
@@ -466,6 +476,118 @@ export default function NewEmployeePage() {
     });
   };
 
+  const downloadBulkTemplate = () => {
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ["이름", "생년월일(YYYY-MM-DD)", "연락처", "이메일", "주소", "부서", "직급", "고용형태", "직속관리자 사번", "입사일(YYYY-MM-DD)"],
+      ["홍길동", "1995-03-02", "010-1234-5678", "hong@example.com", "서울특별시 종로구", "개발팀", "사원", "정규직", "E2026001", "2026-07-01"],
+    ]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "직원등록");
+    XLSX.writeFile(workbook, "직원_일괄등록_양식.xlsx");
+  };
+
+  const findOptionId = (options: Option[], label: string) => {
+    const normalized = label.trim().toLowerCase();
+    return options.find((option) => option.label.trim().toLowerCase() === normalized)?.value;
+  };
+
+  const handleBulkUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setBulkUploading(true);
+    setBulkResult(null);
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
+
+      if (rows.length === 0) {
+        setBulkResult({ total: 0, success: 0, failures: ["엑셀 파일에 데이터가 없습니다."] });
+        return;
+      }
+
+      const items: Record<string, unknown>[] = [];
+      const preValidationFailures: string[] = [];
+
+      rows.forEach((row, index) => {
+        const rowNo = index + 2;
+        const name = String(row["이름"] ?? "").trim();
+        const birthDate = String(row["생년월일(YYYY-MM-DD)"] ?? "").trim();
+        const departmentName = String(row["부서"] ?? "").trim();
+        const positionName = String(row["직급"] ?? "").trim();
+
+        if (!name || !birthDate || !departmentName || !positionName) {
+          preValidationFailures.push(`${rowNo}행: 이름/생년월일/부서/직급은 필수입니다.`);
+          return;
+        }
+
+        const departmentId = findOptionId(departments, departmentName);
+        const positionId = findOptionId(positions, positionName);
+        if (!departmentId) {
+          preValidationFailures.push(`${rowNo}행(${name}): "${departmentName}" 부서를 찾을 수 없습니다.`);
+          return;
+        }
+        if (!positionId) {
+          preValidationFailures.push(`${rowNo}행(${name}): "${positionName}" 직급을 찾을 수 없습니다.`);
+          return;
+        }
+
+        const employmentTypeName = String(row["고용형태"] ?? "").trim();
+        const managerEmployeeNo = String(row["직속관리자 사번"] ?? "").trim();
+        const hireDate = String(row["입사일(YYYY-MM-DD)"] ?? "").trim();
+
+        items.push({
+          departmentId: Number(departmentId),
+          positionId: Number(positionId),
+          employmentTypeId: employmentTypeName ? findOptionId(employmentTypes, employmentTypeName) ?? null : null,
+          managerId: managerEmployeeNo ? employeeNoToId[managerEmployeeNo] ?? null : null,
+          name,
+          birthDate,
+          phone: String(row["연락처"] ?? "").trim() || null,
+          email: String(row["이메일"] ?? "").trim() || null,
+          address: String(row["주소"] ?? "").trim() || null,
+          hireDate: hireDate || null,
+          password: birthDate.replaceAll("-", ""),
+        });
+      });
+
+      if (items.length === 0) {
+        setBulkResult({ total: rows.length, success: 0, failures: preValidationFailures });
+        return;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/employees/bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ items }),
+      });
+      if (!res.ok) throw new Error("직원 일괄등록에 실패했습니다.");
+
+      const results = (await res.json()) as { rowIndex: number; name: string; success: boolean; failureReason: string | null }[];
+      const successCount = results.filter((result) => result.success).length;
+      const failureMessages = results
+        .filter((result) => !result.success)
+        .map((result) => `${result.name || "(이름 없음)"}: ${result.failureReason}`);
+
+      setBulkResult({
+        total: rows.length,
+        success: successCount,
+        failures: [...preValidationFailures, ...failureMessages],
+      });
+    } catch (err) {
+      setBulkResult({
+        total: 0,
+        success: 0,
+        failures: [err instanceof Error ? err.message : "엑셀 파일을 처리하지 못했습니다."],
+      });
+    } finally {
+      setBulkUploading(false);
+    }
+  };
+
   return (
     <div className="max-w-[1600px] mx-auto pb-8">
       <div className="space-y-6">
@@ -475,6 +597,55 @@ export default function NewEmployeePage() {
             <p className="text-sm font-extrabold">신규 직원 등록</p>
             <p className="text-xs text-indigo-500">필수 항목을 모두 입력한 뒤 등록하기를 눌러 등록을 완료하세요.</p>
           </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-extrabold text-slate-900">엑셀로 여러 명 한 번에 등록</p>
+              <p className="mt-0.5 text-xs text-slate-400">양식을 내려받아 작성한 뒤 업로드하면 여러 직원을 한 번에 등록할 수 있습니다. (이름·생년월일·부서·직급은 필수)</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={downloadBulkTemplate}
+                className="h-9 rounded-lg border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 hover:bg-slate-50"
+              >
+                ⇩ 양식 다운로드
+              </button>
+              <input
+                ref={bulkInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                className="hidden"
+                onChange={handleBulkUpload}
+              />
+              <button
+                type="button"
+                onClick={() => bulkInputRef.current?.click()}
+                disabled={bulkUploading}
+                className="h-9 rounded-lg bg-indigo-600 px-4 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {bulkUploading ? "등록 중..." : "⇧ 엑셀 업로드"}
+              </button>
+            </div>
+          </div>
+
+          {bulkResult && (
+            <div className={`mt-4 rounded-lg border p-3 text-xs ${bulkResult.failures.length > 0 ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+              <p className="font-bold">
+                총 {bulkResult.total}건 중 {bulkResult.success}명 등록 성공
+                {bulkResult.failures.length > 0 ? `, ${bulkResult.failures.length}건 실패` : ""}
+              </p>
+              {bulkResult.failures.length > 0 && (
+                <ul className="mt-2 space-y-0.5 text-amber-700">
+                  {bulkResult.failures.map((message, index) => (
+                    <li key={index}>· {message}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
