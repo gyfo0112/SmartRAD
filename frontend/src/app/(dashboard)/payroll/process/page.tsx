@@ -811,8 +811,8 @@ export default function PayrollProcessPage() {
             </div>
           ))}
         </div>
-        <div className="flex gap-2">
-          <span className={`rounded-full px-4 py-2 text-sm font-bold ${overallPayStatus.className}`}>
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold ${overallPayStatus.className}`}>
             ● {overallPayStatus.text}
           </span>
           <button
