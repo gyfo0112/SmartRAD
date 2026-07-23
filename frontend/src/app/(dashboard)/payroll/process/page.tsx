@@ -752,6 +752,13 @@ export default function PayrollProcessPage() {
     },
   ];
 
+  const overallPayStatus =
+    rows.length === 0 || completedRows.length === 0
+      ? { text: "지급 대기", className: "bg-amber-50 text-amber-600" }
+      : waitingRows.length === 0 && holdRows.length === 0 && failedRows.length === 0
+        ? { text: "지급 완료", className: "bg-emerald-50 text-emerald-600" }
+        : { text: "지급 중", className: "bg-indigo-50 text-indigo-600" };
+
   return (
     <div className="payroll-statement-print mx-auto max-w-[1600px] space-y-5 text-slate-900">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -805,8 +812,8 @@ export default function PayrollProcessPage() {
           ))}
         </div>
         <div className="flex gap-2">
-          <span className="rounded-full bg-amber-50 px-4 py-2 text-sm font-bold text-amber-600">
-            ● 지급 대기
+          <span className={`rounded-full px-4 py-2 text-sm font-bold ${overallPayStatus.className}`}>
+            ● {overallPayStatus.text}
           </span>
           <button
             type="button"
@@ -1050,7 +1057,12 @@ export default function PayrollProcessPage() {
                   "처리일시",
                   "관리",
                 ].map((header) => (
-                  <th key={header} className="whitespace-nowrap px-4 py-3">
+                  <th
+                    key={header}
+                    className={`whitespace-nowrap px-4 py-3 ${
+                      ["지급총액", "공제합계", "실지급액"].includes(header) ? "text-right" : ""
+                    }`}
+                  >
                     {header}
                   </th>
                 ))}

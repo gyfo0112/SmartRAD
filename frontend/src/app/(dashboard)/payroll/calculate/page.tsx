@@ -825,6 +825,13 @@ export default function PayrollCalculatePage() {
     netPay: formatCurrency(totalNetPay),
   };
 
+  const overallCalcStatus =
+    payrollRows.length === 0 || completedCount === 0
+      ? { text: "계산 전", className: "bg-slate-100 text-slate-600" }
+      : pendingCount === 0
+        ? { text: "계산 완료", className: "bg-emerald-100 text-emerald-700" }
+        : { text: "계산 중", className: "bg-indigo-100 text-indigo-700" };
+
   const hasSelection = selectedRows.length > 0;
   const bulkButtonBaseClass =
     "rounded-lg border px-3 py-2 text-xs font-semibold disabled:cursor-not-allowed";
@@ -879,8 +886,8 @@ export default function PayrollCalculatePage() {
           ))}
         </div>
         <div className="flex gap-2">
-          <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">
-            ● 계산 전
+          <span className={`rounded-full px-4 py-2 text-sm font-bold ${overallCalcStatus.className}`}>
+            ● {overallCalcStatus.text}
           </span>
           <button
             type="button"
@@ -1082,7 +1089,14 @@ export default function PayrollCalculatePage() {
                   "검토상태",
                   "관리",
                 ].map((header) => (
-                  <th key={header} className="whitespace-nowrap px-4 py-3">
+                  <th
+                    key={header}
+                    className={`whitespace-nowrap px-4 py-3 ${
+                      ["기본급", "수당 합계", "상여금", "지급 총액", "공제 합계", "실지급액"].includes(header)
+                        ? "text-right"
+                        : ""
+                    }`}
+                  >
                     {header}
                   </th>
                 ))}
