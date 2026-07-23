@@ -47,6 +47,16 @@ public class NotificationService {
     }
 
     @Transactional
+    public void deleteNotification(Long notificationId, Long employeeId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTIFICATION_NOT_FOUND));
+        if (!notification.getRecipient().getEmployeeId().equals(employeeId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+        notificationRepository.delete(notification);
+    }
+
+    @Transactional
     public void notify(Long recipientId, String type, String title, String content, String linkUrl) {
         Employee recipient = employeeRepository.findById(recipientId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
