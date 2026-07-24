@@ -197,20 +197,20 @@ export default function EmployeeDashboard() {
     <div className="max-w-[1600px] mx-auto space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* 출퇴근 현황 위젯 */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
                 <ClockIcon className="w-6 h-6" />
               </div>
               <h2 className="text-lg font-bold text-gray-900">오늘 출퇴근 현황</h2>
             </div>
-            <div className="flex gap-2">
+            <div className="flex w-full sm:w-auto gap-2">
               <button
                 type="button"
                 onClick={handleCheckIn}
                 disabled={processing || summary?.todayAttendance?.checkInTime != null}
-                className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-[#5569e5] text-white hover:bg-blue-700 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-[#5569e5] text-white hover:bg-blue-700 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowRightOnRectangleIcon className="w-4 h-4" />
                 출근
@@ -219,7 +219,7 @@ export default function EmployeeDashboard() {
                 type="button"
                 onClick={handleCheckOut}
                 disabled={processing || !summary?.todayAttendance?.checkInTime || summary?.todayAttendance?.checkOutTime != null}
-                className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-[#a6aab2] text-white hover:bg-gray-500 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-[#a6aab2] text-white hover:bg-gray-500 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowLeftOnRectangleIcon className="w-4 h-4" />
                 퇴근
@@ -243,7 +243,7 @@ export default function EmployeeDashboard() {
         </div>
 
         {/* 연차 현황 위젯 */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-center">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <CalendarDaysIcon className="w-6 h-6" />
@@ -262,7 +262,7 @@ export default function EmployeeDashboard() {
 
       {/* 공지사항 위젯 */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MegaphoneIcon className="w-5 h-5 text-rose-500" />
             <h2 className="text-lg font-bold text-gray-900">최근 공지사항</h2>
@@ -282,7 +282,7 @@ export default function EmployeeDashboard() {
                 type="button"
                 key={notice.noticeId}
                 onClick={() => openNotice(notice.noticeId)}
-                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                className="w-full px-4 sm:px-5 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between text-left hover:bg-gray-50 transition-colors gap-2 sm:gap-0"
               >
                 <div className="flex items-center gap-2">
                   {notice.pinned && (
