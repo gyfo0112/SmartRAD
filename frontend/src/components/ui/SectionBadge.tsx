@@ -16,12 +16,12 @@ export default function SectionBadge({
 
   return (
     <div
-      className={`inline-flex h-[38px] items-center gap-2 rounded-full border px-[14px] text-[13px] font-bold ${variantClasses} ${className}`}
+      className={`inline-flex min-h-9 max-w-full items-center gap-2 rounded-full border px-3 py-2 text-[12px] font-bold leading-5 sm:px-[14px] sm:text-[13px] ${variantClasses} ${className}`}
     >
-      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-mint-soft">
+      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-mint-soft">
         <span className="h-2 w-2 rounded-full bg-brand-mint" />
       </span>
-      <span>{children}</span>
+      <span className="min-w-0 break-keep">{children}</span>
     </div>
   );
 }

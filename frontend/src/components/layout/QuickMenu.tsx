@@ -29,12 +29,12 @@ const buttonClassName = `
   shadow-[0_12px_28px_rgba(50,94,160,0.12)]
   transition-all duration-300 ease-out
 
-  hover:-translate-y-1
-  hover:border-transparent
-  hover:bg-gradient-to-br
-  hover:from-brand-primary-deep
-  hover:to-brand-primary-light
-  hover:shadow-[0_16px_32px_rgba(36,107,254,0.28)]
+  [@media(hover:hover)]:hover:-translate-y-1
+  [@media(hover:hover)]:hover:border-transparent
+  [@media(hover:hover)]:hover:bg-gradient-to-br
+  [@media(hover:hover)]:hover:from-brand-primary-deep
+  [@media(hover:hover)]:hover:to-brand-primary-light
+  [@media(hover:hover)]:hover:shadow-[0_16px_32px_rgba(36,107,254,0.28)]
 
   active:translate-y-0
   active:scale-95
@@ -63,8 +63,8 @@ const iconClassName = `
   object-contain
   transition-[filter] duration-300 ease-out
 
-  group-hover:brightness-0
-  group-hover:invert
+  [@media(hover:hover)]:group-hover:brightness-0
+  [@media(hover:hover)]:group-hover:invert
 
   group-active:brightness-0
   group-active:invert
@@ -81,16 +81,18 @@ export default function QuickMenu() {
   const handleScrollTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
     })
   }
 
   return (
     <aside
       aria-label="빠른 메뉴"
-      className="fixed right-5 bottom-10 z-40 hidden flex-col items-center lg:flex xl:right-8"
+      className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 [@media(max-height:700px)]:inset-x-auto [@media(max-height:700px)]:right-2 [@media(max-height:700px)]:px-0 lg:inset-x-auto lg:right-5 lg:bottom-10 lg:px-0 xl:right-8"
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-2 rounded-full border border-brand-border bg-white/95 p-2 shadow-[0_12px_28px_rgba(50,94,160,0.16)] backdrop-blur [@media(max-height:700px)]:flex-col lg:flex-col lg:gap-4 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
         {quickMenus.map((menu) => {
           const icon = (
             <Image

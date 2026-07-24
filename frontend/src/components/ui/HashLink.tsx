@@ -15,7 +15,13 @@ export default function HashLink({ href, scrollBlock = "center", onClick, ...pro
 
     if (target) {
       e.preventDefault();
-      target.scrollIntoView({ behavior: "smooth", block: scrollBlock });
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      target.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: scrollBlock,
+      });
       window.history.pushState(null, "", href);
     }
 

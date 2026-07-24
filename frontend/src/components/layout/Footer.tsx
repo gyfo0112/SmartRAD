@@ -57,9 +57,9 @@ const linkClassName =
 
 export default function Footer() {
   return (
-    <footer className="min-h-[420px] w-full bg-brand-soft py-10 pt-16">
+    <footer className="w-full bg-brand-soft pt-12 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:pt-14 lg:py-10 lg:pt-16">
       <Container>
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[1.3fr_repeat(4,1fr)]">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4 xl:grid-cols-[1.3fr_repeat(4,1fr)]">
           <div className="sm:col-span-2 lg:col-span-4 xl:col-span-1">
             <Link
               href="/"
@@ -77,7 +77,7 @@ export default function Footer() {
             <div className="mt-6 space-y-4 text-[12px] font-semibold leading-5 text-brand-text">
               <div>
                 <p className="font-extrabold">ADDRESS</p>
-                <address className="break-keep not-italic">
+                <address className="break-words not-italic">
                   서울특별시 강남구 테헤란로 000, 00층
                 </address>
               </div>
@@ -123,13 +123,13 @@ export default function Footer() {
         <div className="mt-11 border-t border-brand-border">
           <nav
             aria-label="정책 및 약관"
-            className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-[12px]"
+            className="mt-7 flex flex-wrap gap-x-4 gap-y-3 text-[12px] sm:gap-x-6"
           >
             {policies.map((policy) => (
               <Link
                 key={policy.label}
                 href={policy.href}
-                className="font-extrabold text-brand-text transition-colors duration-300 hover:text-brand-primary focus-visible:text-brand-primary focus-visible:outline-none"
+                className="break-keep font-extrabold text-brand-text transition-colors duration-300 hover:text-brand-primary focus-visible:text-brand-primary focus-visible:outline-none"
               >
                 {policy.label}
               </Link>
@@ -137,7 +137,7 @@ export default function Footer() {
           </nav>
 
           <div className="mt-[22px] flex flex-col gap-3 text-[12px] font-semibold text-brand-muted sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-            <p className="break-keep">
+            <p className="min-w-0 break-words">
               (주)스마트에이치알 · 대표이사 홍길동 · 사업자등록번호 000-00-00000 · © 2026 SmartHR. All rights reserved.
             </p>
             <p className="shrink-0">
