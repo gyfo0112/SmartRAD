@@ -160,6 +160,7 @@ body {
 
   .notice-list-header,
   .notice-pagination,
+  .employee-notice-pagination,
   .payroll-detail-footer {
     align-items: stretch;
     flex-direction: column;
@@ -167,6 +168,12 @@ body {
 
   .notice-table-scroll {
     overflow-x: auto;
+  }
+
+  .employee-notice-pagination > div {
+    justify-content: center;
+    margin-right: 0;
+    width: 100%;
   }
 
   .payroll-statement-page h2 {
