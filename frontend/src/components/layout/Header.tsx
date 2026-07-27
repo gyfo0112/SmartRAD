@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Container from "@/components/ui/Container";
 import Logo from "@/components/ui/Logo";
 import HashLink from "@/components/ui/HashLink";
+import { startFreeTrial } from "@/lib/guestTrial";
 
 const navigation: { label: string; href: `#${string}`; scrollBlock?: ScrollLogicalPosition }[] = [
   { label: "주요 기능", href: "#features" },
@@ -15,6 +16,17 @@ const navigation: { label: string; href: `#${string}`; scrollBlock?: ScrollLogic
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isTrialLoading, setIsTrialLoading] = useState(false);
+
+  const handleFreeTrial = async () => {
+    setIsTrialLoading(true);
+    try {
+      await startFreeTrial();
+    } catch {
+      window.alert("무료체험 접속에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      setIsTrialLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -83,6 +95,14 @@ export default function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <button
+            type="button"
+            onClick={handleFreeTrial}
+            disabled={isTrialLoading}
+            className="hidden h-10 items-center justify-center whitespace-nowrap rounded-full border border-brand-primary px-4 text-sm font-semibold text-brand-primary transition-colors duration-300 ease-out hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/25 disabled:cursor-not-allowed disabled:opacity-60 sm:flex md:h-12 md:px-5 md:text-base motion-reduce:transition-none"
+          >
+            {isTrialLoading ? "접속 중..." : "무료체험하기"}
+          </button>
           <Link
             href="/login"
             className="flex h-10 min-w-[72px] items-center justify-center whitespace-nowrap rounded-full bg-brand-primary px-4 text-sm font-semibold transition-colors duration-300 ease-out hover:bg-brand-primary-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/25 md:h-12 md:w-[104px] md:px-0 md:text-base motion-reduce:transition-none"
@@ -145,6 +165,17 @@ export default function Header() {
                 {item.label}
               </HashLink>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleFreeTrial();
+              }}
+              disabled={isTrialLoading}
+              className="flex min-h-12 w-full items-center rounded-xl px-3 text-[15px] font-extrabold text-brand-primary transition-colors hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isTrialLoading ? "접속 중..." : "무료체험하기"}
+            </button>
           </nav>
         </>
       ) : null}

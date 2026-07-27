@@ -1,7 +1,11 @@
+"use client"
+
 import Image from "next/image"
+import { useState } from "react"
 import Container from "@/components/ui/Container"
 import HashLink from "@/components/ui/HashLink"
 import SectionBadge from "@/components/ui/SectionBadge"
+import { startFreeTrial } from "@/lib/guestTrial"
 
 const highlights = [
   { title: "4 Core", description: "핵심 HR 기능 통합" },
@@ -16,6 +20,18 @@ const highlights = [
 ]
 
 export default function Hero() {
+  const [isTrialLoading, setIsTrialLoading] = useState(false)
+
+  const handleFreeTrial = async () => {
+    setIsTrialLoading(true)
+    try {
+      await startFreeTrial()
+    } catch {
+      window.alert("무료체험 접속에 실패했습니다. 잠시 후 다시 시도해주세요.")
+      setIsTrialLoading(false)
+    }
+  }
+
   return (
     <section className="w-full bg-[radial-gradient(circle_at_82%_8%,var(--color-brand-soft-strong)_0%,#F5F9FF_26%,#FFFFFF_58%)]">
       <Container className="flex flex-col items-center gap-10 py-14 sm:gap-12 sm:py-20 lg:flex-row lg:gap-16">
@@ -48,12 +64,16 @@ export default function Hero() {
           </p>
 
           <div className="mt-8 grid animate-fade-in-up grid-cols-1 gap-3 [animation-delay:280ms] min-[480px]:grid-cols-2 sm:mt-[42px] sm:gap-[14px]">
-            <HashLink
-              href="#features"
-              className="flex h-[52px] w-full items-center justify-center whitespace-nowrap rounded-full bg-brand-primary px-5 text-[14px] font-extrabold transition-colors duration-300 ease-out hover:bg-brand-primary-dark sm:h-[54px] sm:px-8 sm:text-[15px] motion-reduce:transition-none"
+            <button
+              type="button"
+              onClick={handleFreeTrial}
+              disabled={isTrialLoading}
+              className="flex h-[52px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brand-primary px-5 text-[14px] font-extrabold transition-colors duration-300 ease-out hover:bg-brand-primary-dark disabled:cursor-not-allowed disabled:opacity-70 sm:h-[54px] sm:px-8 sm:text-[15px] motion-reduce:transition-none"
             >
-              <span className="text-white">주요 기능 보기</span>
-            </HashLink>
+              <span className="text-white">
+                {isTrialLoading ? "체험 계정 접속 중..." : "무료체험하기"}
+              </span>
+            </button>
             <HashLink
               href="#contact"
               scrollBlock="start"
