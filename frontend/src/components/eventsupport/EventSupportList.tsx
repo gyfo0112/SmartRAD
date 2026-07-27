@@ -137,7 +137,7 @@ export default function EventSupportList({ refreshKey, onActionComplete }: { ref
   return (
     <div className="bg-white rounded-xl border border-gray-200 flex flex-col min-h-0 flex-1">
       <div className="p-5 border-b border-gray-200">
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex flex-col items-stretch justify-between gap-4 lg:flex-row lg:items-center">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold text-gray-900">경조비 신청 내역</h2>
             <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
@@ -145,8 +145,8 @@ export default function EventSupportList({ refreshKey, onActionComplete }: { ref
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="relative sm:col-span-2 lg:col-span-1">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
@@ -154,13 +154,13 @@ export default function EventSupportList({ refreshKey, onActionComplete }: { ref
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
                 placeholder="신청자명 검색..."
-                className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 lg:w-64"
               />
             </div>
             <select
               value={eventType}
               onChange={(e) => { setEventType(e.target.value); setPage(0); }}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">경조사 유형</option>
               {EVENT_TYPE_OPTIONS.map((option) => (
@@ -170,7 +170,7 @@ export default function EventSupportList({ refreshKey, onActionComplete }: { ref
             <select
               value={status}
               onChange={(e) => { setStatus(e.target.value); setPage(0); }}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">처리 상태</option>
               {EVENT_STATUS_OPTIONS.map((option) => (
@@ -182,8 +182,8 @@ export default function EventSupportList({ refreshKey, onActionComplete }: { ref
         {actionError && <p className="mt-2 text-sm font-medium text-rose-500">{actionError}</p>}
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="hidden flex-1 overflow-auto lg:block">
+        <table className="w-full min-w-[1200px] border-collapse text-left">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
               {["신청일", "신청자", "부서", "경조사 유형", "경조사 일자", "사유", "지원 금액", "상태", "첨부", "관리"].map((title) => (
@@ -247,11 +247,84 @@ export default function EventSupportList({ refreshKey, onActionComplete }: { ref
         </table>
       </div>
 
-      <div className="p-4 border-t border-gray-200 flex items-center justify-between">
+      <div className="divide-y divide-gray-200 lg:hidden">
+        {loading ? (
+          <p className="px-4 py-12 text-center text-sm text-gray-500">로딩 중...</p>
+        ) : rows.length === 0 ? (
+          <div className="px-4 py-12 text-center text-gray-500">
+            <p className="font-medium text-gray-900">데이터가 없습니다</p>
+            <p className="mt-1 text-sm">해당하는 경조비 신청 내역이 없습니다.</p>
+          </div>
+        ) : (
+          rows.map((row: EventSupportResponse) => {
+            const badge = eventStatusBadge(row.status);
+            return (
+              <article key={row.eventSupportId} className="space-y-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-bold text-gray-900">{row.employeeName}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {row.departmentName || "-"} · 신청 {row.createdAt.substring(0, 10)}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${badge.className}`}>
+                    {badge.label}
+                  </span>
+                </div>
+
+                <dl className="grid grid-cols-2 gap-3 rounded-lg bg-gray-50 p-3 text-xs">
+                  <div>
+                    <dt className="text-gray-400">경조사 유형</dt>
+                    <dd className="mt-1 font-semibold text-gray-700">{eventTypeLabel(row.eventType)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-gray-400">경조사 일자</dt>
+                    <dd className="mt-1 font-semibold text-gray-700">{row.eventDate}</dd>
+                  </div>
+                  <div className="col-span-2">
+                    <dt className="text-gray-400">사유</dt>
+                    <dd className="mt-1 break-words font-medium text-gray-700">{row.reason || "-"}</dd>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-between border-t border-gray-200 pt-2">
+                    <dt className="font-semibold text-gray-500">지원 금액</dt>
+                    <dd className="font-bold text-gray-900">{formatAmount(getPolicyAmount(row.eventType))}</dd>
+                  </div>
+                </dl>
+
+                <div className="flex items-center justify-between gap-3">
+                  {row.attachmentUrl ? (
+                    <a
+                      href={resolveFileUrl(row.attachmentUrl)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-medium text-blue-600 hover:underline"
+                    >
+                      첨부파일 보기
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-400">첨부파일 없음</span>
+                  )}
+                  {row.status === "PENDING" && (
+                    <div className="flex gap-1.5">
+                      <button type="button" onClick={() => runAction(row.eventSupportId, "approve")} className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">승인</button>
+                      <button type="button" onClick={() => runAction(row.eventSupportId, "reject")} className="rounded-md border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">반려</button>
+                    </div>
+                  )}
+                  {row.status === "APPROVED" && (
+                    <button type="button" onClick={() => runAction(row.eventSupportId, "pay")} className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">지급 처리</button>
+                  )}
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
+
+      <div className="flex flex-col items-stretch gap-3 border-t border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-gray-500">
           총 {totalElements}건 중 {rows.length ? page * PAGE_SIZE + 1 : 0}-{page * PAGE_SIZE + rows.length} 표시
         </p>
-        <div className="flex gap-1 mr-20">
+        <div className="flex justify-center gap-1 sm:mr-20">
           <button
             disabled={page === 0}
             onClick={() => setPage((p) => p - 1)}
