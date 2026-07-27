@@ -229,9 +229,12 @@ export default function LeavePoliciesPage() {
             <p className="px-4 py-8 text-center text-sm text-slate-400">등록된 휴가정책이 없습니다.</p>
           ) : policies.map((policy) => (
             <article key={policy.leavePolicyId} className="space-y-3 p-4">
-              <div className="flex min-w-0 items-start justify-between gap-3">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <h2 className="min-w-0 break-words font-semibold text-slate-800">{policy.positionName ?? "(삭제된 직책)"}</h2>
-                <button type="button" onClick={() => deletePolicy(policy)} className="shrink-0 rounded-md border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50">삭제</button>
+                <div className="grid shrink-0 grid-cols-2 gap-2 sm:flex">
+                  <button type="button" onClick={() => openModal(policy)} className="min-h-10 rounded-md border border-indigo-200 px-3 py-2 text-xs font-semibold text-indigo-600 hover:bg-indigo-50">수정</button>
+                  <button type="button" onClick={() => deletePolicy(policy)} className="min-h-10 rounded-md border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50">삭제</button>
+                </div>
               </div>
               <dl className="grid grid-cols-2 gap-3 text-sm">
                 <div><dt className="text-xs text-slate-400">연차 발생일수</dt><dd className="mt-1 font-medium text-slate-700">{policy.annualLeaveDays ?? "-"}일</dd></div>
@@ -261,7 +264,7 @@ export default function LeavePoliciesPage() {
                 value={positionId}
                 onChange={(event) => setPositionId(event.target.value)}
                 disabled={!!editingPolicy}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400 disabled:bg-slate-50 disabled:text-slate-500"
+                className="min-w-0 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400 disabled:bg-slate-50 disabled:text-slate-500"
               >
                 {editingPolicy ? (
                   <option value={editingPolicy.positionId || ""}>{editingPolicy.positionName}</option>
@@ -274,14 +277,14 @@ export default function LeavePoliciesPage() {
                 )}
               </select>
             </label>
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
               <label className="block space-y-1.5 text-sm font-semibold text-slate-700">
                 <span>연차 발생일수</span>
                 <input
                   value={annualLeaveDays}
                   onChange={(event) => setAnnualLeaveDays(event.target.value)}
                   inputMode="numeric"
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400"
+                  className="min-w-0 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400"
                 />
               </label>
               <label className="block space-y-1.5 text-sm font-semibold text-slate-700">
@@ -290,7 +293,7 @@ export default function LeavePoliciesPage() {
                   value={maxCarryOverDays}
                   onChange={(event) => setMaxCarryOverDays(event.target.value)}
                   inputMode="numeric"
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400"
+                  className="min-w-0 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400"
                 />
               </label>
             </div>
@@ -308,7 +311,7 @@ export default function LeavePoliciesPage() {
               <input
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400"
+                className="min-w-0 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-400"
                 placeholder="선택 입력"
               />
             </label>

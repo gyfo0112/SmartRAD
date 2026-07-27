@@ -59,6 +59,8 @@ export default function AttendanceTable({ rows, departments, date, loading, erro
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
   const pageRows = filteredRows.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  const visiblePages = Array.from({ length: totalPages }, (_, index) => index)
+    .filter((index) => totalPages <= 5 || Math.abs(index - currentPage) <= 2);
 
   useEffect(() => { onFilteredRowsChange(filteredRows); }, [filteredRows, onFilteredRowsChange]);
 
@@ -103,7 +105,7 @@ export default function AttendanceTable({ rows, departments, date, loading, erro
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[980px] text-left text-sm">
           <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
             <tr>
@@ -142,12 +144,44 @@ export default function AttendanceTable({ rows, departments, date, loading, erro
         </table>
       </div>
 
+      <div className="divide-y divide-gray-100 md:hidden">
+        {!loading && !error && pageRows.length > 0 && <label className="flex min-h-11 items-center gap-2 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-600"><input type="checkbox" checked={allChecked} onChange={toggleAll} aria-label="현재 페이지 전체 선택" className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />현재 페이지 전체 선택</label>}
+        {loading ? <p className="p-8 text-center text-sm text-gray-500">로딩 중...</p>
+          : error ? <p className="p-8 text-center text-sm text-rose-600">{error}</p>
+          : pageRows.length === 0 ? <p className="p-8 text-center text-sm text-gray-500">조회된 근태 내역이 없습니다.</p>
+          : pageRows.map((row) => (
+            <article key={row.attendanceId} className="p-4">
+              <div className="flex min-w-0 items-start gap-3">
+                <input type="checkbox" checked={checkedIds.includes(row.attendanceId)} onChange={() => setCheckedIds((ids) => ids.includes(row.attendanceId) ? ids.filter((id) => id !== row.attendanceId) : [...ids, row.attendanceId])} aria-label={`${row.employeeName} 선택`} className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-gray-900">{row.employeeName}</p>
+                      <p className="mt-0.5 truncate text-xs text-gray-400">{row.employeeNo || "-"} · {row.departmentName || "-"} · {row.positionName || "-"}</p>
+                    </div>
+                    <span className={`inline-flex shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${badgeStyles[row.normalizedStatus]}`}>{attendanceStatusLabel(row)}</span>
+                  </div>
+                  <dl className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-gray-50 p-3 text-center">
+                    <div><dt className="text-[11px] text-gray-400">출근</dt><dd className="mt-1 whitespace-nowrap text-sm font-semibold text-gray-700">{formatTime(row.checkInTime)}</dd></div>
+                    <div><dt className="text-[11px] text-gray-400">퇴근</dt><dd className="mt-1 whitespace-nowrap text-sm font-semibold text-gray-700">{formatTime(row.checkOutTime)}</dd></div>
+                    <div><dt className="text-[11px] text-gray-400">근무</dt><dd className="mt-1 whitespace-nowrap text-sm font-semibold text-gray-700">{formatMinutes(row.workMinutes)}</dd></div>
+                  </dl>
+                  <div className="mt-3 min-w-0 text-sm text-gray-500">
+                    {row.reason ? <p className="truncate" title={row.reason}>{row.reason}</p> : <p>-</p>}
+                    {row.attachmentUrl && <a href={`${(process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api").replace(/\/api\/?$/, "")}${row.attachmentUrl}`} target="_blank" rel="noreferrer" className="mt-1 inline-block max-w-full truncate text-xs text-blue-600 hover:underline">{row.attachmentName || "첨부파일"}</a>}
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+      </div>
+
       <div className="flex flex-col gap-3 border-t border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-sm text-gray-500">{filteredRows.length ? `${currentPage * PAGE_SIZE + 1}-${Math.min((currentPage + 1) * PAGE_SIZE, filteredRows.length)} / 총 ${filteredRows.length}명` : "0 / 총 0명"}</span>
-        <div className="flex items-center gap-1 mr-20">
-          <button type="button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)} aria-label="이전 페이지" className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"><ChevronLeftIcon className="h-4 w-4" /></button>
-          {Array.from({ length: totalPages }, (_, index) => index).map((index) => <button type="button" key={index} onClick={() => setPage(index)} className={`h-8 min-w-8 rounded-md px-2 text-sm font-medium ${currentPage === index ? 'bg-blue-600 text-white' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{index + 1}</button>)}
-          <button type="button" disabled={currentPage >= totalPages - 1} onClick={() => setPage(currentPage + 1)} aria-label="다음 페이지" className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"><ChevronRightIcon className="h-4 w-4" /></button>
+        <div className="flex w-full max-w-full items-center justify-center gap-1 overflow-x-auto sm:w-auto sm:justify-start">
+          <button type="button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)} aria-label="이전 페이지" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"><ChevronLeftIcon className="h-4 w-4" /></button>
+          {visiblePages.map((index) => <button type="button" key={index} onClick={() => setPage(index)} className={`h-8 min-w-8 shrink-0 rounded-md px-2 text-sm font-medium ${currentPage === index ? 'bg-blue-600 text-white' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{index + 1}</button>)}
+          <button type="button" disabled={currentPage >= totalPages - 1} onClick={() => setPage(currentPage + 1)} aria-label="다음 페이지" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"><ChevronRightIcon className="h-4 w-4" /></button>
         </div>
       </div>
     </section>
