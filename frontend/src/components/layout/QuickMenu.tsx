@@ -2,7 +2,10 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import HashLink from "@/components/ui/HashLink"
+
+const SCROLL_TOP_THRESHOLD = 400
 
 const quickMenus = [
   {
@@ -78,6 +81,17 @@ const iconClassName = `
 `
 
 export default function QuickMenu() {
+  const [showScrollTop, setShowScrollTop] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > SCROLL_TOP_THRESHOLD)
+    }
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   const handleScrollTop = () => {
     window.scrollTo({
       top: 0,
@@ -90,7 +104,7 @@ export default function QuickMenu() {
   return (
     <aside
       aria-label="빠른 메뉴"
-      className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 [@media(max-height:700px)]:inset-x-auto [@media(max-height:700px)]:right-2 [@media(max-height:700px)]:px-0 lg:inset-x-auto lg:right-5 lg:bottom-10 lg:px-0 xl:right-8"
+      className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex animate-fade-in-up justify-center px-4 [animation-delay:600ms] [@media(max-height:700px)]:inset-x-auto [@media(max-height:700px)]:right-2 [@media(max-height:700px)]:px-0 lg:inset-x-auto lg:right-5 lg:bottom-10 lg:px-0 xl:right-8"
     >
       <div className="flex items-center gap-2 rounded-full border border-brand-border bg-white/95 p-2 shadow-[0_12px_28px_rgba(50,94,160,0.16)] backdrop-blur [@media(max-height:700px)]:flex-col lg:flex-col lg:gap-4 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
         {quickMenus.map((menu) => {
@@ -130,8 +144,14 @@ export default function QuickMenu() {
         <button
           type="button"
           aria-label="페이지 맨 위로 이동"
+          aria-hidden={!showScrollTop}
+          tabIndex={showScrollTop ? 0 : -1}
           onClick={handleScrollTop}
-          className={buttonClassName}
+          className={`${buttonClassName} duration-300 ${
+            showScrollTop
+              ? "opacity-100 scale-100"
+              : "pointer-events-none opacity-0 scale-75"
+          }`}
         >
           <Image
             src="/icons/quick-menu/top.svg"

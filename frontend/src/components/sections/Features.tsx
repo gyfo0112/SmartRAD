@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useState } from "react"
 import Container from "@/components/ui/Container"
 import SectionBadge from "@/components/ui/SectionBadge"
+import CountUp from "@/components/ui/CountUp"
 
 type Feature = {
   number: string
@@ -244,7 +245,9 @@ export default function Features() {
                   key={stat.label}
                   className="flex min-h-[88px] flex-col justify-center rounded-[14px] bg-[#164BAF]/65 px-4 py-4"
                 >
-                  <p className="text-[18px] font-extrabold">{stat.value}</p>
+                  <p className="text-[18px] font-extrabold">
+                    <CountUp value={stat.value} />
+                  </p>
 
                   <p className="mt-2 text-[11px] font-semibold text-white/70">
                     {stat.label}

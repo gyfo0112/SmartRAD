@@ -1,6 +1,7 @@
 import Container from "@/components/ui/Container";
 import HashLink from "@/components/ui/HashLink";
 import SectionBadge from "@/components/ui/SectionBadge";
+import CountUp from "@/components/ui/CountUp";
 
 const plans = [
   {
@@ -53,7 +54,7 @@ export default function Pricing() {
               <span className="w-fit rounded-full bg-brand-soft-strong px-3 py-2 text-[11px] font-bold text-brand-primary transition-colors duration-300 ease-out group-hover:bg-white/15 group-hover:text-white motion-reduce:transition-none">{plan.badge}</span>
               <h3 className="mt-6 text-[27px] font-extrabold text-brand-navy transition-colors duration-300 ease-out group-hover:text-white motion-reduce:transition-none">{plan.title}</h3>
               <p className="mt-3 text-[14px] font-semibold leading-6 text-brand-text transition-colors duration-300 ease-out group-hover:text-white/75 lg:min-h-[48px] motion-reduce:transition-none">{plan.description}</p>
-              <p className="mt-8 flex min-w-0 flex-wrap items-end gap-1 text-brand-navy transition-colors duration-300 ease-out group-hover:text-white lg:mt-12 motion-reduce:transition-none"><span className="break-keep text-[34px] font-extrabold tracking-[-1.5px] sm:text-[38px] lg:text-[42px] lg:tracking-[-2px]">{plan.price}</span>{plan.suffix && <span className="shrink-0 pb-2 text-[12px] font-bold text-brand-muted transition-colors duration-300 ease-out group-hover:text-white/70 motion-reduce:transition-none">{plan.suffix}</span>}</p>
+              <p className="mt-8 flex min-w-0 flex-wrap items-end gap-1 text-brand-navy transition-colors duration-300 ease-out group-hover:text-white lg:mt-12 motion-reduce:transition-none"><CountUp value={plan.price} className="break-keep text-[34px] font-extrabold tracking-[-1.5px] sm:text-[38px] lg:text-[42px] lg:tracking-[-2px]" />{plan.suffix && <span className="shrink-0 pb-2 text-[12px] font-bold text-brand-muted transition-colors duration-300 ease-out group-hover:text-white/70 motion-reduce:transition-none">{plan.suffix}</span>}</p>
               <ul className="mt-6 space-y-3 text-[14px] font-bold text-brand-text transition-colors duration-300 ease-out group-hover:text-white/85 motion-reduce:transition-none">
                 {plan.features.map((feature) => <li key={feature}>{`✓ ${feature}`}</li>)}
               </ul>
