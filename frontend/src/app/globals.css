@@ -94,6 +94,16 @@ body {
   }
 }
 
+@keyframes pulse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 104, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(40, 104, 246, 0.1);
+  }
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -104,6 +114,10 @@ body {
 
 .animate-soft-pulse {
   animation: soft-pulse 5s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2.6s ease-in-out infinite;
 }
 
 /* Scroll-linked reveal: progressive enhancement only. Content stays fully
@@ -122,6 +136,7 @@ body {
   .animate-fade-in-up,
   .animate-hero-float,
   .animate-soft-pulse,
+  .animate-pulse-ring,
   .reveal-on-scroll {
     animation: none !important;
     opacity: 1 !important;

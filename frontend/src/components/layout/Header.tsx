@@ -17,6 +17,14 @@ const navigation: { label: string; href: `#${string}`; scrollBlock?: ScrollLogic
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTrialLoading, setIsTrialLoading] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 8);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleFreeTrial = async () => {
     setIsTrialLoading(true);
@@ -62,7 +70,13 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 h-16 w-full bg-white shadow-[0_1px_0_rgba(16,42,80,0.06)] md:h-[84px]">
+    <header
+      className={`sticky top-0 z-50 h-16 w-full transition-[box-shadow,background-color,backdrop-filter] duration-300 ease-out md:h-[84px] motion-reduce:transition-none ${
+        isScrolled
+          ? "bg-white/85 shadow-[0_8px_30px_rgba(16,42,80,0.12)] backdrop-blur-md"
+          : "bg-white shadow-[0_1px_0_rgba(16,42,80,0.06)]"
+      }`}
+    >
       <Container className="flex h-full items-center justify-between">
         <Link
           href="/"

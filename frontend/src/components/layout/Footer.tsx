@@ -59,7 +59,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-brand-soft pt-12 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:pt-14 lg:py-10 lg:pt-16">
       <Container>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4 xl:grid-cols-[1.3fr_repeat(4,1fr)]">
+        <div className="reveal-on-scroll grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4 xl:grid-cols-[1.3fr_repeat(4,1fr)]">
           <div className="sm:col-span-2 lg:col-span-4 xl:col-span-1">
             <Link
               href="/"
@@ -120,7 +120,10 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-11 border-t border-brand-border">
+        <div
+          style={{ animationDelay: "100ms" }}
+          className="reveal-on-scroll mt-11 border-t border-brand-border"
+        >
           <nav
             aria-label="정책 및 약관"
             className="mt-7 flex flex-wrap gap-x-4 gap-y-3 text-[12px] sm:gap-x-6"

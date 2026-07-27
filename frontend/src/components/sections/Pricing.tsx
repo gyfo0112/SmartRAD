@@ -21,6 +21,7 @@ const plans = [
     suffix: "/ 월",
     features: ["조직·구성원 관리", "근태·휴가 승인", "급여 정산 자동화"],
     button: "시작하기",
+    recommended: true,
   },
   {
     badge: "Enterprise",
@@ -50,7 +51,17 @@ export default function Pricing() {
             <article
               key={plan.badge}
               style={{ animationDelay: `${index * 100}ms` }}
-              className="reveal-on-scroll group flex min-w-0 flex-col rounded-[26px] border border-brand-border bg-white p-5 text-brand-navy transition-all duration-300 ease-out sm:p-8 md:last:col-span-2 md:last:mx-auto md:last:w-full md:last:max-w-[calc(50%_-_0.75rem)] lg:min-h-[528px] lg:p-9 lg:last:col-span-1 lg:last:max-w-none [@media(hover:hover)]:hover:z-10 [@media(hover:hover)]:hover:border-brand-primary [@media(hover:hover)]:hover:bg-gradient-to-br [@media(hover:hover)]:hover:from-brand-primary-deep [@media(hover:hover)]:hover:via-[#246BFE] [@media(hover:hover)]:hover:to-brand-primary-light [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:shadow-xl [@media(hover:hover)]:md:hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none">
+              className={`reveal-on-scroll group relative flex min-w-0 flex-col rounded-[26px] border bg-white p-5 text-brand-navy transition-all duration-300 ease-out sm:p-8 md:last:col-span-2 md:last:mx-auto md:last:w-full md:last:max-w-[calc(50%_-_0.75rem)] lg:min-h-[528px] lg:p-9 lg:last:col-span-1 lg:last:max-w-none [@media(hover:hover)]:hover:z-10 [@media(hover:hover)]:hover:border-brand-primary [@media(hover:hover)]:hover:bg-gradient-to-br [@media(hover:hover)]:hover:from-brand-primary-deep [@media(hover:hover)]:hover:via-[#246BFE] [@media(hover:hover)]:hover:to-brand-primary-light [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:shadow-xl [@media(hover:hover)]:md:hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none ${
+                plan.recommended
+                  ? "animate-pulse-ring border-brand-primary"
+                  : "border-brand-border"
+              }`}
+            >
+              {plan.recommended && (
+                <span className="absolute -top-3.5 left-1/2 w-fit -translate-x-1/2 whitespace-nowrap rounded-full bg-brand-primary px-4 py-1.5 text-[11px] font-extrabold text-white shadow-[0_6px_16px_rgba(36,107,254,0.35)]">
+                  🔥 가장 많이 선택하는 플랜
+                </span>
+              )}
               <span className="w-fit rounded-full bg-brand-soft-strong px-3 py-2 text-[11px] font-bold text-brand-primary transition-colors duration-300 ease-out group-hover:bg-white/15 group-hover:text-white motion-reduce:transition-none">{plan.badge}</span>
               <h3 className="mt-6 text-[27px] font-extrabold text-brand-navy transition-colors duration-300 ease-out group-hover:text-white motion-reduce:transition-none">{plan.title}</h3>
               <p className="mt-3 text-[14px] font-semibold leading-6 text-brand-text transition-colors duration-300 ease-out group-hover:text-white/75 lg:min-h-[48px] motion-reduce:transition-none">{plan.description}</p>
