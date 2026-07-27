@@ -997,6 +997,16 @@ export default function PayrollProcessPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-bold">직원별 급여 지급 현황</h2>
+            <label className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 lg:hidden">
+              <input
+                type="checkbox"
+                checked={allPageSelected}
+                onChange={toggleSelectAllOnPage}
+                aria-label="현재 페이지 전체 선택"
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              전체 선택
+            </label>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
               총 {filteredRows.length.toLocaleString("ko-KR")}명
             </span>
@@ -1041,8 +1051,8 @@ export default function PayrollProcessPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+        <div className="hidden overflow-x-auto lg:block">
+          <table className="w-full min-w-[1500px] text-left text-sm">
             <thead className="bg-slate-50 text-xs font-bold text-slate-500">
               <tr>
                 <th className="whitespace-nowrap px-4 py-3">
@@ -1265,6 +1275,135 @@ export default function PayrollProcessPage() {
           </table>
         </div>
 
+<div className="divide-y divide-slate-100 lg:hidden">
+          {loading && (
+            <p className="px-4 py-12 text-center text-sm font-semibold text-slate-400">
+              급여 지급 데이터를 불러오는 중입니다.
+            </p>
+          )}
+          {!loading && errorMessage && (
+            <p className="px-4 py-12 text-center text-sm font-semibold text-rose-500">
+              {errorMessage}
+            </p>
+          )}
+          {!loading &&
+            !errorMessage &&
+            paginatedRows.map((row) => (
+              <article
+                key={row.payrollId}
+                className={`space-y-3 px-4 py-4 ${
+                  row.paymentStatus === "지급실패"
+                    ? "bg-orange-50/60"
+                    : row.paymentStatus === "지급대기"
+                      ? "bg-indigo-50/60"
+                      : row.paymentStatus === "지급보류"
+                        ? "bg-violet-50/60"
+                        : "bg-white"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <label className="flex min-w-0 items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(row.payrollId)}
+                      onChange={() => toggleRowSelected(row.payrollId)}
+                      aria-label={`${row.name} 선택`}
+                      className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300"
+                    />
+                    <span className="min-w-0">
+                      <span className="block truncate font-bold text-slate-900">
+                        {row.name}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        {row.employeeNo} · {row.department}
+                      </span>
+                    </span>
+                  </label>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${statusPillClass(row.paymentStatus)}`}
+                  >
+                    ● {row.paymentStatus}
+                  </span>
+                </div>
+
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-3 rounded-lg bg-white/70 p-3 text-xs">
+                  <div>
+                    <dt className="text-slate-400">지급 총액</dt>
+                    <dd className="mt-1 font-semibold text-slate-700">
+                      {formatCurrency(row.grossPay)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-slate-400">공제 합계</dt>
+                    <dd className="mt-1 font-semibold text-slate-700">
+                      {formatCurrency(row.deduction)}
+                    </dd>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-between border-t border-slate-200 pt-2">
+                    <dt className="font-semibold text-slate-500">실지급액</dt>
+                    <dd className="font-extrabold text-teal-600">
+                      {formatCurrency(row.netPay)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-slate-400">급여 계좌</dt>
+                    <dd className="mt-1 break-all font-medium text-slate-700">
+                      {row.bankName} {row.accountNumber}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-slate-400">예금주 · 계좌상태</dt>
+                    <dd className="mt-1 flex flex-wrap items-center gap-2 font-medium text-slate-700">
+                      {row.depositor}
+                      <span
+                        className={`rounded-full px-2 py-0.5 font-bold ring-1 ${accountPillClass(row.accountStatus)}`}
+                      >
+                        ● {row.accountStatus}
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs text-slate-400">
+                    지급예정 {row.paymentDate}
+                    {row.processedAt !== "-" && ` · 처리 ${row.processedAt}`}
+                  </span>
+                  {row.paymentStatus === "지급대기" ? (
+                    <button
+                      type="button"
+                      onClick={() => markAsPaid(row.payrollId)}
+                      className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white"
+                    >
+                      지급 처리
+                    </button>
+                  ) : row.paymentStatus === "지급실패" ? (
+                    <button
+                      type="button"
+                      onClick={() => markAsPaid(row.payrollId)}
+                      className="shrink-0 rounded-lg border border-orange-200 bg-white px-3 py-1.5 text-xs font-bold text-orange-600"
+                    >
+                      재처리
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => openPayrollDetail(row.payrollId)}
+                      className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600"
+                    >
+                      상세
+                    </button>
+                  )}
+                </div>
+              </article>
+            ))}
+          {!loading && !errorMessage && filteredRows.length === 0 && (
+            <p className="px-4 py-12 text-center text-sm font-semibold text-slate-400">
+              조회 조건에 맞는 급여 지급 대상이 없습니다.
+            </p>
+          )}
+        </div>
+        
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-5 py-4 text-sm text-slate-400">
           <span>
             총 {filteredRows.length}명 조회 · {currentPage}/{totalPages} 페이지

@@ -178,7 +178,7 @@ export default function PayrollItemsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900">급여항목 관리</h1>
           <p className="mt-1 text-sm text-slate-500">급여 계산에 사용되는 지급/공제 항목을 관리합니다.</p>
@@ -186,7 +186,7 @@ export default function PayrollItemsPage() {
         <button
           type="button"
           onClick={openCreateModal}
-          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
+          className="flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
         >
           <PlusIcon className="h-4 w-4" />
           새 항목 등록
@@ -209,7 +209,7 @@ export default function PayrollItemsPage() {
       </div>
 
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
+        <table className="hidden w-full min-w-[900px] text-left text-sm lg:table">
           <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3">항목명</th>
@@ -283,6 +283,87 @@ export default function PayrollItemsPage() {
             )}
           </tbody>
         </table>
+
+        <div className="divide-y divide-slate-100 lg:hidden">
+          {loading ? (
+            <p className="px-4 py-10 text-center text-sm text-slate-400">
+              불러오는 중...
+            </p>
+          ) : items.length === 0 ? (
+            <p className="px-4 py-10 text-center text-sm text-slate-400">
+              등록된 급여항목이 없습니다.
+            </p>
+          ) : (
+            items.map((item) => (
+              <article
+                key={item.payrollItemMasterId}
+                className="space-y-3 p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-bold text-slate-800">
+                      {item.itemName}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {item.taxable ? "과세" : "비과세"} · {item.fixed ? "고정" : "변동"}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${
+                      item.itemTypeCode === "EARNING"
+                        ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                        : "bg-rose-50 text-rose-600 ring-rose-200"
+                    }`}
+                  >
+                    {TYPE_LABEL[item.itemTypeCode] ?? item.itemTypeCode}
+                  </span>
+                </div>
+
+                <dl className="grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3 text-xs">
+                  <div>
+                    <dt className="text-slate-400">기본금액</dt>
+                    <dd className="mt-1 font-bold text-slate-700">
+                      {formatAmount(item.defaultAmount)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-slate-400">비율</dt>
+                    <dd className="mt-1 font-bold text-slate-700">
+                      {formatRate(item.rate)}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleActive(item)}
+                    title="클릭하여 상태 전환"
+                    className={`rounded-full px-2.5 py-1 text-xs font-bold ring-1 transition-colors ${item.active ? "bg-indigo-50 text-indigo-700 ring-indigo-200 hover:bg-indigo-100" : "bg-slate-100 text-slate-500 ring-slate-200 hover:bg-slate-200"}`}
+                  >
+                    {item.active ? "사용중" : "사용해제"}
+                  </button>
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(item)}
+                      className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                      수정
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteItem(item)}
+                      className="rounded-md border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
+        </div>
       </section>
 
       {showModal && (
@@ -326,7 +407,7 @@ export default function PayrollItemsPage() {
                   고정 항목
                 </label>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="block space-y-1 text-sm font-semibold text-slate-700">
                   <span>기본금액</span>
                   <input

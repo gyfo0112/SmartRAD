@@ -1025,7 +1025,7 @@ export default function PayrollCalculatePage() {
         <div className="payroll-calculate-results-header flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-bold">직원별 급여 계산 결과</h2>
-            <label className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 sm:hidden">
+            <label className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 lg:hidden">
               <input
                 type="checkbox"
                 className="h-4 w-4 rounded border-slate-300"
@@ -1088,8 +1088,8 @@ export default function PayrollCalculatePage() {
           </div>
         </div>
 
-        <div className="payroll-calculate-table hidden overflow-x-auto sm:block">
-          <table className="min-w-[1320px] text-left text-sm">
+         <div className="payroll-calculate-table hidden overflow-x-auto lg:block">
+          <table className="w-full min-w-[1320px] text-left text-sm">
             <thead className="bg-slate-50 text-xs font-bold text-slate-500">
               <tr>
                 <th className="whitespace-nowrap px-4 py-3">
@@ -1257,7 +1257,7 @@ export default function PayrollCalculatePage() {
           </table>
         </div>
 
-        <div className="divide-y divide-slate-100 sm:hidden">
+        <div className="divide-y divide-slate-100 lg:hidden">
           {loading && <p className="px-4 py-12 text-center text-sm font-semibold text-slate-400">급여 계산 결과를 불러오는 중입니다.</p>}
           {!loading && errorMessage && <p className="px-4 py-12 text-center text-sm font-semibold text-rose-500">{errorMessage}</p>}
           {!loading && !errorMessage && filteredRows.map((row) => (
