@@ -127,12 +127,7 @@ export default function AuditLogsPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  useEffect(() => {
-    fetchLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, actionType, from, to]);
-
-  const fetchLogs = async () => {
+  async function fetchLogs() {
     setLoading(true);
     try {
       let url = `${API_BASE_URL}/audit-logs?page=${page}&size=${PAGE_SIZE}&sort=createdAt,desc`;
@@ -148,7 +143,13 @@ export default function AuditLogsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, actionType, from, to]);
 
   const applyFilters = () => {
     setActionType(draftActionType);
@@ -168,23 +169,23 @@ export default function AuditLogsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-5 p-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
-          <ClipboardDocumentListIcon className="h-7 w-7 text-gray-400" />
+    <div className="mx-auto min-w-0 max-w-[1400px] space-y-4 overflow-x-clip p-4 sm:space-y-5 sm:p-6">
+      <div className="min-w-0">
+        <h1 className="flex min-w-0 items-center gap-2 text-xl font-bold text-gray-900 sm:text-2xl">
+          <ClipboardDocumentListIcon className="h-6 w-6 shrink-0 text-gray-400 sm:h-7 sm:w-7" />
           관리자 활동 로그
         </h1>
-        <p className="mt-1 text-sm text-gray-500">직원/부서/급여 등 주요 데이터를 누가, 언제, 무엇을 변경했는지 기록합니다.</p>
+        <p className="mt-1 break-words text-sm leading-6 text-gray-500">직원/부서/급여 등 주요 데이터를 누가, 언제, 무엇을 변경했는지 기록합니다.</p>
       </div>
 
       <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-4 xl:grid-cols-[1.2fr_1fr_1fr_auto_auto]">
-          <label className="space-y-1 text-sm font-semibold text-gray-700">
+        <div className="grid min-w-0 grid-cols-2 gap-3 xl:grid-cols-[1.2fr_1fr_1fr_auto_auto]">
+          <label className="col-span-2 min-w-0 space-y-1 text-sm font-semibold text-gray-700 sm:col-span-1">
             <span>액션 유형</span>
             <select
               value={draftActionType}
               onChange={(event) => setDraftActionType(event.target.value)}
-              className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 outline-none focus:border-blue-500"
+              className="h-10 min-w-0 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 outline-none focus:border-blue-500"
             >
               <option value="">전체</option>
               {Object.entries(ACTION_TYPE_LABELS).map(([value, label]) => (
@@ -192,28 +193,28 @@ export default function AuditLogsPage() {
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-sm font-semibold text-gray-700">
+          <label className="col-span-2 min-w-0 space-y-1 text-sm font-semibold text-gray-700 sm:col-span-1">
             <span>조회 시작일</span>
             <input
               type="date"
               value={draftFrom}
               onChange={(event) => setDraftFrom(event.target.value)}
-              className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm outline-none focus:border-blue-500"
+              className="h-10 min-w-0 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm outline-none focus:border-blue-500"
             />
           </label>
-          <label className="space-y-1 text-sm font-semibold text-gray-700">
+          <label className="min-w-0 space-y-1 text-sm font-semibold text-gray-700 sm:col-span-2 xl:col-span-1">
             <span>조회 종료일</span>
             <input
               type="date"
               value={draftTo}
               onChange={(event) => setDraftTo(event.target.value)}
-              className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm outline-none focus:border-blue-500"
+              className="h-10 min-w-0 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm outline-none focus:border-blue-500"
             />
           </label>
           <button
             type="button"
             onClick={resetFilters}
-            className="h-10 self-end rounded-lg border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+            className="h-10 min-w-0 self-end whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 sm:px-4"
           >
             <ArrowPathIcon className="mr-1 inline h-4 w-4" />
             초기화
@@ -221,7 +222,7 @@ export default function AuditLogsPage() {
           <button
             type="button"
             onClick={applyFilters}
-            className="h-10 self-end rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700"
+            className="h-10 min-w-0 self-end whitespace-nowrap rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 sm:px-5"
           >
             <MagnifyingGlassIcon className="mr-1 inline h-4 w-4" />
             조회
@@ -230,19 +231,20 @@ export default function AuditLogsPage() {
       </section>
 
       <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <h2 className="text-lg font-bold text-gray-900">활동 내역</h2>
-          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600">
+        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-5">
+          <h2 className="shrink-0 text-base font-bold text-gray-900 sm:text-lg">활동 내역</h2>
+          <span className="shrink-0 rounded-full bg-gray-100 px-2 py-1 text-[11px] font-bold text-gray-600 sm:px-2.5 sm:text-xs">
             총 {data?.totalElements ?? 0}건
           </span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-sm">
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[720px] table-fixed text-left text-sm">
             <thead className="bg-gray-50 text-xs text-gray-500">
               <tr>
-                {["시간", "담당자", "액션 유형", "내용"].map((label) => (
-                  <th key={label} className="px-5 py-3 font-semibold">{label}</th>
-                ))}
+                <th className="w-40 px-4 py-3 font-semibold lg:px-5">시간</th>
+                <th className="w-32 px-4 py-3 font-semibold lg:px-5">담당자</th>
+                <th className="w-44 px-4 py-3 font-semibold lg:px-5">액션 유형</th>
+                <th className="px-4 py-3 font-semibold lg:px-5">내용</th>
               </tr>
             </thead>
             <tbody>
@@ -253,31 +255,66 @@ export default function AuditLogsPage() {
               ) : (
                 data.content.map((row) => (
                   <tr key={row.auditLogId} className="border-t border-gray-100">
-                    <td className="whitespace-nowrap px-5 py-4 text-gray-500">{formatDateTime(row.createdAt)}</td>
-                    <td className="whitespace-nowrap px-5 py-4 font-semibold text-gray-900">{row.actorName}</td>
-                    <td className="whitespace-nowrap px-5 py-4">
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${actionStyle(row.actionType)}`}>
+                    <td className="whitespace-nowrap px-4 py-4 text-gray-500 lg:px-5">{formatDateTime(row.createdAt)}</td>
+                    <td className="whitespace-nowrap px-4 py-4 font-semibold text-gray-900 lg:px-5">{row.actorName}</td>
+                    <td className="whitespace-nowrap px-4 py-4 lg:px-5">
+                      <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${actionStyle(row.actionType)}`}>
                         {actionLabel(row.actionType)}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-gray-700">{row.targetDescription}</td>
+                    <td className="break-words whitespace-normal px-4 py-4 text-gray-700 lg:px-5">{row.targetDescription}</td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
+        <div className="md:hidden">
+          {loading ? (
+            <div className="px-4 py-14 text-center text-sm text-gray-500">활동 로그를 불러오는 중입니다.</div>
+          ) : !data || data.content.length === 0 ? (
+            <div className="px-4 py-14 text-center text-sm text-gray-500">조건에 맞는 활동 로그가 없습니다.</div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {data.content.map((row) => (
+                <article key={row.auditLogId} className="min-w-0 p-4">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <span className={`inline-block min-w-0 break-words rounded-full px-2.5 py-1 text-xs font-semibold leading-5 ${actionStyle(row.actionType)}`}>
+                      {actionLabel(row.actionType)}
+                    </span>
+                    <time className="shrink-0 whitespace-nowrap pt-1 text-xs text-gray-500">
+                      {formatDateTime(row.createdAt)}
+                    </time>
+                  </div>
+                  <dl className="mt-3 min-w-0 space-y-3">
+                    <div className="flex min-w-0 items-start gap-3 text-sm">
+                      <dt className="shrink-0 text-gray-500">담당자</dt>
+                      <dd className="min-w-0 break-words font-semibold text-gray-900">{row.actorName}</dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-xs text-gray-500">변경 내용</dt>
+                      <dd className="mt-1 min-w-0 break-words whitespace-normal text-sm leading-6 text-gray-700">
+                        {row.targetDescription}
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
         {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-gray-100 p-4">
+          <div className="flex flex-col gap-3 border-t border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-gray-500">
               {page + 1} / {data.totalPages} 페이지
             </span>
-            <div className="flex gap-1">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-1">
               <button
                 type="button"
                 disabled={page === 0}
                 onClick={() => setPage((current) => current - 1)}
-                className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"
+                aria-label="이전 페이지"
+                className="flex h-10 min-w-0 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 sm:h-8 sm:w-8"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
@@ -285,7 +322,8 @@ export default function AuditLogsPage() {
                 type="button"
                 disabled={page >= data.totalPages - 1}
                 onClick={() => setPage((current) => current + 1)}
-                className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"
+                aria-label="다음 페이지"
+                className="flex h-10 min-w-0 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 sm:h-8 sm:w-8"
               >
                 <ChevronRightIcon className="h-4 w-4" />
               </button>
