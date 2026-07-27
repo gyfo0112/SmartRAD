@@ -222,7 +222,7 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey,
       </div>
 
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-sm text-left">
+        <table className="w-full text-sm text-left whitespace-nowrap">
           <thead className="text-xs text-gray-500 bg-gray-50 uppercase border-y border-gray-200">
             <tr>
               {role === "ADMIN" && (
@@ -263,7 +263,7 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey,
                   </td>
                 )}
                 <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${selectedId === emp.employeeId ? 'bg-blue-600' : 'bg-gray-400'}`}>
+                  <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${selectedId === emp.employeeId ? 'bg-blue-600' : 'bg-gray-400'}`}>
                     {emp.name ? emp.name.charAt(0) : '?'}
                   </div>
                   {emp.name}

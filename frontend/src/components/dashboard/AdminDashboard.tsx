@@ -233,20 +233,20 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-[1600px] mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
             <div
               key={index}
-              className="bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className={`w-12 h-12 rounded-full ${stat.bg} ${stat.color} flex items-center justify-center`}>
-                <Icon className="w-6 h-6" />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full ${stat.bg} ${stat.color} flex items-center justify-center`}>
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500 font-medium">{stat.label}</p>
-                <h3 className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</h3>
+              <div className="min-w-0 w-full">
+                <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">{stat.label}</p>
+                <h3 className="text-lg sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1 truncate">{stat.value}</h3>
               </div>
             </div>
           );
@@ -271,16 +271,17 @@ export default function AdminDashboard() {
                 type="button"
                 key={notice.noticeId}
                 onClick={() => openNotice(notice.noticeId)}
-                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                className="w-full px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between text-left gap-2 sm:gap-4 hover:bg-gray-50 transition-colors"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 overflow-hidden w-full sm:w-auto">
                   {notice.pinned && (
-                    <span className="text-xs font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full">고정</span>
+                    <span className="shrink-0 text-xs font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full">고정</span>
                   )}
-                  <span className="font-medium text-gray-900">{notice.title}</span>
+                  <span className="font-medium text-gray-900 truncate">{notice.title}</span>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-3 text-sm text-gray-500 shrink-0">
                   <span>{notice.writerName}</span>
+                  <span className="hidden sm:inline text-gray-300">|</span>
                   <span>{notice.createdAt.substring(0, 10)}</span>
                 </div>
               </button>
