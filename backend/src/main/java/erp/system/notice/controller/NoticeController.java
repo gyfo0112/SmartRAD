@@ -23,10 +23,11 @@ public class NoticeController {
 
     @GetMapping
     public Page<NoticeSummaryResponse> getList(
+            @AuthenticationPrincipal Long requesterId,
             @RequestParam(required = false) String keyword,
             Pageable pageable
     ) {
-        return noticeService.getList(keyword, pageable);
+        return noticeService.getList(requesterId, keyword, pageable);
     }
 
     @GetMapping("/{id}")

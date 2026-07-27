@@ -1,6 +1,7 @@
 package erp.system.notice.dto;
 
 import erp.system.common.util.SoftDeleteAware;
+import erp.system.department.entity.Department;
 import erp.system.employee.entity.Employee;
 import erp.system.notice.entity.Notice;
 
@@ -15,13 +16,16 @@ public record NoticeResponse(
         boolean pinned,
         int viewCount,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Long scopeDepartmentId,
+        String scopeDepartmentName
 ) {
     private static final String DELETED_EMPLOYEE_LABEL = "(삭제된 직원)";
 
     public static NoticeResponse from(Notice notice) {
         Employee rawWriter = notice.getWriter();
         Employee writer = SoftDeleteAware.resolve(rawWriter, Employee::getName);
+        Department scopeDepartment = SoftDeleteAware.resolve(notice.getScopeDepartment(), Department::getDepartmentName);
 
         return new NoticeResponse(
                 notice.getNoticeId(),
@@ -32,7 +36,9 @@ public record NoticeResponse(
                 notice.isPinned(),
                 notice.getViewCount(),
                 notice.getCreatedAt(),
-                notice.getUpdatedAt()
+                notice.getUpdatedAt(),
+                scopeDepartment != null ? scopeDepartment.getDepartmentId() : null,
+                scopeDepartment != null ? scopeDepartment.getDepartmentName() : null
         );
     }
 }

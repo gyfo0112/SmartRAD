@@ -58,11 +58,13 @@ export default function SessionTimer() {
       if (res.ok) {
         const data = await res.json();
         if (data.accessToken) {
-          if (window.localStorage.getItem("accessToken")) {
-            window.localStorage.setItem("accessToken", data.accessToken);
-          } else {
-            window.sessionStorage.setItem("accessToken", data.accessToken);
-          }
+          const storage = window.localStorage.getItem("accessToken") ? window.localStorage : window.sessionStorage;
+          // accessToken만 갱신하면 role/delegated/departmentId가 로그인 시점 값으로 굳어버려서,
+          // 세션 연장 사이에 관리자가 역할이나 팀장 위임 상태를 바꾸면 화면이 낡은 값을 계속 보여준다.
+          storage.setItem("accessToken", data.accessToken);
+          if (data.role) storage.setItem("role", data.role);
+          storage.setItem("delegated", String(Boolean(data.delegated)));
+          storage.setItem("departmentId", data.departmentId != null ? String(data.departmentId) : "");
           calculateTimeLeft();
         }
       }

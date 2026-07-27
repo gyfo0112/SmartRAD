@@ -56,14 +56,16 @@ public class LeaveRequestController {
 
     @GetMapping
     public List<LeaveRequestResponse> getList(
+            @AuthenticationPrincipal Long requesterId,
             @RequestParam(required = false) Long employeeId,
             @RequestParam(required = false) String status
     ) {
-        return leaveRequestService.getList(employeeId, status);
+        return leaveRequestService.getList(requesterId, employeeId, status);
     }
 
     @GetMapping("/search")
     public Page<LeaveRequestResponse> getPagedList(
+            @AuthenticationPrincipal Long requesterId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) Long leaveTypeId,
@@ -72,23 +74,24 @@ public class LeaveRequestController {
             @RequestParam(required = false) Long departmentId,
             Pageable pageable
     ) {
-        return leaveRequestService.getPagedList(startDate, endDate, leaveTypeId, status, keyword, departmentId, pageable);
+        return leaveRequestService.getPagedList(requesterId, startDate, endDate, leaveTypeId, status, keyword, departmentId, pageable);
     }
 
     @GetMapping("/summary")
     public LeaveRequestSummaryResponse getSummary(
+            @AuthenticationPrincipal Long requesterId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) Long leaveTypeId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long departmentId
     ) {
-        return leaveRequestService.getSummary(startDate, endDate, leaveTypeId, keyword, departmentId);
+        return leaveRequestService.getSummary(requesterId, startDate, endDate, leaveTypeId, keyword, departmentId);
     }
 
     @GetMapping("/{id}")
-    public LeaveRequestResponse getById(@PathVariable Long id) {
-        return leaveRequestService.getById(id);
+    public LeaveRequestResponse getById(@AuthenticationPrincipal Long requesterId, @PathVariable Long id) {
+        return leaveRequestService.getById(requesterId, id);
     }
 
     @PostMapping

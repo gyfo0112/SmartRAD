@@ -13,6 +13,7 @@ import erp.system.common.exception.BusinessException;
 import erp.system.common.exception.ErrorCode;
 import erp.system.employee.entity.Employee;
 import erp.system.employee.repository.EmployeeRepository;
+import erp.system.teamlead.service.TeamLeadAuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoApiClient kakaoApiClient;
+    private final TeamLeadAuthorityService teamLeadAuthorityService;
 
     public LoginResponse login(LoginRequest request) {
         Employee employee = employeeRepository.findByEmployeeNoOrEmail(request.email(), request.email())
@@ -40,8 +42,9 @@ public class AuthService {
             throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
         }
 
-        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode());
-        return LoginResponse.of(accessToken, employee);
+        boolean delegated = teamLeadAuthorityService.hasAuthority(employee.getEmployeeId());
+        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode(), delegated);
+        return LoginResponse.of(accessToken, employee, delegated);
     }
 
     public KakaoLoginResponse kakaoLogin(KakaoLoginRequest request) {
@@ -50,8 +53,9 @@ public class AuthService {
         return employeeRepository.findByKakaoId(kakaoId)
                 .filter(Employee::isLoginable)
                 .map(employee -> {
-                    String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode());
-                    return KakaoLoginResponse.linked(accessToken, employee);
+                    boolean delegated = teamLeadAuthorityService.hasAuthority(employee.getEmployeeId());
+                    String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode(), delegated);
+                    return KakaoLoginResponse.linked(accessToken, employee, delegated);
                 })
                 .orElseGet(KakaoLoginResponse::notLinked);
     }
@@ -76,8 +80,9 @@ public class AuthService {
 
         employee.linkKakao(kakaoId);
 
-        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode());
-        return KakaoLoginResponse.linked(accessToken, employee);
+        boolean delegated = teamLeadAuthorityService.hasAuthority(employee.getEmployeeId());
+        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode(), delegated);
+        return KakaoLoginResponse.linked(accessToken, employee, delegated);
     }
 
     @Transactional
@@ -103,7 +108,8 @@ public class AuthService {
             throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
         }
 
-        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode());
-        return LoginResponse.of(accessToken, employee);
+        boolean delegated = teamLeadAuthorityService.hasAuthority(employee.getEmployeeId());
+        String accessToken = jwtTokenProvider.createToken(employee.getEmployeeId(), employee.getEmployeeNo(), employee.getRoleCode(), delegated);
+        return LoginResponse.of(accessToken, employee, delegated);
     }
 }

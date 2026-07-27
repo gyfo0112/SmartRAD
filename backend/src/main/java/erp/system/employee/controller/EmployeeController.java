@@ -13,8 +13,6 @@ import erp.system.employee.dto.EmployeeSummaryResponse;
 import erp.system.employee.dto.EmployeeUpdateRequest;
 import erp.system.employee.dto.ProfileImageUploadResponse;
 import erp.system.employee.service.EmployeeService;
-import erp.system.common.exception.BusinessException;
-import erp.system.common.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -90,9 +88,7 @@ public class EmployeeController {
                                     @AuthenticationPrincipal Long requesterId, Authentication authentication) {
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-        if (!isAdmin && !id.equals(requesterId)) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED);
-        }
+        // 본인/관리자가 아닌 경우 팀장 위임 여부와 부서 일치 여부를 서비스 계층에서 재검증한다(ACCESS_DENIED 발생 가능).
         return employeeService.update(id, request, requesterId, isAdmin);
     }
 

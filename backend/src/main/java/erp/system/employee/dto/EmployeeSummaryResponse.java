@@ -16,10 +16,11 @@ public record EmployeeSummaryResponse (
         String employeeStatusCode,
         String email,
         LocalDate hireDate,
-        LocalDate resignationDate
+        LocalDate resignationDate,
+        boolean teamLeadDelegated
 ){
 
-    public static EmployeeSummaryResponse from(Employee employee) {
+    public static EmployeeSummaryResponse from(Employee employee, boolean teamLeadDelegated) {
         Department department = SoftDeleteAware.resolve(employee.getDepartment(), Department::getDepartmentName);
         Position position = SoftDeleteAware.resolve(employee.getPosition(), Position::getPositionName);
         return new EmployeeSummaryResponse(
@@ -31,7 +32,8 @@ public record EmployeeSummaryResponse (
                 employee.getEmployeeStatusCode(),
                 employee.getEmail(),
                 employee.getHireDate(),
-                employee.getResignationDate()
+                employee.getResignationDate(),
+                teamLeadDelegated
         );
     }
 }

@@ -31,6 +31,7 @@ import erp.system.notification.entity.Notification;
 import erp.system.notification.service.NotificationService;
 import erp.system.position.entity.Position;
 import erp.system.position.repository.PositionRepository;
+import erp.system.teamlead.service.TeamLeadAuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +64,7 @@ public class EmployeeService {
     private final NotificationService notificationService;
     private final AuditLogService auditLogService;
     private final FileStorageService fileStorageService;
+    private final TeamLeadAuthorityService teamLeadAuthorityService;
 
     private static String employeeStatusLabel(String status) {
         if (status == null) return "-";
@@ -76,7 +78,7 @@ public class EmployeeService {
 
     public EmployeeResponse getById(Long employeeId, Long requesterId, boolean requesterIsAdmin) {
         boolean includeSensitive = requesterIsAdmin || employeeId.equals(requesterId);
-        return EmployeeResponse.from(findActive(employeeId), includeSensitive);
+        return EmployeeResponse.from(findActive(employeeId), includeSensitive, teamLeadAuthorityService.hasAuthority(employeeId));
     }
 
     public Page<EmployeeSummaryResponse> getList(String keyword, Long departmentId, String status, Pageable pageable) {
@@ -99,7 +101,9 @@ public class EmployeeService {
             return predicate;
         };
 
-        return employeeRepository.findAll(spec, pageable).map(EmployeeSummaryResponse::from);
+        java.util.Set<Long> delegatedIds = teamLeadAuthorityService.getActiveEmployeeIds();
+        return employeeRepository.findAll(spec, pageable)
+                .map(employee -> EmployeeSummaryResponse.from(employee, delegatedIds.contains(employee.getEmployeeId())));
     }
 
     public List<EmployeePayrollSummaryResponse> getPayrollSummaryList() {
@@ -132,7 +136,7 @@ public class EmployeeService {
                 null
         );
 
-        return EmployeeResponse.from(savedEmployee);
+        return EmployeeResponse.from(savedEmployee, false);
     }
 
     @Transactional
@@ -199,24 +203,52 @@ public class EmployeeService {
     @Transactional
     public EmployeeResponse update(Long employeeId, EmployeeUpdateRequest request, Long actorId, boolean actorIsAdmin) {
         Employee employee = findActive(employeeId);
+        boolean isSelf = actorId != null && actorId.equals(employeeId);
+        boolean isTeamLeadEditingTeammate = false;
+        if (!actorIsAdmin && !isSelf) {
+            Long targetDepartmentId = employee.getDepartment() != null ? employee.getDepartment().getDepartmentId() : null;
+            teamLeadAuthorityService.authorizeManage(actorId, false, targetDepartmentId);
+            isTeamLeadEditingTeammate = true;
+        }
+
         String previousStatus = employee.getEmployeeStatusCode();
         String previousProfileImage = employee.getProfileImage();
 
-        employee.update(
-                resolveEmploymentType(request.employmentTypeId()),
-                request.name(),
-                request.birthDate(),
-                request.phone(),
-                request.email(),
-                request.address(),
-                request.hireDate(),
-                request.resignationDate(),
-                request.employeeStatusCode(),
-                request.bankName(),
-                request.accountNumber(),
-                request.accountHolder(),
-                request.profileImage()
-        );
+        if (isTeamLeadEditingTeammate) {
+            // 팀장 위임자는 팀원의 기본정보(이름/생년월일/연락처/이메일/주소/프로필사진)만 수정 가능.
+            // 계좌·재직상태·퇴사일·고용형태 등 민감 필드는 요청에 값이 와도 반영하지 않고 기존 값을 유지한다.
+            employee.update(
+                    employee.getEmploymentType(),
+                    request.name(),
+                    request.birthDate(),
+                    request.phone(),
+                    request.email(),
+                    request.address(),
+                    employee.getHireDate(),
+                    employee.getResignationDate(),
+                    employee.getEmployeeStatusCode(),
+                    employee.getBankName(),
+                    employee.getAccountNumber(),
+                    employee.getAccountHolder(),
+                    request.profileImage()
+            );
+        } else {
+            employee.update(
+                    resolveEmploymentType(request.employmentTypeId()),
+                    request.name(),
+                    request.birthDate(),
+                    request.phone(),
+                    request.email(),
+                    request.address(),
+                    request.hireDate(),
+                    request.resignationDate(),
+                    request.employeeStatusCode(),
+                    request.bankName(),
+                    request.accountNumber(),
+                    request.accountHolder(),
+                    request.profileImage()
+            );
+        }
 
         if (StringUtils.hasText(previousProfileImage)
                 && !previousProfileImage.equals(request.profileImage())) {
@@ -243,7 +275,7 @@ public class EmployeeService {
             );
         }
 
-        return EmployeeResponse.from(employee);
+        return EmployeeResponse.from(employee, teamLeadAuthorityService.hasAuthority(employeeId));
     }
 
     @Transactional
@@ -287,7 +319,7 @@ public class EmployeeService {
             );
         }
 
-        return EmployeeResponse.from(employee);
+        return EmployeeResponse.from(employee, teamLeadAuthorityService.hasAuthority(employeeId));
     }
 
     @Transactional

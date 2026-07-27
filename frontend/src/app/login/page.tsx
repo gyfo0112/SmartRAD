@@ -33,6 +33,8 @@ interface LoginResponse {
   name: string;
   email: string;
   role: string;
+  delegated: boolean;
+  departmentId: number | null;
 }
 
 interface KakaoLoginResponse {
@@ -44,6 +46,8 @@ interface KakaoLoginResponse {
   name: string | null;
   email: string | null;
   role: string | null;
+  delegated: boolean;
+  departmentId: number | null;
 }
 
 interface ErrorResponse {
@@ -118,6 +122,8 @@ export default function LoginPage() {
     storage.setItem("employeeName", data.name);
     storage.setItem("employeeEmail", data.email);
     storage.setItem("role", data.role);
+    storage.setItem("delegated", String(data.delegated));
+    storage.setItem("departmentId", data.departmentId != null ? String(data.departmentId) : "");
     router.push("/dashboard");
   };
 
@@ -187,6 +193,8 @@ export default function LoginPage() {
               name: data.name,
               email: data.email,
               role: data.role ?? "EMPLOYEE",
+              delegated: data.delegated,
+              departmentId: data.departmentId,
             });
           } else {
             setKakaoAccessToken(authObj.access_token);

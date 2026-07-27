@@ -5,6 +5,7 @@ import EmployeeStats from "@/components/employee/EmployeeStats";
 import EmployeeList from "@/components/employee/EmployeeList";
 import EmployeeDetail from "@/components/employee/EmployeeDetail";
 import EmployeeEditModal from "@/components/employee/EmployeeEditModal";
+import { isDelegatedTeamLead, getDepartmentId } from "@/lib/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -64,14 +65,15 @@ export default function EmployeesPage() {
         />
       </div>
 
-      {editEmployee && role === "ADMIN" && (
-        <EmployeeEditModal 
-          employee={editEmployee} 
-          onClose={() => setEditEmployee(null)} 
+      {editEmployee && (role === "ADMIN" || (isDelegatedTeamLead() && editEmployee.departmentId === getDepartmentId())) && (
+        <EmployeeEditModal
+          employee={editEmployee}
+          restricted={role !== "ADMIN"}
+          onClose={() => setEditEmployee(null)}
           onSave={() => {
             setEditEmployee(null);
             setRefreshKey((prev) => prev + 1);
-          }} 
+          }}
         />
       )}
     </div>

@@ -39,7 +39,7 @@ export const dashboardMenuGroups = [
       { name: "부서 관리", href: "/departments", icon: BuildingOfficeIcon, adminOnly: true },
       { name: "신규 직원 등록", href: "/employees/new", icon: UserPlusIcon, adminOnly: true },
       { name: "인사 발령 관리", href: "/appointments", icon: ArrowPathIcon, adminOnly: true },
-      { name: "제증명서 관리", href: "/certificates", icon: DocumentTextIcon, adminOnly: true },
+      { name: "제증명서 관리", href: "/certificates", icon: DocumentTextIcon, adminOnly: true, teamLeadAllowed: true },
     ]
   },
   {
@@ -50,7 +50,7 @@ export const dashboardMenuGroups = [
       { name: "휴가 신청/내역 조회", href: "/leave/my", icon: CalendarIcon, adminOnly: false, userOnly: true },
       { name: "일일 근태 현황", href: "/attendance/daily", icon: ClockIcon, adminOnly: true },
       { name: "월간 근태 통계", href: "/attendance/monthly", icon: ChartBarIcon, adminOnly: true },
-      { name: "휴가 승인/관리", href: "/leave/approve", icon: CheckBadgeIcon, adminOnly: true },
+      { name: "휴가 승인/관리", href: "/leave/approve", icon: CheckBadgeIcon, adminOnly: true, teamLeadAllowed: true },
       { name: "휴가 사용 현황", href: "/leave/status", icon: CalendarIcon, adminOnly: true },
       { name: "휴가정책 관리", href: "/leave/policies", icon: AdjustmentsHorizontalIcon, adminOnly: true },
     ]
@@ -71,7 +71,7 @@ export const dashboardMenuGroups = [
     title: "사내 소통",
     items: [
       { name: "공지사항", href: "/notices/view", icon: MegaphoneIcon, adminOnly: false },
-      { name: "공지사항 관리", href: "/notices", icon: MegaphoneIcon, adminOnly: true },
+      { name: "공지사항 관리", href: "/notices", icon: MegaphoneIcon, adminOnly: true, teamLeadAllowed: true },
     ]
   },
   {

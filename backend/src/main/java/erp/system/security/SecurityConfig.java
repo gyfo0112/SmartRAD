@@ -83,11 +83,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/attendances/check-in").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/attendances/check-out").authenticated()
 
-                        // 제증명서 - 본인 신청/내역 조회는 로그인만 하면 가능, 승인/반려/발급 처리 및
-                        // 임의 사번 지정 조회·등록은 관리자 전용
+                        // 제증명서 - 본인 신청/내역 조회는 로그인만 하면 가능. 승인/반려/발급 처리 및 검색은
+                        // 관리자 또는 팀장 위임자(서비스 계층에서 본인 부서 범위로 재검증), 전체 목록 조회·임의 등록은 관리자 전용
                         .requestMatchers(HttpMethod.GET, "/api/certificate-issues/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/certificate-issues/me").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/certificate-issues/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/certificate-issues/search").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/certificate-issues/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/certificate-issues").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/certificate-issues").hasRole("ADMIN")
 
@@ -102,14 +103,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/leave-policies/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/leave-policies/**").hasRole("ADMIN")
 
-                        // 휴가 신청 - 본인 신청/조회/취소는 로그인만 하면 가능, 관리자 대리등록/전체조회/
-                        // 검색/요약/승인/반려/일괄승인은 관리자 전용
+                        // 휴가 신청 - 본인 신청/조회/취소는 로그인만 하면 가능. 전체조회/검색/요약/승인/반려/
+                        // 일괄승인은 관리자 또는 팀장 위임자(서비스 계층에서 본인 부서 범위로 재검증), 관리자 대리등록만 관리자 전용
                         .requestMatchers(HttpMethod.GET, "/api/leave-requests/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/leave-requests/me", "/api/leave-requests/me/preview").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/leave-requests/me/*/cancel").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/leave-requests/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/leave-requests/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/leave-requests").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/leave-requests/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/leave-requests/**").authenticated()
 
                         // 휴가 잔여일수 수동 등록 - 관리자 전용
                         .requestMatchers(HttpMethod.POST, "/api/leave-balances").hasRole("ADMIN")
@@ -120,9 +121,13 @@ public class SecurityConfig {
                         // 관리자 활동 로그 - 관리자 전용
                         .requestMatchers(HttpMethod.GET, "/api/audit-logs").hasRole("ADMIN")
 
-                        // 공지사항 - 등록/수정/삭제는 관리자 전용, 조회는 로그인만 하면 가능
-                        .requestMatchers(HttpMethod.POST, "/api/notices").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/notices/**").hasRole("ADMIN")
+                        // 팀장 위임 권한 관리 - 관리자 전용
+                        .requestMatchers("/api/team-lead-authorities/**").hasRole("ADMIN")
+
+                        // 공지사항 - 등록/수정은 관리자 또는 팀장 위임자(서비스 계층에서 본인 부서 범위로 재검증),
+                        // 삭제는 위임 범위 밖이라 관리자 전용 유지, 조회는 로그인만 하면 가능
+                        .requestMatchers(HttpMethod.POST, "/api/notices").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/notices/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/notices/**").hasRole("ADMIN")
 
                         // AI 비서 - 로그인만 하면 가능 (본인 데이터만 근거로 답변)

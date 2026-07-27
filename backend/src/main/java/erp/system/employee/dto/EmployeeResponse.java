@@ -36,9 +36,10 @@ public record EmployeeResponse (
         String profileImage,
         boolean active,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        boolean teamLeadDelegated
 ){
-    public static EmployeeResponse from(Employee employee) {
+    public static EmployeeResponse from(Employee employee, boolean teamLeadDelegated) {
         Department department = SoftDeleteAware.resolve(employee.getDepartment(), Department::getDepartmentName);
         Position position = SoftDeleteAware.resolve(employee.getPosition(), Position::getPositionName);
         EmploymentType employmentType = SoftDeleteAware.resolve(employee.getEmploymentType(), EmploymentType::getEmploymentTypeName);
@@ -70,12 +71,13 @@ public record EmployeeResponse (
                 employee.getProfileImage(),
                 employee.isActive(),
                 employee.getCreatedAt(),
-                employee.getUpdatedAt()
+                employee.getUpdatedAt(),
+                teamLeadDelegated
         );
     }
 
-    public static EmployeeResponse from(Employee employee, boolean includeSensitive) {
-        EmployeeResponse response = from(employee);
+    public static EmployeeResponse from(Employee employee, boolean includeSensitive, boolean teamLeadDelegated) {
+        EmployeeResponse response = from(employee, teamLeadDelegated);
         if (includeSensitive) {
             return response;
         }
@@ -85,7 +87,7 @@ public record EmployeeResponse (
                 response.managerId(), response.managerName(), response.name(), response.birthDate(), response.phone(),
                 response.email(), response.address(), response.hireDate(), response.resignationDate(),
                 response.employeeStatusCode(), null, null, null, null, response.profileImage(),
-                response.active(), response.createdAt(), response.updatedAt()
+                response.active(), response.createdAt(), response.updatedAt(), response.teamLeadDelegated()
         );
     }
 }

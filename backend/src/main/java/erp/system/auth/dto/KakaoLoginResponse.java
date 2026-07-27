@@ -10,9 +10,11 @@ public record KakaoLoginResponse(
         String employeeNo,
         String name,
         String email,
-        String role
+        String role,
+        boolean delegated,
+        Long departmentId
 ) {
-    public static KakaoLoginResponse linked(String accessToken, Employee employee) {
+    public static KakaoLoginResponse linked(String accessToken, Employee employee, boolean delegated) {
         return new KakaoLoginResponse(
                 true,
                 accessToken,
@@ -21,11 +23,13 @@ public record KakaoLoginResponse(
                 employee.getEmployeeNo(),
                 employee.getName(),
                 employee.getEmail(),
-                employee.getRoleCode()
+                employee.getRoleCode(),
+                delegated,
+                employee.getDepartment() != null ? employee.getDepartment().getDepartmentId() : null
         );
     }
 
     public static KakaoLoginResponse notLinked() {
-        return new KakaoLoginResponse(false, null, null, null, null, null, null, null);
+        return new KakaoLoginResponse(false, null, null, null, null, null, null, null, false, null);
     }
 }

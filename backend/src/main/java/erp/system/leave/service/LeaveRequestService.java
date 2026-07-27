@@ -21,6 +21,7 @@ import erp.system.leave.repository.LeaveRequestRepository;
 import erp.system.leave.repository.LeaveTypeRepository;
 import erp.system.notification.entity.Notification;
 import erp.system.notification.service.NotificationService;
+import erp.system.teamlead.service.TeamLeadAuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,7 @@ public class LeaveRequestService {
     private final EmployeeLeaveBalanceRepository employeeLeaveBalanceRepository;
     private final NotificationService notificationService;
     private final AuditLogService auditLogService;
+    private final TeamLeadAuthorityService teamLeadAuthorityService;
 
     public List<LeaveRequestResponse> getMyRequests(Long employeeId) {
         return leaveRequestRepository.findAllByEmployee_EmployeeIdOrderByCreatedAtDesc(employeeId).stream()
@@ -90,7 +92,8 @@ public class LeaveRequestService {
         return pendingRequests.size();
     }
 
-    public List<LeaveRequestResponse> getList(Long employeeId, String status) {
+    public List<LeaveRequestResponse> getList(Long requesterId, Long employeeId, String status) {
+        Long scopedDepartmentId = resolveDepartmentScope(requesterId);
         return leaveRequestRepository.findAll((root, query, cb) -> {
             var predicates = cb.conjunction();
             if (employeeId != null) {
@@ -99,19 +102,26 @@ public class LeaveRequestService {
             if (StringUtils.hasText(status)) {
                 predicates = cb.and(predicates, cb.equal(root.get("status"), status));
             }
+            if (scopedDepartmentId != null) {
+                predicates = cb.and(predicates, cb.equal(root.get("employee").get("department").get("departmentId"), scopedDepartmentId));
+            }
             return predicates;
         }).stream().map(LeaveRequestResponse::from).toList();
     }
 
-    public Page<LeaveRequestResponse> getPagedList(LocalDate startDate, LocalDate endDate, Long leaveTypeId,
+    public Page<LeaveRequestResponse> getPagedList(Long requesterId, LocalDate startDate, LocalDate endDate, Long leaveTypeId,
                                                      String status, String keyword, Long departmentId, Pageable pageable) {
-        Specification<LeaveRequest> spec = buildSpecification(startDate, endDate, leaveTypeId, status, keyword, departmentId);
+        Long scopedDepartmentId = resolveDepartmentScope(requesterId);
+        Long effectiveDepartmentId = scopedDepartmentId != null ? scopedDepartmentId : departmentId;
+        Specification<LeaveRequest> spec = buildSpecification(startDate, endDate, leaveTypeId, status, keyword, effectiveDepartmentId);
         return leaveRequestRepository.findAll(spec, pageable).map(LeaveRequestResponse::from);
     }
 
-    public LeaveRequestSummaryResponse getSummary(LocalDate startDate, LocalDate endDate, Long leaveTypeId,
+    public LeaveRequestSummaryResponse getSummary(Long requesterId, LocalDate startDate, LocalDate endDate, Long leaveTypeId,
                                                     String keyword, Long departmentId) {
-        Specification<LeaveRequest> base = buildSpecification(startDate, endDate, leaveTypeId, null, keyword, departmentId);
+        Long scopedDepartmentId = resolveDepartmentScope(requesterId);
+        Long effectiveDepartmentId = scopedDepartmentId != null ? scopedDepartmentId : departmentId;
+        Specification<LeaveRequest> base = buildSpecification(startDate, endDate, leaveTypeId, null, keyword, effectiveDepartmentId);
         long total = leaveRequestRepository.count(base);
         long pending = leaveRequestRepository.count(base.and(statusEquals(LeaveRequest.STATUS_PENDING)));
         long approved = leaveRequestRepository.count(base.and(statusEquals(LeaveRequest.STATUS_APPROVED)));
@@ -119,8 +129,32 @@ public class LeaveRequestService {
         return new LeaveRequestSummaryResponse(total, pending, approved, rejected);
     }
 
-    public LeaveRequestResponse getById(Long leaveRequestId) {
-        return LeaveRequestResponse.from(findById(leaveRequestId));
+    public LeaveRequestResponse getById(Long requesterId, Long leaveRequestId) {
+        LeaveRequest leaveRequest = findById(leaveRequestId);
+        Long scopedDepartmentId = resolveDepartmentScope(requesterId);
+        if (scopedDepartmentId != null) {
+            Long targetDepartmentId = leaveRequest.getEmployee().getDepartment() != null
+                    ? leaveRequest.getEmployee().getDepartment().getDepartmentId() : null;
+            if (!scopedDepartmentId.equals(targetDepartmentId)) {
+                throw new BusinessException(ErrorCode.ACCESS_DENIED);
+            }
+        }
+        return LeaveRequestResponse.from(leaveRequest);
+    }
+
+    /**
+     * admin이면 null(무제한). 팀장 위임자면 강제할 부서 id. 둘 다 아니면 ACCESS_DENIED.
+     */
+    private Long resolveDepartmentScope(Long requesterId) {
+        Employee requester = findEmployee(requesterId);
+        if (requester.isAdmin()) {
+            return null;
+        }
+        Long managedDepartmentId = teamLeadAuthorityService.getManagedDepartmentId(requesterId);
+        if (managedDepartmentId == null) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+        return managedDepartmentId;
     }
 
     @Transactional
@@ -172,6 +206,8 @@ public class LeaveRequestService {
         LeaveRequest leaveRequest = findById(leaveRequestId);
         Employee approver = employeeRepository.findById(approverId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
+        teamLeadAuthorityService.authorizeManage(approverId, approver.isAdmin(),
+                leaveRequest.getEmployee().getDepartment() != null ? leaveRequest.getEmployee().getDepartment().getDepartmentId() : null);
 
         EmployeeLeaveBalance balance = employeeLeaveBalanceRepository
                 .findByEmployee_EmployeeIdAndLeaveType_LeaveTypeId(
@@ -207,6 +243,8 @@ public class LeaveRequestService {
         LeaveRequest leaveRequest = findById(leaveRequestId);
         Employee approver = employeeRepository.findById(approverId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
+        teamLeadAuthorityService.authorizeManage(approverId, approver.isAdmin(),
+                leaveRequest.getEmployee().getDepartment() != null ? leaveRequest.getEmployee().getDepartment().getDepartmentId() : null);
 
         leaveRequest.reject(approver, rejectionReason);
 

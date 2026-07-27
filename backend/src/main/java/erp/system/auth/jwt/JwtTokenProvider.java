@@ -25,7 +25,7 @@ public class JwtTokenProvider {
         this.validityInMilliseconds = validityInSeconds * 1000;
     }
 
-    public String createToken(Long employeeId, String employeeNo, String roleCode) {
+    public String createToken(Long employeeId, String employeeNo, String roleCode, boolean delegated) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validityInMilliseconds);
 
@@ -33,6 +33,9 @@ public class JwtTokenProvider {
                 .subject(String.valueOf(employeeId))
                 .claim("employeeNo", employeeNo)
                 .claim("role", roleCode)
+                // 프런트 메뉴 노출 판단에만 쓰는 값. 서버 인가 판단(팀장 위임 여부 확인)은 매 요청마다
+                // TeamLeadAuthorityService가 DB를 다시 조회해서 하며, 이 클레임을 절대 신뢰하지 않는다.
+                .claim("delegated", delegated)
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(key)

@@ -9,9 +9,11 @@ public record LoginResponse(
         String employeeNo,
         String name,
         String email,
-        String role
+        String role,
+        boolean delegated,
+        Long departmentId
 ) {
-    public static LoginResponse of(String accessToken, Employee employee) {
+    public static LoginResponse of(String accessToken, Employee employee, boolean delegated) {
         return new LoginResponse(
                 accessToken,
                 "Bearer",
@@ -19,7 +21,9 @@ public record LoginResponse(
                 employee.getEmployeeNo(),
                 employee.getName(),
                 employee.getEmail(),
-                employee.getRoleCode()
+                employee.getRoleCode(),
+                delegated,
+                employee.getDepartment() != null ? employee.getDepartment().getDepartmentId() : null
         );
     }
 }

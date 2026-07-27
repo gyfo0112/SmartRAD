@@ -13,6 +13,7 @@ import erp.system.employee.entity.Employee;
 import erp.system.employee.repository.EmployeeRepository;
 import erp.system.notification.entity.Notification;
 import erp.system.notification.service.NotificationService;
+import erp.system.teamlead.service.TeamLeadAuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ public class EmployeeCertificateIssueService {
     private final EmployeeRepository employeeRepository;
     private final NotificationService notificationService;
     private final AuditLogService auditLogService;
+    private final TeamLeadAuthorityService teamLeadAuthorityService;
 
     private static String certificateTypeLabel(String certificateType) {
         return switch (certificateType) {
@@ -52,8 +54,19 @@ public class EmployeeCertificateIssueService {
                 .toList();
     }
 
-    public Page<EmployeeCertificateIssueResponse> getList(Long employeeId, String certificateType, String approvalStatus,
+    public Page<EmployeeCertificateIssueResponse> getList(Long requesterId, Long employeeId, String certificateType, String approvalStatus,
                                                             String keyword, Pageable pageable) {
+        Employee requester = employeeRepository.findById(requesterId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
+        Long scopedDepartmentId = null;
+        if (!requester.isAdmin()) {
+            scopedDepartmentId = teamLeadAuthorityService.getManagedDepartmentId(requesterId);
+            if (scopedDepartmentId == null) {
+                throw new BusinessException(ErrorCode.ACCESS_DENIED);
+            }
+        }
+        Long finalScopedDepartmentId = scopedDepartmentId;
+
         Specification<EmployeeCertificateIssue> spec = (root, query, cb) -> {
             var predicate = cb.conjunction();
             if (employeeId != null) {
@@ -67,6 +80,9 @@ public class EmployeeCertificateIssueService {
             }
             if (StringUtils.hasText(keyword)) {
                 predicate = cb.and(predicate, cb.like(root.get("employee").get("name"), "%" + keyword + "%"));
+            }
+            if (finalScopedDepartmentId != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("employee").get("department").get("departmentId"), finalScopedDepartmentId));
             }
             return predicate;
         };
@@ -118,6 +134,7 @@ public class EmployeeCertificateIssueService {
     @Transactional
     public EmployeeCertificateIssueResponse approve(Long id, Long actorId) {
         EmployeeCertificateIssue issue = findActive(id);
+        authorizeManage(actorId, issue);
         issue.approve();
         notificationService.notify(
                 issue.getEmployee().getEmployeeId(),
@@ -138,6 +155,7 @@ public class EmployeeCertificateIssueService {
     @Transactional
     public EmployeeCertificateIssueResponse reject(Long id, String memo, Long actorId) {
         EmployeeCertificateIssue issue = findActive(id);
+        authorizeManage(actorId, issue);
         issue.reject(memo);
         notificationService.notify(
                 issue.getEmployee().getEmployeeId(),
@@ -158,6 +176,7 @@ public class EmployeeCertificateIssueService {
     @Transactional
     public EmployeeCertificateIssueResponse issue(Long id, Long actorId) {
         EmployeeCertificateIssue issue = findActive(id);
+        authorizeManage(actorId, issue);
         issue.issue();
         notificationService.notify(
                 issue.getEmployee().getEmployeeId(),
@@ -173,6 +192,14 @@ public class EmployeeCertificateIssueService {
                 null
         );
         return EmployeeCertificateIssueResponse.from(issue);
+    }
+
+    private void authorizeManage(Long actorId, EmployeeCertificateIssue issue) {
+        Employee actor = employeeRepository.findById(actorId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
+        Long targetDepartmentId = issue.getEmployee().getDepartment() != null
+                ? issue.getEmployee().getDepartment().getDepartmentId() : null;
+        teamLeadAuthorityService.authorizeManage(actorId, actor.isAdmin(), targetDepartmentId);
     }
 
     private EmployeeCertificateIssue findActive(Long id) {

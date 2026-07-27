@@ -47,6 +47,8 @@ public class AuditLog extends CreatedAtEntity {
     public static final String ACTION_NOTICE_CREATE = "NOTICE_CREATE";
     public static final String ACTION_NOTICE_UPDATE = "NOTICE_UPDATE";
     public static final String ACTION_NOTICE_DELETE = "NOTICE_DELETE";
+    public static final String ACTION_TEAM_LEAD_AUTHORITY_GRANT = "TEAM_LEAD_AUTHORITY_GRANT";
+    public static final String ACTION_TEAM_LEAD_AUTHORITY_REVOKE = "TEAM_LEAD_AUTHORITY_REVOKE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

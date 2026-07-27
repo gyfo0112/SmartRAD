@@ -4,20 +4,19 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ShieldExclamationIcon } from "@heroicons/react/24/outline";
 import { dashboardMenuGroups } from "@/lib/dashboardMenu";
-import { isAdmin } from "@/lib/auth";
+import { isAdmin, isDelegatedTeamLead } from "@/lib/auth";
 import Modal from "@/components/common/Modal";
 
 const allMenuItems = dashboardMenuGroups.flatMap((group) => group.items);
 
-function isAdminOnlyPath(pathname: string) {
+function findMostSpecificMenuItem(pathname: string) {
   // Some employee routes are nested below an administrator-only route
   // (e.g. `/certificates/my` under `/certificates`), so prefix matches must
   // resolve to the most specific (longest href) menu item, not just the
   // first one encountered.
   const matches = allMenuItems.filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
-  if (matches.length === 0) return false;
-  const mostSpecific = matches.reduce((longest, item) => (item.href.length > longest.href.length ? item : longest));
-  return mostSpecific.adminOnly;
+  if (matches.length === 0) return null;
+  return matches.reduce((longest, item) => (item.href.length > longest.href.length ? item : longest));
 }
 
 export default function RoleGuard() {
@@ -26,7 +25,10 @@ export default function RoleGuard() {
   const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
-    if (isAdminOnlyPath(pathname) && !isAdmin()) {
+    const item = findMostSpecificMenuItem(pathname);
+    const isAdminOnly = item?.adminOnly ?? false;
+    const teamLeadAllowed = (item && "teamLeadAllowed" in item && item.teamLeadAllowed) ?? false;
+    if (isAdminOnly && !isAdmin() && !(teamLeadAllowed && isDelegatedTeamLead())) {
       setBlocked(true);
       router.replace("/dashboard");
     } else {

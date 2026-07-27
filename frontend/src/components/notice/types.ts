@@ -5,6 +5,8 @@ export interface NoticeSummary {
   pinned: boolean;
   viewCount: number;
   createdAt: string;
+  scopeDepartmentId: number | null;
+  scopeDepartmentName: string | null;
 }
 
 export interface NoticePage {
@@ -25,4 +27,6 @@ export interface NoticeDetail {
   viewCount: number;
   createdAt: string;
   updatedAt: string;
+  scopeDepartmentId: number | null;
+  scopeDepartmentName: string | null;
 }

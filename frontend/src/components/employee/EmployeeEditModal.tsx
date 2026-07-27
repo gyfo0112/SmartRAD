@@ -23,7 +23,7 @@ const STATUS_OPTIONS = [
 const inputClasses = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
 const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
-export default function EmployeeEditModal({ employee, onClose, onSave }: any) {
+export default function EmployeeEditModal({ employee, onClose, onSave, restricted }: any) {
   const [formData, setFormData] = useState({
     ...employee,
     name: employee.name || "",
@@ -93,7 +93,8 @@ export default function EmployeeEditModal({ employee, onClose, onSave }: any) {
   return (
     <Modal
       icon={PencilSquareIcon}
-      title="직원 정보 수정"
+      title={restricted ? "팀원 정보 수정" : "직원 정보 수정"}
+      subtitle={restricted ? "팀장 권한으로는 기본정보(이름/연락처/이메일/주소/사진)만 수정할 수 있습니다." : undefined}
       onClose={onClose}
       maxWidth="lg"
       as="form"
@@ -163,31 +164,33 @@ export default function EmployeeEditModal({ employee, onClose, onSave }: any) {
 
 
 
-            <div className="border border-gray-100 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-100">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">재직 상태</h3>
-              </div>
-              <div className="p-4">
-                <div className="grid grid-cols-3 gap-2">
-                  {STATUS_OPTIONS.map((option) => {
-                    const selected = formData.employeeStatusCode === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => setFormData({ ...formData, employeeStatusCode: option.value })}
-                        className={`h-10 rounded-lg border text-sm font-bold transition-colors ${
-                          selected ? option.selectedClasses : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    );
-                  })}
+            {!restricted && (
+              <div className="border border-gray-100 rounded-lg overflow-hidden">
+                <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-100">
+                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">재직 상태</h3>
+                </div>
+                <div className="p-4">
+                  <div className="grid grid-cols-3 gap-2">
+                    {STATUS_OPTIONS.map((option) => {
+                      const selected = formData.employeeStatusCode === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => setFormData({ ...formData, employeeStatusCode: option.value })}
+                          className={`h-10 rounded-lg border text-sm font-bold transition-colors ${
+                            selected ? option.selectedClasses : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
     </Modal>
   );
 }

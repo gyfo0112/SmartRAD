@@ -42,6 +42,8 @@ const ACTION_TYPE_LABELS: Record<string, string> = {
   NOTICE_CREATE: "공지사항 등록",
   NOTICE_UPDATE: "공지사항 수정",
   NOTICE_DELETE: "공지사항 삭제",
+  TEAM_LEAD_AUTHORITY_GRANT: "팀장 권한 부여",
+  TEAM_LEAD_AUTHORITY_REVOKE: "팀장 권한 회수",
 };
 
 const ACTION_TYPE_STYLES: Record<string, string> = {
@@ -74,6 +76,8 @@ const ACTION_TYPE_STYLES: Record<string, string> = {
   NOTICE_CREATE: "bg-emerald-50 text-emerald-700",
   NOTICE_UPDATE: "bg-blue-50 text-blue-700",
   NOTICE_DELETE: "bg-rose-50 text-rose-700",
+  TEAM_LEAD_AUTHORITY_GRANT: "bg-indigo-50 text-indigo-700",
+  TEAM_LEAD_AUTHORITY_REVOKE: "bg-rose-50 text-rose-700",
 };
 
 function actionLabel(actionType: string) {

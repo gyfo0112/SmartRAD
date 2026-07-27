@@ -6,6 +6,7 @@ import { UserIcon, PencilSquareIcon, TrashIcon, ClockIcon, CurrencyDollarIcon, B
 import { getEmployeeStatusLabel, getEmployeeStatusBadgeClasses } from "@/lib/employeeStatus";
 import { EMPLOYEE_DOCUMENT_TYPE_OPTIONS } from "@/components/employee/documentTypes";
 import { resolveFileUrl } from "@/lib/fileUrl";
+import { isDelegatedTeamLead, getDepartmentId } from "@/lib/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -32,6 +33,7 @@ interface EmployeeDetailData {
   managerId: number | null;
   managerName: string | null;
   profileImage: string | null;
+  teamLeadDelegated: boolean;
 }
 
 interface LeaveBalance {
@@ -76,6 +78,7 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
   const [documents, setDocuments] = useState<EmployeeDocument[]>([]);
   const [uploadingType, setUploadingType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [delegating, setDelegating] = useState(false);
 
   useEffect(() => {
     if (employeeId) {
@@ -172,6 +175,29 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
     }
   };
 
+  const handleToggleTeamLead = async () => {
+    if (!data) return;
+    const grant = !data.teamLeadDelegated;
+    if (!confirm(grant ? `${data.name}님에게 팀장 권한을 부여하시겠습니까?` : `${data.name}님의 팀장 권한을 회수하시겠습니까?`)) return;
+    setDelegating(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/team-lead-authorities/${data.employeeId}`, {
+        method: grant ? "POST" : "DELETE",
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        setData((current) => (current ? { ...current, teamLeadDelegated: grant } : current));
+      } else {
+        alert(grant ? "권한 부여에 실패했습니다." : "권한 회수에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("처리 중 오류가 발생했습니다.");
+    } finally {
+      setDelegating(false);
+    }
+  };
+
   if (!employeeId) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm h-full flex flex-col items-center justify-center text-gray-400 p-8">
@@ -191,6 +217,8 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
 
   if (!data) return null;
 
+  const canEditAsTeamLead = isDelegatedTeamLead() && data.departmentId != null && data.departmentId === getDepartmentId();
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm h-full flex flex-col">
       <div className="p-5 border-b border-gray-100 flex items-center justify-between">
@@ -200,16 +228,29 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
         </h2>
         <div className="flex items-center gap-2">
           {role === "ADMIN" && (
-            <>
-              <button onClick={() => onEditClick?.(data)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-                <PencilSquareIcon className="w-4 h-4" />
-                정보 수정
-              </button>
-              <button onClick={() => onDeleteClick?.(data.employeeId)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-rose-600 bg-rose-50 border border-rose-100 rounded-md hover:bg-rose-100 transition-colors">
-                <TrashIcon className="w-4 h-4" />
-                직원 삭제
-              </button>
-            </>
+            <button
+              onClick={handleToggleTeamLead}
+              disabled={delegating}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                data.teamLeadDelegated
+                  ? "text-indigo-600 bg-indigo-50 border-indigo-100 hover:bg-indigo-100"
+                  : "text-gray-700 bg-white border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              {data.teamLeadDelegated ? "팀장 권한 회수" : "팀장 권한 부여"}
+            </button>
+          )}
+          {(role === "ADMIN" || canEditAsTeamLead) && (
+            <button onClick={() => onEditClick?.(data)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+              <PencilSquareIcon className="w-4 h-4" />
+              정보 수정
+            </button>
+          )}
+          {role === "ADMIN" && (
+            <button onClick={() => onDeleteClick?.(data.employeeId)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-rose-600 bg-rose-50 border border-rose-100 rounded-md hover:bg-rose-100 transition-colors">
+              <TrashIcon className="w-4 h-4" />
+              직원 삭제
+            </button>
           )}
         </div>
       </div>

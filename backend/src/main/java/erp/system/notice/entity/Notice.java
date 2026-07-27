@@ -1,6 +1,7 @@
 package erp.system.notice.entity;
 
 import erp.system.common.entity.BaseEntity;
+import erp.system.department.entity.Department;
 import erp.system.employee.entity.Employee;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -38,19 +39,26 @@ public class Notice extends BaseEntity {
     @Column(name = "view_count", nullable = false)
     private int viewCount;
 
+    // null이면 전사공개. 값이 있으면 해당 부서 소속 직원에게만 노출된다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scope_department_id")
+    private Department scopeDepartment;
+
     @Builder
-    public Notice(Employee writer, String title, String content, boolean pinned) {
+    public Notice(Employee writer, String title, String content, boolean pinned, Department scopeDepartment) {
         this.writer = writer;
         this.title = title;
         this.content = content;
         this.pinned = pinned;
         this.viewCount = 0;
+        this.scopeDepartment = scopeDepartment;
     }
 
-    public void update(String title, String content, boolean pinned) {
+    public void update(String title, String content, boolean pinned, Department scopeDepartment) {
         this.title = title;
         this.content = content;
         this.pinned = pinned;
+        this.scopeDepartment = scopeDepartment;
     }
 
     public void increaseViewCount() {

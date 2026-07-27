@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowRightStartOnRectangleIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { dashboardMenuGroups as menuGroups } from "@/lib/dashboardMenu";
-import { clearAuthStorage, isAdmin } from "@/lib/auth";
+import { clearAuthStorage, isAdmin, isDelegatedTeamLead } from "@/lib/auth";
 import Logo from "@/components/ui/Logo";
 import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
@@ -19,6 +19,7 @@ export default function DashboardSidebar() {
   const [employeeName, setEmployeeName] = useState("");
   const [employeeEmail, setEmployeeEmail] = useState("");
   const [admin, setAdmin] = useState(false);
+  const [teamLead, setTeamLead] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function DashboardSidebar() {
     setEmployeeName(getStoredValue("employeeName") ?? "");
     setEmployeeEmail(getStoredValue("employeeEmail") ?? "");
     setAdmin(isAdmin());
+    setTeamLead(isDelegatedTeamLead());
   }, []);
 
   const handleLogout = () => {
@@ -40,7 +42,9 @@ export default function DashboardSidebar() {
   const filteredGroups = menuGroups.map(group => ({
     ...group,
     items: group.items
-      .filter(item => admin ? !("userOnly" in item && item.userOnly) : !item.adminOnly)
+      .filter(item => admin
+        ? !("userOnly" in item && item.userOnly)
+        : (!item.adminOnly || (teamLead && "teamLeadAllowed" in item && item.teamLeadAllowed)))
       .filter(item => item.name.includes(searchQuery))
   })).filter(group => group.items.length > 0);
 

@@ -43,13 +43,14 @@ public class EmployeeCertificateIssueController {
 
     @GetMapping("/search")
     public Page<EmployeeCertificateIssueResponse> getList(
+            @AuthenticationPrincipal Long requesterId,
             @RequestParam(required = false) Long employeeId,
             @RequestParam(required = false) String certificateType,
             @RequestParam(required = false) String approvalStatus,
             @RequestParam(required = false) String keyword,
             Pageable pageable
     ) {
-        return certificateIssueService.getList(employeeId, certificateType, approvalStatus, keyword, pageable);
+        return certificateIssueService.getList(requesterId, employeeId, certificateType, approvalStatus, keyword, pageable);
     }
 
     @PostMapping

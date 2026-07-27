@@ -134,7 +134,7 @@ export default function NoticeList({ refreshKey, onActionComplete, onEdit }: Pro
       const res = await fetch(`${API_BASE_URL}/notices/${notice.noticeId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({ title: detail.title, content: detail.content, pinned }),
+        body: JSON.stringify({ title: detail.title, content: detail.content, pinned, departmentId: detail.scopeDepartmentId }),
       });
       if (!res.ok) throw new Error();
     } catch {
@@ -263,6 +263,11 @@ export default function NoticeList({ refreshKey, onActionComplete, onEdit }: Pro
                       <button type="button" onClick={() => openView(row.noticeId)} className="text-left hover:underline hover:text-blue-600">
                         {row.title}
                       </button>
+                      {row.scopeDepartmentId != null && (
+                        <span className="ml-1.5 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-600">
+                          {row.scopeDepartmentName ?? "부서"}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 text-center whitespace-nowrap">{row.writerName}</td>
                     <td className="py-3 px-4 text-sm text-gray-600 text-center whitespace-nowrap">{formatDate(row.createdAt)}</td>
