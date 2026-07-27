@@ -61,6 +61,11 @@ const STATS = [
   { value: "15년", label: "운영 경력" },
 ];
 
+const DEMO_ACCOUNTS = [
+  { role: "관리자", email: "admin123@test.com", password: "test1234" },
+  { role: "사원", email: "e002.mkt@smartrad.co.kr", password: "test1234" },
+];
+
 const FEATURES = [
   {
     title: "인사관리",
@@ -125,6 +130,12 @@ export default function LoginPage() {
     storage.setItem("delegated", String(data.delegated));
     storage.setItem("departmentId", data.departmentId != null ? String(data.departmentId) : "");
     router.push("/dashboard");
+  };
+
+  const handleFillDemoAccount = (account: { email: string; password: string }) => {
+    setError(null);
+    setEmail(account.email);
+    setPassword(account.password);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -357,7 +368,38 @@ export default function LoginPage() {
             <h2 className="mt-3 text-2xl font-bold text-brand-navy">로그인</h2>
             <p className="mt-1.5 text-sm text-brand-muted">계정에 로그인하여 업무를 시작하세요</p>
 
-            <form className="mt-7 flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
+            <div className="mt-5 rounded-2xl border border-brand-border-light bg-brand-soft px-4 py-3.5">
+              <p className="text-xs font-bold text-brand-primary">
+                포트폴리오 테스트 계정
+              </p>
+              <div className="mt-2.5 flex flex-col gap-2">
+                {DEMO_ACCOUNTS.map((account) => (
+                  <button
+                    key={account.role}
+                    type="button"
+                    onClick={() => handleFillDemoAccount(account)}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-brand-border-light bg-white px-3.5 py-2.5 text-left transition-colors hover:border-brand-primary hover:bg-brand-primary/5"
+                  >
+                    <span className="min-w-0">
+                      <span className="mr-2 inline-block rounded-full bg-brand-primary/10 px-2 py-0.5 text-[11px] font-bold text-brand-primary">
+                        {account.role}
+                      </span>
+                      <span className="break-all font-mono text-[12px] text-brand-navy">
+                        {account.email}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-[11px] font-semibold text-brand-muted">
+                      자동입력
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2.5 text-[11px] text-brand-muted">
+                비밀번호는 두 계정 모두 <span className="font-mono font-semibold">test1234</span> 입니다.
+              </p>
+            </div>
+
+            <form className="mt-5 flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
               <div>
                 <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-brand-text">
                   이메일
