@@ -46,11 +46,11 @@ export default function EmployeesPage() {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto h-[calc(100vh-100px)] flex flex-col">
+    <div className="max-w-[1600px] mx-auto min-h-[calc(100vh-100px)] pb-6 flex flex-col">
       {role === "ADMIN" && <EmployeeStats refreshKey={refreshKey} />}
       
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
-        <div className={`h-full min-h-0 ${selectedEmployeeId ? 'hidden lg:block' : 'block'}`}>
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`${selectedEmployeeId ? 'hidden lg:block' : 'block'}`}>
           <EmployeeList
             refreshKey={refreshKey}
             onSelectEmployee={setSelectedEmployeeId}
@@ -58,7 +58,7 @@ export default function EmployeesPage() {
             role={role}
           />
         </div>
-        <div className={`h-full min-h-0 ${selectedEmployeeId ? 'block' : 'hidden lg:block'}`}>
+        <div className={`${selectedEmployeeId ? 'block' : 'hidden lg:block'}`}>
           <EmployeeDetail
             refreshKey={refreshKey}
             employeeId={selectedEmployeeId}

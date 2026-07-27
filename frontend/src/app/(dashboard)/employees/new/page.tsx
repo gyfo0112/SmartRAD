@@ -605,16 +605,16 @@ export default function NewEmployeePage() {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3">
             <div>
               <p className="text-sm font-extrabold text-slate-900">엑셀로 여러 명 한 번에 등록</p>
               <p className="mt-0.5 text-xs text-slate-400">양식을 내려받아 작성한 뒤 업로드하면 여러 직원을 한 번에 등록할 수 있습니다. (이름·생년월일·부서·직급은 필수)</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex w-full sm:w-auto gap-2">
               <button
                 type="button"
                 onClick={downloadBulkTemplate}
-                className="h-9 rounded-lg border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                className="flex-1 sm:flex-none h-9 rounded-lg border border-slate-200 bg-white px-3 sm:px-4 text-xs font-bold text-slate-600 hover:bg-slate-50"
               >
                 ⇩ 양식 다운로드
               </button>
@@ -629,7 +629,7 @@ export default function NewEmployeePage() {
                 type="button"
                 onClick={() => bulkInputRef.current?.click()}
                 disabled={bulkUploading}
-                className="h-9 rounded-lg bg-indigo-600 px-4 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="flex-1 sm:flex-none h-9 rounded-lg bg-indigo-600 px-3 sm:px-4 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
               >
                 {bulkUploading ? "등록 중..." : "⇧ 엑셀 업로드"}
               </button>
@@ -816,16 +816,16 @@ export default function NewEmployeePage() {
           </aside>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-4">
-          <p className="text-xs text-slate-400">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 rounded-xl border border-slate-200 bg-white px-4 sm:px-6 py-4">
+          <p className="text-xs text-slate-400 text-center sm:text-left">
             {error ? <span className="font-bold text-rose-500">{error}</span> : "ⓘ * 표시 항목은 모두 입력해야 등록이 가능합니다."}
           </p>
-          <div className="flex gap-3">
-            <button type="button" onClick={() => router.push("/employees")} className="h-10 rounded-lg border border-slate-200 px-5 text-sm">취소</button>
-            <button type="button" onClick={resetForm} className="h-10 rounded-lg border border-orange-200 bg-orange-50 px-5 text-sm font-bold text-orange-500">
+          <div className="flex w-full sm:w-auto gap-2 sm:gap-3">
+            <button type="button" onClick={() => router.push("/employees")} className="flex-1 sm:flex-none h-10 rounded-lg border border-slate-200 px-3 sm:px-5 text-sm">취소</button>
+            <button type="button" onClick={resetForm} className="flex-1 sm:flex-none h-10 rounded-lg border border-orange-200 bg-orange-50 px-3 sm:px-5 text-sm font-bold text-orange-500">
               초기화
             </button>
-            <button type="button" onClick={handleSave} disabled={isSubmitting} className="h-10 rounded-lg bg-indigo-600 px-7 text-sm font-bold text-white disabled:opacity-50">
+            <button type="button" onClick={handleSave} disabled={isSubmitting} className="flex-1 sm:flex-none h-10 rounded-lg bg-indigo-600 px-3 sm:px-7 text-sm font-bold text-white disabled:opacity-50">
               {isSubmitting ? "등록 중..." : "✓ 등록하기"}
             </button>
           </div>

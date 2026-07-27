@@ -240,7 +240,7 @@ export default function DepartmentsPage() {
           </span>
         </div>
         
-        <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#f8fafc]">
+        <div className="flex-1 overflow-auto p-4 sm:p-12 flex sm:justify-center bg-[#f8fafc]">
           {loading ? (
             <div className="flex items-center justify-center h-full text-gray-500 font-medium">조직도를 불러오는 중입니다...</div>
           ) : error ? (

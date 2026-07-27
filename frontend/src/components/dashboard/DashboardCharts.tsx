@@ -85,7 +85,7 @@ export function TodayAttendanceChart({ data, loading }: { data: AttendanceStatus
       {loading ? (
         <div className="flex h-[220px] items-center justify-center text-sm text-gray-500">로딩 중...</div>
       ) : (
-        <div className="mt-4 flex items-center gap-4">
+        <div className="mt-4 flex flex-col sm:flex-row items-center gap-6 sm:gap-4">
           <div className="relative h-[180px] w-[180px] shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -101,7 +101,7 @@ export function TodayAttendanceChart({ data, loading }: { data: AttendanceStatus
               <span className="text-xs text-gray-500">전체 인원</span>
             </div>
           </div>
-          <div className="min-w-0 flex-1 space-y-2">
+          <div className="w-full sm:min-w-0 sm:flex-1 space-y-2">
             {data.map((item) => (
               <div key={item.name} className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 text-gray-600">
