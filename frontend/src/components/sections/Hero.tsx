@@ -20,11 +20,11 @@ export default function Hero() {
     <section className="w-full bg-[radial-gradient(circle_at_82%_8%,var(--color-brand-soft-strong)_0%,#F5F9FF_26%,#FFFFFF_58%)]">
       <Container className="flex flex-col items-center gap-10 py-14 sm:gap-12 sm:py-20 lg:flex-row lg:gap-16">
         <div className="w-full min-w-0 max-w-[540px] lg:shrink-0">
-          <SectionBadge className="mb-6 tracking-[0] sm:mb-7">
+          <SectionBadge className="mb-6 animate-fade-in-up tracking-[0] sm:mb-7">
             기업 인사관리를 위한 HR ERP
           </SectionBadge>
 
-          <h1 className="break-keep text-[36px] font-bold leading-[1.12] tracking-[-2.5px] min-[380px]:text-[40px] sm:text-[52px] sm:leading-[58px] sm:tracking-[-5px] lg:text-[60px] lg:leading-[65px] lg:tracking-[-7px]">
+          <h1 className="animate-fade-in-up break-keep text-[36px] font-bold leading-[1.12] tracking-[-2.5px] [animation-delay:80ms] min-[380px]:text-[40px] sm:text-[52px] sm:leading-[58px] sm:tracking-[-5px] lg:text-[60px] lg:leading-[65px] lg:tracking-[-7px]">
             <span className="block text-brand-navy">
               인사관리의
             </span>
@@ -35,7 +35,7 @@ export default function Hero() {
             </span>
           </h1>
 
-          <p className="mt-6 max-w-[530px] break-words text-base font-bold leading-7 tracking-[0] text-brand-text sm:mt-8 sm:text-[22px] sm:leading-[35.6px]">
+          <p className="mt-6 max-w-[530px] animate-fade-in-up break-words text-base font-bold leading-7 tracking-[0] text-brand-text [animation-delay:180ms] sm:mt-8 sm:text-[22px] sm:leading-[35.6px]">
             <span className="sm:block">
               직원 정보, 조직, 근태, 휴가, 급여 정산까지.
             </span>
@@ -47,7 +47,7 @@ export default function Hero() {
             </span>
           </p>
 
-          <div className="mt-8 grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 sm:mt-[42px] sm:gap-[14px]">
+          <div className="mt-8 grid animate-fade-in-up grid-cols-1 gap-3 [animation-delay:280ms] min-[480px]:grid-cols-2 sm:mt-[42px] sm:gap-[14px]">
             <HashLink
               href="#features"
               className="flex h-[52px] w-full items-center justify-center whitespace-nowrap rounded-full bg-brand-primary px-5 text-[14px] font-extrabold transition-colors duration-300 ease-out hover:bg-brand-primary-dark sm:h-[54px] sm:px-8 sm:text-[15px] motion-reduce:transition-none"
@@ -63,11 +63,11 @@ export default function Hero() {
             </HashLink>
           </div>
 
-          <div className="mt-9 grid grid-cols-1 gap-3 sm:mt-11 sm:grid-cols-3">
+          <div className="mt-9 grid animate-fade-in-up grid-cols-1 gap-3 [animation-delay:380ms] sm:mt-11 sm:grid-cols-3">
             {highlights.map((item) => (
               <div
                 key={item.title}
-                className="min-h-[76px] min-w-0 rounded-[18px] border border-brand-border bg-white px-4 py-4 shadow-[0_12px_30px_rgba(50,94,160,0.07)] sm:min-h-[84px] sm:px-[18px]"
+                className="min-h-[76px] min-w-0 rounded-[18px] border border-brand-border bg-white px-4 py-4 shadow-[0_12px_30px_rgba(50,94,160,0.07)] transition-all duration-300 ease-out sm:min-h-[84px] sm:px-[18px] [@media(hover:hover)]:hover:-translate-y-1 [@media(hover:hover)]:hover:shadow-[0_16px_36px_rgba(50,94,160,0.12)] motion-reduce:transform-none motion-reduce:transition-none"
               >
                 <p className="text-[24px] font-extrabold leading-none text-brand-navy">
                   {item.title}
@@ -80,16 +80,22 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="flex w-full min-w-0 flex-1 items-center justify-center lg:justify-end">
-          <Image
-            src="/hero-dashboard.svg"
-            alt="SmartHR 인사관리 대시보드 화면"
-            width={3844}
-            height={3120}
-            priority
-            sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(100vw - 48px), 750px"
-            className="h-auto w-full max-w-[680px] object-contain lg:max-w-[750px]"
+        <div className="relative flex w-full min-w-0 flex-1 animate-fade-in-up items-center justify-center [animation-delay:220ms] lg:justify-end">
+          <div
+            aria-hidden
+            className="animate-soft-pulse absolute inset-[8%] -z-10 rounded-full bg-[radial-gradient(circle,rgba(40,104,246,0.28)_0%,rgba(40,104,246,0)_70%)] blur-2xl motion-reduce:hidden"
           />
+          <div className="animate-hero-float motion-reduce:animate-none">
+            <Image
+              src="/hero-dashboard.svg"
+              alt="SmartHR 인사관리 대시보드 화면"
+              width={3844}
+              height={3120}
+              priority
+              sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(100vw - 48px), 750px"
+              className="h-auto w-full max-w-[680px] object-contain lg:max-w-[750px]"
+            />
+          </div>
         </div>
       </Container>
     </section>

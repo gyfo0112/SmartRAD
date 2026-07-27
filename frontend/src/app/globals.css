@@ -60,6 +60,75 @@ body {
   background: #ffffff;
 }
 
+/* Landing page entrance / scroll animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-hero-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 5s ease-in-out infinite;
+}
+
+/* Scroll-linked reveal: progressive enhancement only. Content stays fully
+   visible in browsers without scroll-driven animation support. */
+@supports (animation-timeline: view()) {
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(28px);
+    animation: fade-in-up 0.6s ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-hero-float,
+  .animate-soft-pulse,
+  .reveal-on-scroll {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* Desktop is the base dashboard layout. Tablet and phone adjustments are below. */
 .dashboard-sidebar {
   z-index: 40;

@@ -36,7 +36,7 @@ export default function Contact() {
       className="w-full bg-[linear-gradient(180deg,#F4F8FF_0%,#FFFFFF_100%)] py-20 sm:py-28 lg:py-32"
     >
       <Container className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10">
-        <div className="flex min-w-0 flex-col rounded-[28px] bg-gradient-to-br from-[#17458F] via-[#1E55C7] to-[#246BFE] p-5 text-white sm:p-10 lg:min-h-[680px]">
+        <div className="reveal-on-scroll flex min-w-0 flex-col rounded-[28px] bg-gradient-to-br from-[#17458F] via-[#1E55C7] to-[#246BFE] p-5 text-white sm:p-10 lg:min-h-[680px]">
           <SectionBadge variant="inverse" className="w-fit">
             문의
           </SectionBadge>
@@ -72,7 +72,8 @@ export default function Contact() {
 
         <form
           onSubmit={handleSubmit}
-          className="flex min-w-0 flex-col rounded-[28px] border border-brand-border bg-white p-5 shadow-[0_18px_45px_rgba(50,94,160,0.08)] sm:p-10 lg:min-h-[680px]"
+          style={{ animationDelay: "100ms" }}
+          className="reveal-on-scroll flex min-w-0 flex-col rounded-[28px] border border-brand-border bg-white p-5 shadow-[0_18px_45px_rgba(50,94,160,0.08)] sm:p-10 lg:min-h-[680px]"
         >
           <h2 className="text-[25px] font-extrabold text-brand-navy">
             도입 문의 및 견적
@@ -114,7 +115,10 @@ export default function Contact() {
           </button>
         </form>
 
-        <div className="rounded-[28px] border border-brand-border bg-white p-7 shadow-[0_18px_45px_rgba(50,94,160,0.06)] sm:p-8">
+        <div
+          style={{ animationDelay: "180ms" }}
+          className="reveal-on-scroll rounded-[28px] border border-brand-border bg-white p-7 shadow-[0_18px_45px_rgba(50,94,160,0.06)] sm:p-8"
+        >
           <h2 className="text-[24px] font-extrabold text-brand-navy">
             자주 묻는 질문
           </h2>
@@ -158,7 +162,10 @@ export default function Contact() {
           </div>
         </div>
 
-        <div className="self-start rounded-[28px] border border-brand-border bg-white p-7 shadow-[0_18px_45px_rgba(50,94,160,0.06)] sm:p-8">
+        <div
+          style={{ animationDelay: "260ms" }}
+          className="reveal-on-scroll self-start rounded-[28px] border border-brand-border bg-white p-7 shadow-[0_18px_45px_rgba(50,94,160,0.06)] sm:p-8"
+        >
           <h2 className="text-[24px] font-extrabold text-brand-navy">
             고객 센터
           </h2>

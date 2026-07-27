@@ -125,7 +125,7 @@ export default function Features() {
   return (
     <section id="features" className="w-full bg-white py-20 sm:py-28 lg:py-32">
       <Container>
-        <div className="text-center">
+        <div className="reveal-on-scroll text-center">
           <SectionBadge>주요 기능</SectionBadge>
 
           <h2 className="mt-5 break-keep text-[30px] font-extrabold leading-[1.25] tracking-[-1.5px] text-brand-navy sm:text-[44px] sm:tracking-[-3px]">
@@ -149,7 +149,8 @@ export default function Features() {
                 aria-pressed={isActive}
                 aria-label={`${feature.title} 기능 보기`}
                 onClick={() => setActiveIndex(index)}
-                className={`flex min-h-[190px] cursor-pointer flex-col rounded-[22px] border p-5 text-left transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/20 sm:min-h-[220px] sm:p-7 motion-reduce:transition-none ${
+                style={{ animationDelay: `${index * 90}ms` }}
+                className={`reveal-on-scroll flex min-h-[190px] cursor-pointer flex-col rounded-[22px] border p-5 text-left transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/20 sm:min-h-[220px] sm:p-7 motion-reduce:transition-none ${
                   isActive
                     ? "border-brand-primary bg-gradient-to-br from-[#246BFE] to-brand-primary-light text-white shadow-[0_14px_32px_rgba(36,107,254,0.16)]"
                     : "border-brand-border bg-white text-brand-navy shadow-none"
