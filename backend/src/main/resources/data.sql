@@ -141,13 +141,14 @@ UPDATE employee SET manager_id = 31 WHERE employee_id = 47;
 UPDATE employee SET manager_id = 19 WHERE employee_id = 48;
 UPDATE employee SET manager_id = 31 WHERE employee_id = 49;
 
--- 부서장 지정
-UPDATE department SET department_head_id = 19 WHERE department_id = 3;
-UPDATE department SET department_head_id = 24 WHERE department_id = 4;
-UPDATE department SET department_head_id = 31 WHERE department_id = 1;
-UPDATE department SET department_head_id = 36 WHERE department_id = 6;
-UPDATE department SET department_head_id = 37 WHERE department_id = 2;
-UPDATE department SET department_head_id = 50 WHERE department_id = 5;
+-- 부서장(팀장 위임) 지정: 부서당 1명, department.department_head_id가 아니라 team_lead_authority로 관리된다.
+INSERT IGNORE INTO team_lead_authority (team_lead_authority_id, employee_id, active, deleted, created_at, updated_at) VALUES
+(1, 31, b'1', b'0', '2026-07-15 06:00:32', '2026-07-15 06:00:32'),
+(2, 37, b'1', b'0', '2026-07-15 06:00:32', '2026-07-15 06:00:32'),
+(3, 19, b'1', b'0', '2026-07-15 06:00:32', '2026-07-15 06:00:32'),
+(4, 24, b'1', b'0', '2026-07-15 06:00:32', '2026-07-15 06:00:32'),
+(5, 50, b'1', b'0', '2026-07-15 06:00:32', '2026-07-15 06:00:32'),
+(6, 36, b'1', b'0', '2026-07-15 06:00:32', '2026-07-15 06:00:32');
 
 INSERT IGNORE INTO employee_leave_balance (employee_leave_balance_id, employee_id, leave_type_id, total_days, used_days, remain_days, expire_date, created_at) VALUES
 (1, 1, 1, 19, 0, 19, '2023-04-06', '2026-07-15 06:00:32'),

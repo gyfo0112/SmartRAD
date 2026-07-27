@@ -15,12 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * 관리자가 특정 직원에게 부여하는 "팀장 권한" — 부서장(Department.departmentHead, 조직도 표시용)과는
- * 별개의 개념이며, 부서는 위임 행에 저장하지 않고 매 요청마다 대상 직원의 현재 소속 부서로 동적으로 계산한다.
- * 인가 판단은 항상 이 서비스가 DB를 다시 조회해서 수행하며, JWT의 delegated 클레임(프런트 메뉴 표시용)은 신뢰하지 않는다.
+ * 관리자가 특정 직원에게 부여하는 "팀장 권한". 부서는 위임 행에 저장하지 않고 매 요청마다
+ * 대상 직원의 현재 소속 부서로 동적으로 계산한다. 한 부서에는 활성 팀장이 항상 최대 1명만 존재하도록
+ * grant() 시 같은 부서의 기존 활성 위임을 자동으로 회수하며, 부서 관리 화면의 "담당자" 표시도 이 위임
+ * 정보를 기준으로 계산한다(위임이 없으면 "공석"). 인가 판단은 항상 이 서비스가 DB를 다시 조회해서
+ * 수행하며, JWT의 delegated 클레임(프런트 메뉴 표시용)은 신뢰하지 않는다.
  */
 @Service
 @RequiredArgsConstructor
@@ -35,6 +39,21 @@ public class TeamLeadAuthorityService {
     public void grant(Long employeeId, Long actorId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
+
+        if (employee.getDepartment() != null) {
+            Long departmentId = employee.getDepartment().getDepartmentId();
+            teamLeadAuthorityRepository.findAllByActiveTrue().stream()
+                    .filter(t -> t.getEmployee().getDepartment() != null
+                            && departmentId.equals(t.getEmployee().getDepartment().getDepartmentId())
+                            && !t.getEmployee().getEmployeeId().equals(employeeId))
+                    .forEach(prev -> {
+                        prev.setActive(false);
+                        auditLogService.log(actorId, AuditLog.ACTION_TEAM_LEAD_AUTHORITY_REVOKE,
+                                "팀장 권한 자동 회수: " + prev.getEmployee().getName() + "(" + prev.getEmployee().getEmployeeNo() + ") - 같은 부서에 새 팀장이 지정되어 자동 회수됨",
+                                null);
+                    });
+        }
+
         TeamLeadAuthority authority = teamLeadAuthorityRepository.findByEmployee_EmployeeId(employeeId)
                 .orElseGet(() -> TeamLeadAuthority.builder().employee(employee).build());
         authority.setActive(true);
@@ -98,5 +117,25 @@ public class TeamLeadAuthorityService {
         return teamLeadAuthorityRepository.findAllByActiveTrue().stream()
                 .map(TeamLeadAuthorityResponse::from)
                 .toList();
+    }
+
+    /**
+     * 부서별로 현재 활성화된 팀장 위임을 조회한다(없으면 map에 항목 자체가 없음).
+     * 부서 관리 화면의 "담당자" 표시를 위임 정보 기준으로 계산하는 데 사용된다.
+     */
+    public Map<Long, TeamLeadAuthorityResponse> getActiveByDepartment() {
+        return teamLeadAuthorityRepository.findAllByActiveTrue().stream()
+                .filter(t -> t.getEmployee().getDepartment() != null)
+                .collect(Collectors.toMap(
+                        t -> t.getEmployee().getDepartment().getDepartmentId(),
+                        TeamLeadAuthorityResponse::from,
+                        (a, b) -> a));
+    }
+
+    public TeamLeadAuthorityResponse getActiveForDepartment(Long departmentId) {
+        if (departmentId == null) {
+            return null;
+        }
+        return getActiveByDepartment().get(departmentId);
     }
 }

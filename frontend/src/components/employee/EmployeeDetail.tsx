@@ -178,7 +178,8 @@ export default function EmployeeDetail({ employeeId, onEditClick, onDeleteClick,
   const handleToggleTeamLead = async () => {
     if (!data) return;
     const grant = !data.teamLeadDelegated;
-    if (!confirm(grant ? `${data.name}님에게 팀장 권한을 부여하시겠습니까?` : `${data.name}님의 팀장 권한을 회수하시겠습니까?`)) return;
+    const grantMessage = `${data.name}님에게 팀장 권한을 부여하시겠습니까?\n"${data.departmentName}" 부서에 이미 팀장으로 지정된 사람이 있다면 그 사람의 권한은 자동으로 회수됩니다.`;
+    if (!confirm(grant ? grantMessage : `${data.name}님의 팀장 권한을 회수하시겠습니까?`)) return;
     setDelegating(true);
     try {
       const res = await fetch(`${API_BASE_URL}/team-lead-authorities/${data.employeeId}`, {

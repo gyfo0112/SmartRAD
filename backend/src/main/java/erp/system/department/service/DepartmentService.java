@@ -18,6 +18,8 @@ import erp.system.notification.entity.Notification;
 import erp.system.notification.service.NotificationService;
 import erp.system.payroll.entity.Payroll;
 import erp.system.payroll.repository.PayrollRepository;
+import erp.system.teamlead.dto.TeamLeadAuthorityResponse;
+import erp.system.teamlead.service.TeamLeadAuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,10 +48,12 @@ public class DepartmentService {
     private final AttendanceRepository attendanceRepository;
     private final NotificationService notificationService;
     private final AuditLogService auditLogService;
+    private final TeamLeadAuthorityService teamLeadAuthorityService;
 
     public List<DepartmentResponse> getAll() {
+        Map<Long, TeamLeadAuthorityResponse> activeByDepartment = teamLeadAuthorityService.getActiveByDepartment();
         return departmentRepository.findAll().stream()
-                .map(DepartmentResponse::from)
+                .map(dept -> DepartmentResponse.from(dept, activeByDepartment.get(dept.getDepartmentId())))
                 .toList();
     }
 
@@ -144,7 +148,7 @@ public class DepartmentService {
                 null
         );
 
-        return DepartmentResponse.from(saved);
+        return DepartmentResponse.from(saved, null);
     }
 
     @Transactional
@@ -161,20 +165,11 @@ public class DepartmentService {
         // 순환 참조 방지를 위해 parent가 현재 부서의 하위 부서인지 검사하는 로직이 필요할 수 있지만,
         // 간단한 1 depth 에서는 위 체크로 충분하거나, 향후 트리를 순회하는 검증이 추가될 수 있음
 
-        erp.system.employee.entity.Employee head = null;
-        if (request.departmentHeadId() != null) {
-            head = employeeRepository.findById(request.departmentHeadId())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_ERROR, "해당 직원을 찾을 수 없습니다."));
-            if (head.getDepartment() == null || !head.getDepartment().getDepartmentId().equals(id)) {
-                throw new BusinessException(ErrorCode.VALIDATION_ERROR, "해당 부서에 소속된 직원만 부서장으로 지정할 수 있습니다.");
-            }
-        }
-
         String previousName = department.getDepartmentName();
         Long previousParentId = department.getParentDepartment() != null
                 ? department.getParentDepartment().getDepartmentId() : null;
 
-        department.update(request.departmentName(), parent, head);
+        department.update(request.departmentName(), parent);
 
         boolean nameChanged = !previousName.equals(request.departmentName());
         Long newParentId = parent != null ? parent.getDepartmentId() : null;
@@ -209,7 +204,7 @@ public class DepartmentService {
             );
         }
 
-        return DepartmentResponse.from(department);
+        return DepartmentResponse.from(department, teamLeadAuthorityService.getActiveForDepartment(id));
     }
 
     @Transactional

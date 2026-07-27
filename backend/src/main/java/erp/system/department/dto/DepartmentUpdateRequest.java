@@ -8,8 +8,6 @@ public record DepartmentUpdateRequest(
         @Size(max = 100, message = "부서명은 100자를 초과할 수 없습니다.")
         String departmentName,
 
-        Long parentDepartmentId,
-        
-        Long departmentHeadId
+        Long parentDepartmentId
 ) {
 }

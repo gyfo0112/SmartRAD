@@ -153,7 +153,7 @@ export default function DepartmentsPage() {
 
           {/* Body - Manager Name */}
           <div className="text-center py-2 px-2 text-[15px] font-semibold text-gray-800 bg-white min-h-[40px] flex items-center justify-center relative">
-            <span>{node.departmentHeadName || "(담당자 미지정)"}</span>
+            <span>{node.departmentHeadName || "공석"}</span>
 
             {/* Action Overlay (Hover) */}
             <div className="absolute inset-0 bg-white/95 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity z-10 border-t border-gray-100">

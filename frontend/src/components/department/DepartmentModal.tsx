@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BuildingOfficeIcon } from "@heroicons/react/24/outline";
 import Modal, { ModalCancelButton, ModalPrimaryButton } from "@/components/common/Modal";
 
@@ -33,36 +33,10 @@ export default function DepartmentModal({ department, departments, initialParent
   const [parentDepartmentId, setParentDepartmentId] = useState<number | "">(
     department?.parentDepartmentId || initialParentId || ""
   );
-  const [departmentHeadId, setDepartmentHeadId] = useState<number | "">(
-    department?.departmentHeadId || ""
-  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [departmentEmployees, setDepartmentEmployees] = useState<{employeeId: number, name: string}[]>([]);
   const isEditMode = !!department;
-
-  useEffect(() => {
-    if (isEditMode && department?.departmentId) {
-      let cancelled = false;
-      const fetchEmployees = async () => {
-        try {
-          const token = window.localStorage.getItem("accessToken") ?? window.sessionStorage.getItem("accessToken");
-          const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-
-          const res = await fetch(`${API_BASE_URL}/employees?departmentId=${department.departmentId}&size=1000`, { headers });
-          if (res.ok) {
-            const data = await res.json();
-            if (!cancelled) setDepartmentEmployees(data.content || []);
-          }
-        } catch (e) {
-          console.error("Failed to fetch employees", e);
-        }
-      };
-      fetchEmployees();
-      return () => { cancelled = true; };
-    }
-  }, [isEditMode, department]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,10 +51,6 @@ export default function DepartmentModal({ department, departments, initialParent
       departmentName,
       parentDepartmentId: parentDepartmentId === "" ? null : Number(parentDepartmentId),
     };
-
-    if (isEdit) {
-      payload.departmentHeadId = departmentHeadId === "" ? null : Number(departmentHeadId);
-    }
 
     try {
       const res = await fetch(url, {
@@ -162,26 +132,10 @@ export default function DepartmentModal({ department, departments, initialParent
       </div>
 
       {isEditMode && (
-        <div>
-          <label htmlFor="departmentHead" className="block text-sm font-semibold text-gray-900 mb-1.5">
-            부서장 (담당자)
-          </label>
-          <select
-            id="departmentHead"
-            value={departmentHeadId}
-            onChange={(e) => setDepartmentHeadId(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-          >
-            <option value="">(담당자 미지정)</option>
-            {departmentEmployees.map((emp) => (
-              <option key={emp.employeeId} value={emp.employeeId}>
-                {emp.name}
-              </option>
-            ))}
-          </select>
-          {departmentEmployees.length === 0 && (
-            <p className="mt-1 text-xs text-gray-500">현재 이 부서에 소속된 직원이 없습니다.</p>
-          )}
+        <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3">
+          <p className="text-sm font-semibold text-gray-900 mb-1">현재 담당자(팀장)</p>
+          <p className="text-sm text-gray-600">{department?.departmentHeadName ?? "공석"}</p>
+          <p className="mt-1 text-xs text-gray-400">팀장 위임은 직원 상세 화면에서 부여/회수할 수 있습니다.</p>
         </div>
       )}
     </Modal>
