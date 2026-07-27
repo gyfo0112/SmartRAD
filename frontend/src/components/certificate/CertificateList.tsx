@@ -133,16 +133,16 @@ export default function CertificateList({ refreshKey, onActionComplete }: { refr
   return (
     <div className="bg-white rounded-xl border border-gray-200 flex flex-col min-h-0 flex-1">
       <div className="p-5 border-b border-gray-200">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
             <h2 className="text-lg font-bold text-gray-900">발급 신청 내역</h2>
             <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
               {totalElements}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
+            <div className="relative w-full sm:w-56">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
@@ -150,15 +150,15 @@ export default function CertificateList({ refreshKey, onActionComplete }: { refr
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
                 placeholder="신청자명 검색..."
-                className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <select
               value={certificateType}
               onChange={(e) => { setCertificateType(e.target.value); setPage(0); }}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
-              <option value="">증명서 종류</option>
+              <option value="">증명서 전체</option>
               {CERTIFICATE_TYPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
@@ -166,9 +166,9 @@ export default function CertificateList({ refreshKey, onActionComplete }: { refr
             <select
               value={approvalStatus}
               onChange={(e) => { setApprovalStatus(e.target.value); setPage(0); }}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="flex-1 sm:flex-none px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
-              <option value="">처리 상태</option>
+              <option value="">상태 전체</option>
               {APPROVAL_STATUS_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
@@ -178,7 +178,7 @@ export default function CertificateList({ refreshKey, onActionComplete }: { refr
         {actionError && <p className="mt-2 text-sm font-medium text-rose-500">{actionError}</p>}
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>

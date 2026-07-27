@@ -25,7 +25,7 @@ export default function AppointmentsPage() {
   }, []);
 
   return (
-    <div className="max-w-[1600px] mx-auto h-[calc(100vh-100px)] flex flex-col p-6">
+    <div className="max-w-[1600px] mx-auto min-h-[calc(100vh-100px)] flex flex-col p-4 sm:p-6 pb-8 space-y-4 sm:space-y-6">
       <AppointmentStats refreshKey={refreshKey} />
       <AppointmentList refreshKey={refreshKey} onActionComplete={handleActionComplete} />
       {showModal && (

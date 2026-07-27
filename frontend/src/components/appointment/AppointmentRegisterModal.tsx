@@ -149,7 +149,7 @@ export default function AppointmentRegisterModal({ onClose, onSaved }: Props) {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelClasses}>발령일 *</label>
                 <input type="date" value={appointmentDate} onChange={(e) => setAppointmentDate(e.target.value)} required className={inputClasses} />
@@ -160,7 +160,7 @@ export default function AppointmentRegisterModal({ onClose, onSaved }: Props) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelClasses}>변경 후 부서</label>
                 <select value={toDepartmentId} onChange={(e) => setToDepartmentId(e.target.value)} className={inputClasses}>

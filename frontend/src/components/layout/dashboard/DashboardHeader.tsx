@@ -157,16 +157,16 @@ export default function DashboardHeader() {
             </button>
           </>
         ) : pathname === "/certificates" ? (
-          <>
+          <div className="flex w-full sm:w-auto gap-2">
             <button
               type="button"
               onClick={() =>
                 window.dispatchEvent(new CustomEvent("certificate:export"))
               }
-              className="flex items-center gap-2 whitespace-nowrap rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 whitespace-nowrap rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
             >
-              <ArrowDownTrayIcon className="h-4 w-4" />
-              일괄 다운로드
+              <ArrowDownTrayIcon className="h-4 w-4 shrink-0" />
+              다운로드
             </button>
 
             <button
@@ -174,12 +174,12 @@ export default function DashboardHeader() {
               onClick={() =>
                 window.dispatchEvent(new CustomEvent("certificate:register"))
               }
-              className="flex items-center gap-2 whitespace-nowrap bg-[#4A5DDF] hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 whitespace-nowrap bg-[#4A5DDF] hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
             >
-              <PlusIcon className="w-4 h-4" />
+              <PlusIcon className="w-4 h-4 shrink-0" />
               발급 신청
             </button>
-          </>
+          </div>
         ) : pathname === "/notices" ? (
           <button
             type="button"
