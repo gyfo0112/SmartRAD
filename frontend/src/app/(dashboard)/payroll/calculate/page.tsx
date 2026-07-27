@@ -854,8 +854,8 @@ export default function PayrollCalculatePage() {
     "rounded-lg border px-3 py-2 text-xs font-semibold disabled:cursor-not-allowed";
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 text-slate-900">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="payroll-calculate-page mx-auto max-w-[1600px] space-y-5 text-slate-900">
+      <div className="payroll-calculate-header flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">급여계산</h1>
           <div className="mt-1 flex items-center gap-2 text-sm text-slate-500">
@@ -864,7 +864,7 @@ export default function PayrollCalculatePage() {
             <span className="font-medium text-indigo-600">급여계산</span>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="payroll-calculate-header-actions flex gap-2">
           <button
             type="button"
             onClick={confirmSelected}
@@ -890,7 +890,7 @@ export default function PayrollCalculatePage() {
         </div>
       </div>
 
-      <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <section className="payroll-calculate-period flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
         <div className="grid flex-1 grid-cols-1 divide-y divide-slate-100 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
           {periodInfo.map(({ label, value, icon: Icon }) => (
             <div key={label} className="px-4 py-2 first:pl-0">
@@ -902,7 +902,7 @@ export default function PayrollCalculatePage() {
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="payroll-calculate-period-actions flex items-center gap-2">
           <span className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold ${overallCalcStatus.className}`}>
             ● {overallCalcStatus.text}
           </span>
@@ -917,7 +917,7 @@ export default function PayrollCalculatePage() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="payroll-calculate-summary grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
         {summaryCards.map(({ icon: Icon, ...card }) => (
           <article
             key={card.title}
@@ -944,7 +944,7 @@ export default function PayrollCalculatePage() {
       </section>
 
       {reviewCount > 0 && (
-        <div className="flex items-center justify-between rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-700">
+        <div className="payroll-calculate-alert flex items-center justify-between rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-700">
           <span className="inline-flex items-center gap-2">
             <ExclamationTriangleIcon className="h-5 w-5" />
             급여 계산 결과 중 확인이 필요한 직원이{" "}
@@ -963,7 +963,7 @@ export default function PayrollCalculatePage() {
         </div>
       )}
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="payroll-calculate-filters rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[repeat(5,minmax(0,1fr))_1.4fr_auto_auto]">
           {filterConfigs.map(({ key, label, options }) => (
             <label
@@ -1022,9 +1022,19 @@ export default function PayrollCalculatePage() {
         id="payroll-result-section"
         className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+        <div className="payroll-calculate-results-header flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-bold">직원별 급여 계산 결과</h2>
+            <label className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 sm:hidden">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-slate-300"
+                checked={allFilteredSelected}
+                onChange={toggleSelectAll}
+                aria-label="전체 선택"
+              />
+              전체 선택
+            </label>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
               총 {filteredRows.length.toLocaleString("ko-KR")}명
             </span>
@@ -1038,7 +1048,7 @@ export default function PayrollCalculatePage() {
               계산 전 {pendingCount.toLocaleString("ko-KR")}명
             </span>
           </div>
-          <div className="flex gap-2">
+          <div className="payroll-calculate-bulk-actions flex gap-2">
             <button
               type="button"
               onClick={recalcSelected}
@@ -1078,8 +1088,8 @@ export default function PayrollCalculatePage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+        <div className="payroll-calculate-table hidden overflow-x-auto sm:block">
+          <table className="min-w-[1320px] text-left text-sm">
             <thead className="bg-slate-50 text-xs font-bold text-slate-500">
               <tr>
                 <th className="whitespace-nowrap px-4 py-3">
@@ -1247,11 +1257,54 @@ export default function PayrollCalculatePage() {
           </table>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-5 py-4 text-sm text-slate-400">
+        <div className="divide-y divide-slate-100 sm:hidden">
+          {loading && <p className="px-4 py-12 text-center text-sm font-semibold text-slate-400">급여 계산 결과를 불러오는 중입니다.</p>}
+          {!loading && errorMessage && <p className="px-4 py-12 text-center text-sm font-semibold text-rose-500">{errorMessage}</p>}
+          {!loading && !errorMessage && filteredRows.map((row) => (
+            <article key={row.payrollId} className="space-y-3 px-4 py-4">
+              <div className="flex items-start justify-between gap-3">
+                <label className="flex min-w-0 items-start gap-3">
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300"
+                    checked={selectedIds.has(row.payrollId)}
+                    onChange={() => toggleRow(row.payrollId)}
+                    aria-label={`${row.name} 선택`}
+                  />
+                  <span className="min-w-0">
+                    <span className="block truncate font-bold text-slate-900">{row.name}</span>
+                    <span className="mt-0.5 block text-xs text-slate-500">{row.employeeNo} · {row.department} · {row.position}</span>
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => openDetail(row.payrollId)}
+                  className="shrink-0 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600"
+                >
+                  상세
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${calcStatusClassName(row.calcStatus)}`}>● {row.calcStatus}</span>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${row.reviewClassName}`}>● {row.reviewStatus}</span>
+              </div>
+              <dl className="grid grid-cols-2 gap-x-3 gap-y-3 rounded-lg bg-slate-50 p-3 text-xs">
+                <div><dt className="text-slate-400">기본급</dt><dd className="mt-1 font-medium text-slate-700">{row.basePay}</dd></div>
+                <div><dt className="text-slate-400">수당 합계</dt><dd className="mt-1 font-medium text-slate-700">{row.allowance}</dd></div>
+                <div><dt className="text-slate-400">지급 총액</dt><dd className="mt-1 font-bold text-slate-900">{row.grossPay}</dd></div>
+                <div><dt className="text-slate-400">공제 합계</dt><dd className="mt-1 font-medium text-slate-700">{row.deduction}</dd></div>
+                <div className="col-span-2 flex items-center justify-between border-t border-slate-200 pt-2"><dt className="font-semibold text-slate-500">실지급액</dt><dd className="font-extrabold text-teal-600">{row.netPay}</dd></div>
+              </dl>
+            </article>
+          ))}
+          {!loading && !errorMessage && filteredRows.length === 0 && <p className="px-4 py-12 text-center text-sm font-semibold text-slate-400">조회 조건에 맞는 급여 계산 결과가 없습니다.</p>}
+        </div>
+
+        <div className="payroll-calculate-pagination flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-5 py-4 text-sm text-slate-400">
           <span>
             총 {filteredRows.length}명 조회 · {selectedIds.size}명 선택
           </span>
-          <div className="flex gap-1 mr-20">
+          <div className="payroll-calculate-page-buttons flex gap-1 mr-20">
             {["‹", "1", "2", "3", "›"].map((page) => (
               <button
                 key={page}
