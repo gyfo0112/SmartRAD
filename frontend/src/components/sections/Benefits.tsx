@@ -28,19 +28,19 @@ export default function Benefits() {
   return (
     <section
       id="benefits"
-      className="flex min-h-[calc(100vh-84px)] w-full items-center bg-[#F4F8FF] py-24 sm:py-32"
+      className="flex w-full items-center bg-[#F4F8FF] py-20 sm:py-28 lg:min-h-[calc(100vh-84px)] lg:py-32"
     >
       <Container>
         <SectionBadge>장점</SectionBadge>
-        <h2 className="mt-7 text-[34px] font-extrabold tracking-[-2px] text-brand-navy sm:text-[46px] sm:tracking-[-3px]">
+        <h2 className="mt-6 break-keep text-[30px] font-extrabold leading-[1.25] tracking-[-1.5px] text-brand-navy sm:mt-7 sm:text-[46px] sm:tracking-[-3px]">
           인사팀이 체감하는 변화는 분명합니다
         </h2>
-        <p className="mt-6 text-[16px] font-bold leading-7 text-brand-text">
+        <p className="mt-5 max-w-4xl break-words text-[15px] font-bold leading-7 text-brand-text sm:mt-6 sm:text-[16px]">
           수기 업무와 반복 확인을 줄이고, 합리적인 비용으로 안전하고 직관적인 인사관리 환경을 구축합니다.
         </p>
-        <div className="mt-20 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-12 sm:grid-cols-2 lg:mt-16 xl:mt-20 xl:grid-cols-4">
           {benefits.map((benefit) => (
-            <article key={benefit.number} className="flex min-h-[270px] flex-col rounded-[24px] border border-[#E2ECFA] bg-white p-[30px] shadow-[0_16px_38px_rgba(50,94,160,0.07)] transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:border-[#C5D9F5] md:hover:shadow-[0_20px_44px_rgba(50,94,160,0.12)] motion-reduce:transform-none motion-reduce:transition-none">
+            <article key={benefit.number} className="flex min-w-0 flex-col rounded-[24px] border border-[#E2ECFA] bg-white p-5 shadow-[0_16px_38px_rgba(50,94,160,0.07)] transition-all duration-300 ease-out sm:min-h-[250px] sm:p-6 [@media(hover:hover)]:md:hover:-translate-y-1 [@media(hover:hover)]:md:hover:border-[#C5D9F5] [@media(hover:hover)]:md:hover:shadow-[0_20px_44px_rgba(50,94,160,0.12)] xl:min-h-[270px] xl:p-[30px] motion-reduce:transform-none motion-reduce:transition-none">
               <span className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-[16px] bg-brand-soft-strong text-[18px] font-bold text-brand-primary transition-colors duration-300 ease-out motion-reduce:transition-none">{benefit.number}</span>
               <h3 className="mt-6 text-[21px] font-extrabold text-brand-navy">{benefit.title}</h3>
               <p className="mt-3 text-[15px] font-semibold leading-[26px] text-brand-text">{benefit.description}</p>

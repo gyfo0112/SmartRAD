@@ -33,14 +33,14 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="w-full bg-[linear-gradient(180deg,#F4F8FF_0%,#FFFFFF_100%)] py-24 sm:py-32"
+      className="w-full bg-[linear-gradient(180deg,#F4F8FF_0%,#FFFFFF_100%)] py-20 sm:py-28 lg:py-32"
     >
-      <Container className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-        <div className="flex min-h-[680px] flex-col rounded-[28px] bg-gradient-to-br from-[#17458F] via-[#1E55C7] to-[#246BFE] p-7 text-white sm:p-10">
+      <Container className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10">
+        <div className="flex min-w-0 flex-col rounded-[28px] bg-gradient-to-br from-[#17458F] via-[#1E55C7] to-[#246BFE] p-5 text-white sm:p-10 lg:min-h-[680px]">
           <SectionBadge variant="inverse" className="w-fit">
             문의
           </SectionBadge>
-          <h2 className="mt-6 text-[38px] font-extrabold leading-[1.5] tracking-[-3px] sm:text-[46px]">
+          <h2 className="mt-6 break-keep text-[30px] font-extrabold leading-[1.35] tracking-[-1.5px] sm:text-[46px] sm:leading-[1.5] sm:tracking-[-3px]">
             <span className="block">우리 회사에 맞는</span>
             <span className="block">인사관리 ERP를</span>
             <span className="block">상담해보세요</span>
@@ -63,7 +63,7 @@ export default function Contact() {
               </p>
             ))}
           </div>
-          <div className="mt-auto pt-4">
+          <div className="mt-8 pt-4 lg:mt-auto">
             <span className="inline-block w-fit rounded-full border border-white/20 bg-white/10 px-4 py-3 text-[13px] font-bold">
               평일 09:00 - 18:00 상담 가능
             </span>
@@ -72,7 +72,7 @@ export default function Contact() {
 
         <form
           onSubmit={handleSubmit}
-          className="flex min-h-[680px] flex-col rounded-[28px] border border-brand-border bg-white p-7 shadow-[0_18px_45px_rgba(50,94,160,0.08)] sm:p-10"
+          className="flex min-w-0 flex-col rounded-[28px] border border-brand-border bg-white p-5 shadow-[0_18px_45px_rgba(50,94,160,0.08)] sm:p-10 lg:min-h-[680px]"
         >
           <h2 className="text-[25px] font-extrabold text-brand-navy">
             도입 문의 및 견적
@@ -80,7 +80,7 @@ export default function Contact() {
           <p className="mt-4 text-[15px] font-bold text-brand-text">
             회사 규모와 필요한 기능을 기준으로 빠른 상담을 연결합니다.
           </p>
-          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="mt-8 grid min-w-0 grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-2">
             {[
               { name: "name", label: "담당자 이름", type: "text" },
               { name: "company", label: "회사명", type: "text" },
@@ -94,7 +94,7 @@ export default function Contact() {
                 required
                 aria-label={field.label}
                 placeholder={field.label}
-                className="h-[58px] rounded-[14px] border border-[#D5E4FA] bg-[#F4F8FF] px-4 text-[14px] font-semibold text-brand-navy outline-none transition-[color,background-color,border-color,box-shadow] duration-300 ease-out placeholder:text-[#7890B3] focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/20 motion-reduce:transition-none"
+                className="h-[52px] w-full min-w-0 rounded-[14px] border border-[#D5E4FA] bg-[#F4F8FF] px-4 text-[14px] font-semibold text-brand-navy outline-none transition-[color,background-color,border-color,box-shadow] duration-300 ease-out placeholder:text-[#7890B3] focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/20 sm:h-[58px] motion-reduce:transition-none"
               />
             ))}
           </div>
@@ -103,7 +103,7 @@ export default function Contact() {
             name="message"
             aria-label="문의 내용"
             placeholder="도입 목적이나 궁금한 내용을 남겨주세요"
-            className="mt-8 min-h-[260px] flex-1 resize-none rounded-[14px] border border-[#D5E4FA] bg-[#F4F8FF] p-4 text-[14px] font-semibold text-brand-navy outline-none transition-[color,background-color,border-color,box-shadow] duration-300 ease-out placeholder:text-[#7890B3] focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/20 motion-reduce:transition-none"
+            className="mt-6 min-h-[180px] w-full min-w-0 resize-y rounded-[14px] border border-[#D5E4FA] bg-[#F4F8FF] p-4 text-[14px] font-semibold text-brand-navy outline-none transition-[color,background-color,border-color,box-shadow] duration-300 ease-out placeholder:text-[#7890B3] focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/20 sm:mt-8 lg:min-h-[260px] lg:flex-1 motion-reduce:transition-none"
           />
 
           <button
@@ -135,10 +135,10 @@ export default function Contact() {
                     onClick={() => setOpenFaq(isOpen ? null : index)}
                     className="flex w-full cursor-pointer items-center justify-between gap-4 px-4 py-4 text-left text-[14px] font-bold text-[#29496F] transition-colors duration-300 ease-out hover:bg-white/60 motion-reduce:transition-none"
                   >
-                    <span>{faq.question}</span>
+                    <span className="min-w-0 break-words">{faq.question}</span>
                     <span
                       aria-hidden="true"
-                      className={`text-[18px] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none ${isOpen ? "rotate-45" : "rotate-0"}`}
+                      className={`shrink-0 text-[18px] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none ${isOpen ? "rotate-45" : "rotate-0"}`}
                     >
                       +
                     </span>

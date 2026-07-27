@@ -25,7 +25,19 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 84px; /* Header의 sticky 높이(h-[84px])만큼 보정 */
+  scroll-padding-top: 64px;
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 84px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 html,

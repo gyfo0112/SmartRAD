@@ -123,16 +123,16 @@ export default function Features() {
   const imageFailed = failedImage === activeFeature.previewImage
 
   return (
-    <section id="features" className="w-full bg-white py-24 sm:py-32">
+    <section id="features" className="w-full bg-white py-20 sm:py-28 lg:py-32">
       <Container>
         <div className="text-center">
           <SectionBadge>주요 기능</SectionBadge>
 
-          <h2 className="mt-5 text-[34px] font-extrabold tracking-[-2px] text-brand-navy sm:text-[44px] sm:tracking-[-3px]">
+          <h2 className="mt-5 break-keep text-[30px] font-extrabold leading-[1.25] tracking-[-1.5px] text-brand-navy sm:text-[44px] sm:tracking-[-3px]">
             인사관리 ERP의 핵심 기능
           </h2>
 
-          <p className="mt-4 text-[16px] font-bold leading-7 text-brand-text">
+          <p className="mx-auto mt-4 max-w-3xl break-words text-[15px] font-bold leading-7 text-brand-text sm:text-[16px]">
             조직 관리부터 급여 정산까지, 기업 인사관리에 필요한 핵심 기능을
             직관적인 화면으로 제공합니다.
           </p>
@@ -149,7 +149,7 @@ export default function Features() {
                 aria-pressed={isActive}
                 aria-label={`${feature.title} 기능 보기`}
                 onClick={() => setActiveIndex(index)}
-                className={`flex min-h-[220px] cursor-pointer flex-col rounded-[22px] border p-7 text-left transition-all duration-300 ease-out motion-reduce:transition-none ${
+                className={`flex min-h-[190px] cursor-pointer flex-col rounded-[22px] border p-5 text-left transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/20 sm:min-h-[220px] sm:p-7 motion-reduce:transition-none ${
                   isActive
                     ? "border-brand-primary bg-gradient-to-br from-[#246BFE] to-brand-primary-light text-white shadow-[0_14px_32px_rgba(36,107,254,0.16)]"
                     : "border-brand-border bg-white text-brand-navy shadow-none"
@@ -185,8 +185,8 @@ export default function Features() {
           key={activeFeature.number}
           className="mt-10 grid items-start gap-5 transition-[opacity,transform] duration-200 ease-out starting:translate-y-1 starting:opacity-0 motion-reduce:transform-none motion-reduce:transition-none lg:grid-cols-2"
         >
-          <div className="min-h-[350px] rounded-[24px] border border-brand-border bg-white p-6 shadow-[0_18px_45px_rgba(50,94,160,0.08)] sm:p-7">
-            <h3 className="text-[24px] font-extrabold text-brand-navy">
+          <div className="min-w-0 rounded-[24px] border border-brand-border bg-white p-4 shadow-[0_18px_45px_rgba(50,94,160,0.08)] sm:min-h-[350px] sm:p-7">
+            <h3 className="break-keep text-[21px] font-extrabold text-brand-navy sm:text-[24px]">
               {activeFeature.previewTitle}
             </h3>
 
@@ -197,7 +197,7 @@ export default function Features() {
                   alt={`${activeFeature.title} 화면 미리보기`}
                   fill
                   unoptimized
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  sizes="(max-width: 639px) calc(100vw - 64px), (max-width: 1023px) calc(100vw - 104px), 680px"
                   className="object-contain object-center"
                   onError={() => setFailedImage(activeFeature.previewImage)}
                 />
@@ -211,8 +211,8 @@ export default function Features() {
             </div>
           </div>
 
-          <div className="flex h-fit self-start flex-col rounded-[24px] bg-gradient-to-br from-brand-primary-deep via-[#246BFE] to-brand-primary-light p-6 text-white sm:p-8">
-            <h3 className="text-[24px] font-extrabold">
+          <div className="flex h-fit min-w-0 self-start flex-col rounded-[24px] bg-gradient-to-br from-brand-primary-deep via-[#246BFE] to-brand-primary-light p-5 text-white sm:p-8">
+            <h3 className="break-keep text-[21px] font-extrabold sm:text-[24px]">
               {activeFeature.detailTitle}
             </h3>
 
@@ -220,11 +220,11 @@ export default function Features() {
               {activeFeature.detailDescription}
             </p>
 
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {activeFeature.detailItems.map((item) => (
                 <div
                   key={item.title}
-                  className="flex h-[180px] flex-col justify-center rounded-[18px] border border-white/20 bg-white/10 px-5 py-6"
+                  className="flex min-h-[150px] min-w-0 flex-col justify-center rounded-[18px] border border-white/20 bg-white/10 px-5 py-6 sm:min-h-[170px] xl:min-h-[180px]"
                 >
                   <p className="text-[19px] font-extrabold leading-[1.3] text-white">
                     {item.title}
