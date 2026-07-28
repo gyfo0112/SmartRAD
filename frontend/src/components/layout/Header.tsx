@@ -18,12 +18,21 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTrialLoading, setIsTrialLoading] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 8);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) * 100 : 0);
+    };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
   }, []);
 
   const handleFreeTrial = async () => {
@@ -81,10 +90,10 @@ export default function Header() {
         <Link
           href="/"
           onClick={handleLogoClick}
-          className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3"
+          className="group flex min-w-0 shrink-0 items-center gap-2 sm:gap-3"
           aria-label="SmartHR 홈"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-primary text-white md:h-11 md:w-11 md:rounded-[14px]">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-primary text-white transition-transform duration-300 ease-out [@media(hover:hover)]:group-hover:-rotate-6 [@media(hover:hover)]:group-hover:scale-110 motion-reduce:transition-none md:h-11 md:w-11 md:rounded-[14px]">
             <Logo className="h-5 w-5 md:h-6 md:w-6" />
           </span>
           <span className="text-lg font-bold text-brand-navy md:text-xl">SmartHR</span>
@@ -155,18 +164,23 @@ export default function Header() {
           </button>
         </div>
       </Container>
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-[2px] bg-brand-primary transition-[width] duration-150 ease-out motion-reduce:transition-none"
+        style={{ width: `${scrollProgress}%` }}
+      />
       {isMenuOpen ? (
         <>
           <button
             type="button"
             aria-label="메뉴 닫기"
             onClick={() => setIsMenuOpen(false)}
-            className="fixed inset-x-0 top-16 bottom-0 z-40 bg-brand-navy/20 backdrop-blur-[1px] md:hidden"
+            className="fixed inset-x-0 top-16 bottom-0 z-40 bg-brand-navy/20 backdrop-blur-[1px] transition-opacity duration-200 ease-out motion-reduce:transition-none starting:opacity-0 md:hidden"
           />
           <nav
             id="mobile-navigation"
             aria-label="모바일 주요 메뉴"
-            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-brand-border bg-white px-4 py-3 shadow-[0_18px_36px_rgba(16,42,80,0.14)] md:hidden"
+            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-brand-border bg-white px-4 py-3 shadow-[0_18px_36px_rgba(16,42,80,0.14)] transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none starting:-translate-y-2 starting:opacity-0 md:hidden"
           >
             {navigation.map((item) => (
               <HashLink

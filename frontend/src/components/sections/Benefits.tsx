@@ -43,10 +43,18 @@ export default function Benefits() {
             <article
               key={benefit.number}
               style={{ animationDelay: `${index * 90}ms` }}
-              className="reveal-on-scroll flex min-w-0 flex-col rounded-[24px] border border-[#E2ECFA] bg-white p-5 shadow-[0_16px_38px_rgba(50,94,160,0.07)] transition-all duration-300 ease-out sm:min-h-[250px] sm:p-6 [@media(hover:hover)]:md:hover:-translate-y-1 [@media(hover:hover)]:md:hover:border-[#C5D9F5] [@media(hover:hover)]:md:hover:shadow-[0_20px_44px_rgba(50,94,160,0.12)] xl:min-h-[270px] xl:p-[30px] motion-reduce:transform-none motion-reduce:transition-none"
+              className="reveal-on-scroll group flex min-w-0 flex-col rounded-[24px] border border-[#E2ECFA] bg-white p-5 shadow-[0_16px_38px_rgba(50,94,160,0.07)] transition-all duration-300 ease-out sm:min-h-[250px] sm:p-6 [@media(hover:hover)]:md:hover:-translate-y-1 [@media(hover:hover)]:md:hover:border-[#C5D9F5] [@media(hover:hover)]:md:hover:shadow-[0_20px_44px_rgba(50,94,160,0.12)] xl:min-h-[270px] xl:p-[30px] motion-reduce:transform-none motion-reduce:transition-none"
             >
 
-              <span className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-[16px] bg-brand-soft-strong text-[18px] font-bold text-brand-primary transition-colors duration-300 ease-out motion-reduce:transition-none">{benefit.number}</span>
+              <span className="relative flex h-[58px] w-[58px] shrink-0 items-center justify-center">
+                <span
+                  aria-hidden
+                  className="animate-spin-slow absolute -inset-1 rounded-[18px] bg-[conic-gradient(from_0deg,var(--color-brand-primary)_0%,var(--color-brand-mint)_50%,var(--color-brand-primary)_100%)] opacity-25 blur-[3px] motion-reduce:hidden"
+                />
+                <span className="relative flex h-[58px] w-[58px] items-center justify-center rounded-[16px] bg-brand-soft-strong text-[18px] font-bold text-brand-primary transition-colors duration-300 ease-out [@media(hover:hover)]:group-hover:animate-[badge-bounce_0.6s_ease-out] motion-reduce:animate-none motion-reduce:transition-none">
+                  {benefit.number}
+                </span>
+              </span>
               <h3 className="mt-6 text-[21px] font-extrabold text-brand-navy">{benefit.title}</h3>
               <p className="mt-3 text-[15px] font-semibold leading-[26px] text-brand-text">{benefit.description}</p>
             </article>

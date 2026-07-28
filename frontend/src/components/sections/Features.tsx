@@ -153,7 +153,7 @@ export default function Features() {
                 style={{ animationDelay: `${index * 90}ms` }}
                 className={`reveal-on-scroll flex min-h-[190px] cursor-pointer flex-col rounded-[22px] border p-5 text-left transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/20 sm:min-h-[220px] sm:p-7 motion-reduce:transition-none ${
                   isActive
-                    ? "border-brand-primary bg-gradient-to-br from-[#246BFE] to-brand-primary-light text-white shadow-[0_14px_32px_rgba(36,107,254,0.16)]"
+                    ? "animate-pulse-ring border-brand-primary bg-gradient-to-br from-[#246BFE] to-brand-primary-light text-white shadow-[0_14px_32px_rgba(36,107,254,0.16)]"
                     : "border-brand-border bg-white text-brand-navy shadow-none"
                 }`}
               >
@@ -192,7 +192,7 @@ export default function Features() {
               {activeFeature.previewTitle}
             </h3>
 
-            <div className="relative mt-5 aspect-[2048/1339] w-full overflow-hidden rounded-[20px] bg-[#F4F8FF]">
+            <div className="relative mt-5 aspect-[2048/1339] w-full overflow-hidden rounded-[20px] bg-[#F4F8FF] transition-[opacity,transform] duration-500 ease-out starting:scale-95 starting:opacity-0 motion-reduce:transform-none motion-reduce:transition-none">
               {!imageFailed ? (
                 <Image
                   src={activeFeature.previewImage}

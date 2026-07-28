@@ -104,6 +104,31 @@ body {
   }
 }
 
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes badge-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+  55% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-2px);
+  }
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -118,6 +143,10 @@ body {
 
 .animate-pulse-ring {
   animation: pulse-ring 2.6s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 6s linear infinite;
 }
 
 /* Scroll-linked reveal: progressive enhancement only. Content stays fully

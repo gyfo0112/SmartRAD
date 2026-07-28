@@ -22,12 +22,23 @@ const faqs = [
   },
 ]
 
+type SubmitStatus = "idle" | "loading" | "success"
+
 export default function Contact() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle")
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    window.alert("상담 신청이 접수되었습니다.")
+    if (submitStatus !== "idle") return
+
+    const form = event.currentTarget
+    setSubmitStatus("loading")
+    window.setTimeout(() => {
+      setSubmitStatus("success")
+      form.reset()
+      window.setTimeout(() => setSubmitStatus("idle"), 2200)
+    }, 900)
   }
 
   return (
@@ -109,9 +120,38 @@ export default function Contact() {
 
           <button
             type="submit"
-            className="mt-8 h-[58px] shrink-0 cursor-pointer rounded-[14px] bg-gradient-to-r from-[#246BFE] to-[#6AACF8] text-[15px] font-extrabold text-white transition-all duration-300 ease-out hover:shadow-[0_10px_24px_rgba(36,107,254,0.22)] hover:brightness-95 motion-reduce:transition-none"
+            disabled={submitStatus !== "idle"}
+            className={`mt-8 flex h-[58px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[14px] text-[15px] font-extrabold text-white transition-all duration-300 ease-out hover:shadow-[0_10px_24px_rgba(36,107,254,0.22)] hover:brightness-95 disabled:cursor-not-allowed motion-reduce:transition-none ${
+              submitStatus === "success"
+                ? "bg-brand-mint"
+                : "bg-gradient-to-r from-[#246BFE] to-[#6AACF8]"
+            }`}
           >
-            상담 신청하기
+            {submitStatus === "loading" && (
+              <span
+                aria-hidden
+                className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none"
+              />
+            )}
+            {submitStatus === "success" && (
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-5 w-5 transition-transform duration-300 ease-out starting:scale-0"
+              >
+                <path
+                  d="M5 12.5 9.5 17 19 7"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+            {submitStatus === "idle" && "상담 신청하기"}
+            {submitStatus === "loading" && "전송 중..."}
+            {submitStatus === "success" && "신청 완료!"}
           </button>
         </form>
 
@@ -142,7 +182,7 @@ export default function Contact() {
                     <span className="min-w-0 break-words">{faq.question}</span>
                     <span
                       aria-hidden="true"
-                      className={`shrink-0 text-[18px] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none ${isOpen ? "rotate-45" : "rotate-0"}`}
+                      className={`shrink-0 text-[18px] transition-transform duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transform-none motion-reduce:transition-none ${isOpen ? "rotate-45" : "rotate-0"}`}
                     >
                       +
                     </span>
