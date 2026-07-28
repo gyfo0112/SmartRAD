@@ -22,7 +22,6 @@ export default function HashLink({ href, scrollBlock = "center", onClick, ...pro
         behavior: prefersReducedMotion ? "auto" : "smooth",
         block: scrollBlock,
       });
-      window.history.pushState(null, "", href);
     }
 
     onClick?.(e);
