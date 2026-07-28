@@ -59,6 +59,7 @@ public class SecurityConfig {
                         // 직원 관리 - 조회는 로그인만 하면 가능, 수정은 본인 또는 관리자(컨트롤러에서 체크),
                         // 등록/삭제/전사 조회는 관리자 전용
                         .requestMatchers(HttpMethod.GET, "/api/employees/payroll-summary").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/employees/export").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/employees/*").authenticated()
                         // 프로필 사진 업로드는 본인/관리자 모두 사용(신규 등록 시에도 필요) - 로그인만 하면 가능
                         .requestMatchers(HttpMethod.POST, "/api/employees/profile-image").authenticated()

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon, ArrowPathIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { downloadExcelFromUrl } from "@/lib/excelExport";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -45,6 +46,7 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey,
   const [sortBy, setSortBy] = useState("name");
   const [searchInput, setSearchInput] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     fetchDepartments();
@@ -104,6 +106,25 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey,
       console.error("Failed to fetch employees", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      let url = `${API_BASE_URL}/employees/export`;
+      const params = new URLSearchParams();
+      if (selectedDepartment) params.set("departmentId", selectedDepartment);
+      if (selectedStatus) params.set("status", selectedStatus);
+      if (keyword) params.set("keyword", keyword);
+      const query = params.toString();
+      if (query) url += `?${query}`;
+      await downloadExcelFromUrl(url, `직원목록_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } catch (error) {
+      console.error("Failed to export employees", error);
+      alert("엑셀 다운로드에 실패했습니다.");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -219,6 +240,17 @@ export default function EmployeeList({ onSelectEmployee, selectedId, refreshKey,
         >
           <ArrowPathIcon className="w-4 h-4" />
         </button>
+        {role === "ADMIN" && (
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            title="현재 필터 기준으로 엑셀 다운로드"
+            className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" />
+            {exporting ? "다운로드 중..." : "엑셀 다운로드"}
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-auto">

@@ -17,7 +17,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -56,6 +61,24 @@ public class EmployeeController {
     @GetMapping("/payroll-summary")
     public List<EmployeePayrollSummaryResponse> getPayrollSummaryList() {
         return employeeService.getPayrollSummaryList();
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) String status
+    ) {
+        byte[] bytes = employeeService.exportToExcel(keyword, departmentId, status);
+        ContentDisposition disposition = ContentDisposition.attachment()
+                .filename("직원목록_" + LocalDate.now() + ".xlsx", StandardCharsets.UTF_8)
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(disposition);
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
     }
 
     @GetMapping("/{id}")

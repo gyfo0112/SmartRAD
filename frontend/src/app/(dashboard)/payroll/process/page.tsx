@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Modal, { ModalCancelButton } from "@/components/common/Modal";
-import * as XLSX from "xlsx";
+import { downloadExcel } from "@/lib/excelExport";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
@@ -655,7 +655,7 @@ export default function PayrollProcessPage() {
     setDetailError("");
   };
 
-  const downloadStatement = () => {
+  const downloadStatement = async () => {
     if (!detailData) return;
     const earnings = detailData.details.filter((item) => item.itemTypeCode === "EARNING");
     const deductions = detailData.details.filter((item) => item.itemTypeCode === "DEDUCTION");
@@ -665,7 +665,7 @@ export default function PayrollProcessPage() {
 
     const formatDateStr = (val: string | null) => val ? val.replaceAll("-", ".") : "지급 예정";
 
-    const wsData = [
+    const wsData: (string | number | null)[][] = [
       ["SmartHR 급여 명세서"],
       [`${detailData.payroll.employeeNameSnapshot} 님의 ${formatMonth(detailData.payroll.payrollYearMonth)} 급여`, `지급일: ${formatDateStr(detailData.payroll.paymentDate)}`],
       [],
@@ -679,24 +679,26 @@ export default function PayrollProcessPage() {
       [],
       ["실수령액", netPay]
     ];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "급여명세서");
-    XLSX.writeFile(wb, `${detailData.payroll.employeeNameSnapshot}_${formatMonth(detailData.payroll.payrollYearMonth).replace(" ", "")}_급여명세서.xlsx`);
+    try {
+      await downloadExcel("급여명세서", `${detailData.payroll.employeeNameSnapshot}_${formatMonth(detailData.payroll.payrollYearMonth).replace(" ", "")}_급여명세서.xlsx`, wsData);
+    } catch {
+      window.alert("엑셀 다운로드에 실패했습니다.");
+    }
   };
 
-  const exportTransferFile = () => {
+  const exportTransferFile = async () => {
     const targets = filteredRows.filter((row) => row.paymentStatus === "지급대기");
     if (targets.length === 0) {
       window.alert("이체 파일로 내보낼 지급 대기 내역이 없습니다.");
       return;
     }
     const headers = ["사번", "성명", "은행", "계좌번호", "예금주", "실지급액"];
-    const wsData = [headers, ...targets.map((row) => [row.employeeNo, row.name, row.bankName, row.accountNumber, row.depositor, row.netPay])];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "급여이체목록");
-    XLSX.writeFile(wb, `payroll-transfer-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    const wsData: (string | number | null)[][] = [headers, ...targets.map((row) => [row.employeeNo, row.name, row.bankName, row.accountNumber, row.depositor, row.netPay])];
+    try {
+      await downloadExcel("급여이체목록", `payroll-transfer-${new Date().toISOString().slice(0, 10)}.xlsx`, wsData);
+    } catch {
+      window.alert("엑셀 다운로드에 실패했습니다.");
+    }
   };
 
   const summaryCards = [

@@ -12,7 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useState } from "react";
 import Modal, { ModalCancelButton } from "@/components/common/Modal";
-import * as XLSX from "xlsx";
+import { downloadExcel } from "@/lib/excelExport";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081/api";
 
@@ -128,9 +128,9 @@ export default function MyPayrollPage() {
   const netPay = detail?.payroll.realPayAmount ?? 0;
   const latest = payrolls[0];
 
-  const downloadStatement = () => {
+  const downloadStatement = async () => {
     if (!detail) return;
-    const wsData = [
+    const wsData: (string | number | null)[][] = [
       ["SmartHR 급여 명세서"],
       [`사번: ${detail.payroll.employeeNo ?? detail.payroll.employeeId ?? ""} | 성명: ${detail.payroll.employeeNameSnapshot ?? ""}`],
       [`귀속연월: ${formatMonth(detail.payroll.payrollYearMonth)}`, `지급일자: ${formatDate(detail.payroll.paymentDate)}`],
@@ -145,10 +145,11 @@ export default function MyPayrollPage() {
       [],
       ["실수령액", netPay]
     ];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "급여명세서");
-    XLSX.writeFile(wb, `${formatMonth(detail.payroll.payrollYearMonth).replace(" ", "")}_급여명세서.xlsx`);
+    try {
+      await downloadExcel("급여명세서", `${formatMonth(detail.payroll.payrollYearMonth).replace(" ", "")}_급여명세서.xlsx`, wsData);
+    } catch {
+      alert("엑셀 다운로드에 실패했습니다.");
+    }
   };
 
   return (

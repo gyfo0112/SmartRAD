@@ -7,6 +7,7 @@ import erp.system.auditlog.entity.AuditLog;
 import erp.system.auditlog.service.AuditLogService;
 import erp.system.common.exception.BusinessException;
 import erp.system.common.exception.ErrorCode;
+import erp.system.common.excel.ExcelWorkbookWriter;
 import erp.system.common.file.FileStorageService;
 import erp.system.common.util.SoftDeleteAware;
 import erp.system.department.entity.Department;
@@ -35,6 +36,7 @@ import erp.system.teamlead.service.TeamLeadAuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,7 +86,41 @@ public class EmployeeService {
     }
 
     public Page<EmployeeSummaryResponse> getList(String keyword, Long departmentId, String status, Pageable pageable) {
-        Specification<Employee> spec = (root, query, cb) -> {
+        Specification<Employee> spec = buildSearchSpec(keyword, departmentId, status);
+
+        java.util.Set<Long> delegatedIds = teamLeadAuthorityService.getActiveEmployeeIds();
+        return employeeRepository.findAll(spec, pageable)
+                .map(employee -> EmployeeSummaryResponse.from(employee, delegatedIds.contains(employee.getEmployeeId())));
+    }
+
+    public byte[] exportToExcel(String keyword, Long departmentId, String status) {
+        Specification<Employee> spec = buildSearchSpec(keyword, departmentId, status);
+        List<Employee> employees = employeeRepository.findAll(spec, Sort.by("name"));
+
+        List<List<Object>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("사번", "이름", "부서", "직급", "고용형태", "이메일", "연락처", "입사일", "재직상태"));
+        for (Employee employee : employees) {
+            Department department = SoftDeleteAware.resolve(employee.getDepartment(), Department::getDepartmentName);
+            Position position = SoftDeleteAware.resolve(employee.getPosition(), Position::getPositionName);
+            EmploymentType employmentType = SoftDeleteAware.resolve(employee.getEmploymentType(), EmploymentType::getEmploymentTypeName);
+            rows.add(Arrays.asList(
+                    employee.getEmployeeNo(),
+                    employee.getName(),
+                    department != null ? department.getDepartmentName() : "-",
+                    position != null ? position.getPositionName() : "-",
+                    employmentType != null ? employmentType.getEmploymentTypeName() : "-",
+                    employee.getEmail(),
+                    employee.getPhone(),
+                    employee.getHireDate() != null ? employee.getHireDate().toString() : null,
+                    employeeStatusLabel(employee.getEmployeeStatusCode())
+            ));
+        }
+
+        return ExcelWorkbookWriter.build("직원목록", rows);
+    }
+
+    private Specification<Employee> buildSearchSpec(String keyword, Long departmentId, String status) {
+        return (root, query, cb) -> {
             var predicate = cb.conjunction();
             if (StringUtils.hasText(keyword)) {
                 String pattern = "%" + keyword + "%";
@@ -101,10 +138,6 @@ public class EmployeeService {
             }
             return predicate;
         };
-
-        java.util.Set<Long> delegatedIds = teamLeadAuthorityService.getActiveEmployeeIds();
-        return employeeRepository.findAll(spec, pageable)
-                .map(employee -> EmployeeSummaryResponse.from(employee, delegatedIds.contains(employee.getEmployeeId())));
     }
 
     public List<EmployeePayrollSummaryResponse> getPayrollSummaryList() {
