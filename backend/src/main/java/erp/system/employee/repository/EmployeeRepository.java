@@ -18,6 +18,8 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long>, JpaSpe
 
     boolean existsByEmployeeNo(String employeeNo);
 
+    Optional<Employee> findByEmployeeNo(String employeeNo);
+
     boolean existsByEmail(String email);
 
     @Query(value = "SELECT MAX(CAST(SUBSTRING(employee_no, 6) AS UNSIGNED)) FROM employee WHERE employee_no LIKE CONCAT('E', :year, '%')", nativeQuery = true)

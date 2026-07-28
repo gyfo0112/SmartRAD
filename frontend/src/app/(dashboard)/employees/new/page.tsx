@@ -264,7 +264,6 @@ export default function NewEmployeePage() {
   const [fieldErrors, setFieldErrors] = useState<Set<string>>(new Set());
   const [addressSearchOpen, setAddressSearchOpen] = useState(false);
   const addressLayerRef = useRef<HTMLDivElement>(null);
-  const [employeeNoToId, setEmployeeNoToId] = useState<Record<string, number>>({});
   const [bulkUploading, setBulkUploading] = useState(false);
   const [bulkResult, setBulkResult] = useState<{ total: number; success: number; failures: string[] } | null>(null);
   const bulkInputRef = useRef<HTMLInputElement>(null);
@@ -300,11 +299,6 @@ export default function NewEmployeePage() {
               value: String(e.employeeId),
             }))
           );
-          const noToId: Record<string, number> = {};
-          data.content.forEach((e: { employeeId: number; employeeNo: string }) => {
-            if (e.employeeNo) noToId[e.employeeNo] = e.employeeId;
-          });
-          setEmployeeNoToId(noToId);
         }
       } catch (err) {
         console.error("Failed to fetch department/position options", err);
@@ -491,11 +485,6 @@ export default function NewEmployeePage() {
     XLSX.writeFile(workbook, "직원_일괄등록_양식.xlsx");
   };
 
-  const findOptionId = (options: Option[], label: string) => {
-    const normalized = label.trim().toLowerCase();
-    return options.find((option) => option.label.trim().toLowerCase() === normalized)?.value;
-  };
-
   const handleBulkUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -504,70 +493,13 @@ export default function NewEmployeePage() {
     setBulkUploading(true);
     setBulkResult(null);
     try {
-      const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer, { type: "array" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
+      const formData = new FormData();
+      formData.append("file", file);
 
-      if (rows.length === 0) {
-        setBulkResult({ total: 0, success: 0, failures: ["엑셀 파일에 데이터가 없습니다."] });
-        return;
-      }
-
-      const items: Record<string, unknown>[] = [];
-      const preValidationFailures: string[] = [];
-
-      rows.forEach((row, index) => {
-        const rowNo = index + 2;
-        const name = String(row["이름"] ?? "").trim();
-        const birthDate = String(row["생년월일(YYYY-MM-DD)"] ?? "").trim();
-        const departmentName = String(row["부서"] ?? "").trim();
-        const positionName = String(row["직급"] ?? "").trim();
-
-        if (!name || !birthDate || !departmentName || !positionName) {
-          preValidationFailures.push(`${rowNo}행: 이름/생년월일/부서/직급은 필수입니다.`);
-          return;
-        }
-
-        const departmentId = findOptionId(departments, departmentName);
-        const positionId = findOptionId(positions, positionName);
-        if (!departmentId) {
-          preValidationFailures.push(`${rowNo}행(${name}): "${departmentName}" 부서를 찾을 수 없습니다.`);
-          return;
-        }
-        if (!positionId) {
-          preValidationFailures.push(`${rowNo}행(${name}): "${positionName}" 직급을 찾을 수 없습니다.`);
-          return;
-        }
-
-        const employmentTypeName = String(row["고용형태"] ?? "").trim();
-        const managerEmployeeNo = String(row["직속관리자 사번"] ?? "").trim();
-        const hireDate = String(row["입사일(YYYY-MM-DD)"] ?? "").trim();
-
-        items.push({
-          departmentId: Number(departmentId),
-          positionId: Number(positionId),
-          employmentTypeId: employmentTypeName ? findOptionId(employmentTypes, employmentTypeName) ?? null : null,
-          managerId: managerEmployeeNo ? employeeNoToId[managerEmployeeNo] ?? null : null,
-          name,
-          birthDate,
-          phone: String(row["연락처"] ?? "").trim() || null,
-          email: String(row["이메일"] ?? "").trim() || null,
-          address: String(row["주소"] ?? "").trim() || null,
-          hireDate: hireDate || null,
-          password: birthDate.replaceAll("-", ""),
-        });
-      });
-
-      if (items.length === 0) {
-        setBulkResult({ total: rows.length, success: 0, failures: preValidationFailures });
-        return;
-      }
-
-      const res = await fetch(`${API_BASE_URL}/employees/bulk`, {
+      const res = await fetch(`${API_BASE_URL}/employees/bulk-excel`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({ items }),
+        headers: authHeaders(),
+        body: formData,
       });
       if (!res.ok) throw new Error("직원 일괄등록에 실패했습니다.");
 
@@ -575,12 +507,12 @@ export default function NewEmployeePage() {
       const successCount = results.filter((result) => result.success).length;
       const failureMessages = results
         .filter((result) => !result.success)
-        .map((result) => `${result.name || "(이름 없음)"}: ${result.failureReason}`);
+        .map((result) => `${result.rowIndex}행(${result.name || "이름 없음"}): ${result.failureReason}`);
 
       setBulkResult({
-        total: rows.length,
+        total: results.length,
         success: successCount,
-        failures: [...preValidationFailures, ...failureMessages],
+        failures: failureMessages,
       });
     } catch (err) {
       setBulkResult({

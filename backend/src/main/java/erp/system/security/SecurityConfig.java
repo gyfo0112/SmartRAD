@@ -64,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/employees/profile-image").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/employees").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/employees/bulk").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/employees/bulk-excel").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/employees/*").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/employees/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/employees/**").hasRole("ADMIN")

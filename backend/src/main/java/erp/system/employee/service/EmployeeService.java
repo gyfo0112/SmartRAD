@@ -65,6 +65,7 @@ public class EmployeeService {
     private final AuditLogService auditLogService;
     private final FileStorageService fileStorageService;
     private final TeamLeadAuthorityService teamLeadAuthorityService;
+    private final EmployeeExcelParser employeeExcelParser;
 
     private static String employeeStatusLabel(String status) {
         if (status == null) return "-";
@@ -161,6 +162,38 @@ public class EmployeeService {
                 actorId,
                 AuditLog.ACTION_EMPLOYEE_BULK_CREATE,
                 "직원 일괄등록: 총 " + items.size() + "명 중 " + successCount + "명 성공",
+                null
+        );
+
+        return results;
+    }
+
+    @Transactional
+    public List<EmployeeBulkCreateResult> bulkCreateFromExcel(MultipartFile file, Long actorId) {
+        List<EmployeeExcelParser.ParsedRow> parsedRows = employeeExcelParser.parse(file);
+        List<EmployeeBulkCreateResult> results = new ArrayList<>();
+        int successCount = 0;
+
+        for (EmployeeExcelParser.ParsedRow row : parsedRows) {
+            if (row.error() != null) {
+                results.add(new EmployeeBulkCreateResult(row.rowNumber(), row.name(), false, null, row.error()));
+                continue;
+            }
+            try {
+                Employee savedEmployee = createInternal(row.request());
+                results.add(new EmployeeBulkCreateResult(row.rowNumber(), row.name(), true, savedEmployee.getEmployeeNo(), null));
+                successCount++;
+            } catch (BusinessException e) {
+                results.add(new EmployeeBulkCreateResult(row.rowNumber(), row.name(), false, null, e.getMessage()));
+            } catch (Exception e) {
+                results.add(new EmployeeBulkCreateResult(row.rowNumber(), row.name(), false, null, "등록 중 오류가 발생했습니다."));
+            }
+        }
+
+        auditLogService.log(
+                actorId,
+                AuditLog.ACTION_EMPLOYEE_BULK_CREATE,
+                "직원 일괄등록(엑셀): 총 " + parsedRows.size() + "명 중 " + successCount + "명 성공",
                 null
         );
 

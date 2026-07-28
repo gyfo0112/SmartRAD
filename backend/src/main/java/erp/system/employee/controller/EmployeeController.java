@@ -83,6 +83,12 @@ public class EmployeeController {
         return employeeService.bulkCreate(request.items(), requesterId);
     }
 
+    @PostMapping("/bulk-excel")
+    public List<EmployeeBulkCreateResult> bulkCreateFromExcel(@RequestParam("file") MultipartFile file,
+                                                               @AuthenticationPrincipal Long requesterId) {
+        return employeeService.bulkCreateFromExcel(file, requesterId);
+    }
+
     @PutMapping("/{id}")
     public EmployeeResponse update(@PathVariable Long id, @Valid @RequestBody EmployeeUpdateRequest request,
                                     @AuthenticationPrincipal Long requesterId, Authentication authentication) {
