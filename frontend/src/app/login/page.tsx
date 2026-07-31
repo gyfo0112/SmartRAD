@@ -249,7 +249,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full flex-col lg:flex-row">
       {/* 좌측 브랜드 패널 */}
-      <div className="relative flex w-full flex-col justify-center overflow-hidden bg-[#0b1023] px-8 py-14 sm:px-14 lg:w-1/2 lg:px-20">
+      <div className="relative hidden lg:flex w-full flex-col justify-center overflow-hidden bg-[#0b1023] px-8 py-14 sm:px-14 lg:w-1/2 lg:px-20">
         {/* 배경 장식 */}
         <div className="pointer-events-none absolute -left-32 bottom-[-10%] h-96 w-96 rounded-full bg-brand-primary/20 blur-3xl" />
         <div className="pointer-events-none absolute right-[-10%] top-[-10%] h-72 w-72 rounded-full bg-brand-primary-light/10 blur-3xl" />
